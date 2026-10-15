@@ -7,6 +7,7 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.ServerSideVerificationOptions
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
 /** Google official rewarded test unit. Never use this ID in a production release. */
@@ -44,10 +45,18 @@ class RewardedAds(private val activity: Activity) {
         )
     }
 
-    fun show(onRewardEarned: () -> Unit) {
+    fun show(onRewardEarned: () -> Unit, sessionId: String? = null, playerId: String? = null) {
         if (!testBuild) return
         val ready = ad ?: return
         if (showing) return
+        if (sessionId != null && playerId != null) {
+            ready.setServerSideVerificationOptions(
+                ServerSideVerificationOptions.Builder()
+                    .setCustomData(sessionId)
+                    .setUserId(playerId)
+                    .build()
+            )
+        }
         showing = true
         ad = null
         onAvailabilityChanged?.invoke(false)
