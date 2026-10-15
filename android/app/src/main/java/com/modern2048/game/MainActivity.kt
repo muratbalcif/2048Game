@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -159,40 +160,82 @@ private fun GameScreen() {
             dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (!motionActive && game.lost) {
-        AlertDialog(onDismissRequest = {}, title = { Text("Oyun Bitti") },
-            text = { Text("Skorun: ${game.score}. Tekrar denemeye hazır mısın?") },
-            confirmButton = {
-                Column {
-                    if (adReady && rewardedContinue.available) {
-                        TextButton(onClick = {
-                            val lostSnapshot = game
-                            rewardedAds.show {
-                                if (game != lostSnapshot) return@show
-                                val (restored, next) = rewardedContinue.redeem(game)
-                                if (next.used && !rewardedContinue.used) {
-                                    game = restored
-                                    rewardedContinue = next
-                                    storage.saveReward(next)
-                                    previous = null
-                                    storage.save(game)
-                                }
-                            }
-                        }) { Text("Reklam İzle · 3 Hamle Geri Al") }
+        Dialog(onDismissRequest = {}) {
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = selectedTheme.canvas,
+                tonalElevation = 8.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        Modifier.size(68.dp).background(selectedTheme.board, RoundedCornerShape(22.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("★", fontSize = 38.sp, color = selectedTheme.accent)
                     }
-                    TextButton(onClick = {
-                        resetMotion()
-                        progress = progress.nextGame()
-                        storage.saveProgress(progress)
-                        game = GameEngine.newGame()
-                        previous = null
-                        rewardedContinue = rewardedContinue.reset()
-                        storage.saveReward(rewardedContinue)
-                        winAcknowledged = false
-                        storage.save(game)
-                    }) { Text("Tekrar Oyna") }
+                    Text("Oyun Bitti!", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                    Text("Harika bir denemeydi! Bir sonraki oyunda rekorunu geçebilirsin.",
+                        fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .7f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        GameOverStat("SKOR", game.score.toString(), selectedTheme, Modifier.weight(1f))
+                        GameOverStat("REKOR", best.toString(), selectedTheme, Modifier.weight(1f))
+                    }
+                    Button(
+                        onClick = {
+                            resetMotion()
+                            progress = progress.nextGame()
+                            storage.saveProgress(progress)
+                            game = GameEngine.newGame()
+                            previous = null
+                            rewardedContinue = rewardedContinue.reset()
+                            storage.saveReward(rewardedContinue)
+                            winAcknowledged = false
+                            storage.save(game)
+                        },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
+                    ) { Text("↻  Yeniden Oyna", fontWeight = FontWeight.Bold) }
+                    if (adReady && rewardedContinue.available) {
+                        OutlinedButton(
+                            onClick = {
+                                val lostSnapshot = game
+                                rewardedAds.show {
+                                    if (game != lostSnapshot) return@show
+                                    val (restored, next) = rewardedContinue.redeem(game)
+                                    if (next.used && !rewardedContinue.used) {
+                                        game = restored
+                                        rewardedContinue = next
+                                        storage.saveReward(next)
+                                        previous = null
+                                        storage.save(game)
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) { Text("▶  Reklam İzle · 3 Hamle Geri Al", fontSize = 12.sp, color = selectedTheme.ink) }
+                    }
+                    if (previous != null) {
+                        TextButton(onClick = {
+                            previous?.let {
+                                game = it
+                                previous = null
+                                rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1))
+                                storage.saveReward(rewardedContinue)
+                                storage.save(game)
+                            }
+                        }) { Text("← Son Hamleyi Geri Al", color = selectedTheme.accent) }
+                    }
                 }
-            },
-            dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
+            }
+        }
     }
     if (showModePicker) {
         AlertDialog(
@@ -473,5 +516,16 @@ private fun SettingsToggle(
             Text(subtitle, color = textColor.copy(alpha = .65f), fontSize = 12.sp)
         }
         Switch(checked = checked, onCheckedChange = onChange)
+    }
+}
+
+@Composable
+private fun GameOverStat(label: String, value: String, theme: GameTheme, modifier: Modifier = Modifier) {
+    Column(
+        modifier.background(theme.board.copy(alpha = .8f), RoundedCornerShape(16.dp)).padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(label, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = theme.ink.copy(alpha = .65f))
+        Text(value, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, color = theme.ink)
     }
 }
