@@ -128,10 +128,12 @@ struct GameScreen: View {
             }
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(theme.ink)
             HStack(spacing: 8) {
-                Button("Geri Al") {
-                    if verifiedSession == nil, let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
+                if doubledGameKey != "\(game.score):\(game.board.map(String.init).joined(separator: ","))" {
+                    Button("Geri Al") {
+                        if doubledGameKey != "\(game.score):\(game.board.map(String.init).joined(separator: ","))" && verifiedSession == nil, let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
+                    }
+                    .disabled(previous == nil || slideInProgress || verifiedSession != nil)
                 }
-                .disabled(previous == nil || slideInProgress || verifiedSession != nil)
                 Button("Yeni Oyun") { confirmRestart = true }
                 Button("Ayarlar") { showSettings = true }
                     .disabled(slideInProgress)
@@ -509,7 +511,7 @@ struct GameScreen: View {
                                 }
                             }
                         }
-                        if verifiedSession == nil && rewardedAds.isReady && rewardedContinue.available {
+                        if doubledGameKey != "\(game.score):\(game.board.map(String.init).joined(separator: ","))" && verifiedSession == nil && rewardedAds.isReady && rewardedContinue.available {
                             Button {
                                 let lostSnapshot = game
                                 rewardedAds.show {
