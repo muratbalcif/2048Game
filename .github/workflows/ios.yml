@@ -15,6 +15,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
         run: brew install xcodegen
+      - name: Run native Swift reward smoke tests
+        run: |
+          swiftc ios/Modern2048/GameEngine.swift ios/Modern2048/RewardedContinue.swift ios/tests/RewardedContinueSmoke.swift -o /tmp/rewarded-smoke
+          /tmp/rewarded-smoke
       - name: Generate Xcode project
         working-directory: ios
         run: xcodegen generate
