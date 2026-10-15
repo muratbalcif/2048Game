@@ -312,7 +312,7 @@ private fun GameScreen() {
                                 rewardedAds.show(onRewardEarned = {
                                     if (game == snapshot && game.lost && doubledGameKey != claimKey) {
                                         rewardChecking = true
-                                        rewardMessage = stringResource(R.string.reward_wait)
+                                        rewardMessage = context.getString(R.string.reward_wait)
                                         scope.launch {
                                             var verified = false
                                             repeat(12) {
@@ -330,7 +330,7 @@ private fun GameScreen() {
                                                 ranking = leaderboard.load(gameMode)
                                                 rewardMessage = null
                                             } else {
-                                                rewardMessage = stringResource(R.string.reward_retry)
+                                                rewardMessage = context.getString(R.string.reward_retry)
                                             }
                                             rewardChecking = false
                                         }
@@ -356,7 +356,7 @@ private fun GameScreen() {
                                         storage.saveBest(best)
                                         ranking = leaderboard.load(gameMode)
                                         rewardMessage = null
-                                    } else rewardMessage = stringResource(R.string.reward_pending)
+                                    } else rewardMessage = context.getString(R.string.reward_pending)
                                     rewardChecking = false
                                 }
                             }) { Text(stringResource(R.string.check_reward)) }
@@ -721,7 +721,7 @@ private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotio
     )
     Box(
         modifier = modifier.scale(scale * popScale).background(color, RoundedCornerShape(14.dp))
-            .semantics { contentDescription = if (value == 0) stringResource(R.string.empty_cell) else "$value taşı" },
+            .semantics { contentDescription = if (value == 0) "Empty cell" else "$value tile" },
         contentAlignment = Alignment.Center
     ) {
         if (value != 0) Text(
