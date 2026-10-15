@@ -101,3 +101,7 @@
 "Oyun başına puan: %d" = "Score per game: %d";
 "%d taşı" = "%d tile";
 "%d taşına ulaştın. Daha yüksek sayılar için devam edebilirsin." = "You reached the %d tile. Keep going for higher numbers.";
+"Dil" = "Language";
+"Telefon dili" = "Phone language";
+"Türkçe" = "Türkçe";
+"English" = "English";
