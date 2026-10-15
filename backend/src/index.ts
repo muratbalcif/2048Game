@@ -35,9 +35,10 @@ export default {
       if (length > 4096) return json({ error: "too_large" }, 413);
       let body: Record<string, unknown>;
       try { body = await request.json() as Record<string, unknown>; } catch { return json({ error: "invalid_json" }, 400); }
+      if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "invalid_submission" }, 400);
       const { playerId, mode, score } = body;
       const name = nickname(body.nickname);
-      if (!isId(playerId) || !validMode(mode) || !Number.isSafeInteger(score) || (score as number) < 0 || (score as number) > 2_000_000_000 || !name)
+      if (!isId(playerId) || !validMode(mode) || typeof score !== "number" || !Number.isSafeInteger(score) || score < 0 || score > 2_000_000_000 || !name)
         return json({ error: "invalid_submission" }, 400);
       const now = Date.now();
       // This is abuse throttling, NOT cryptographic score verification.
