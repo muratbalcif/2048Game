@@ -1,0 +1,16 @@
+name: Documentation checks
+on:
+  push:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check phase 0 documents
+        run: |
+          test -s README.md
+          test -s docs/ARCHITECTURE.md
+          test -s docs/GAME_RULES.md
+          test -s docs/DESIGN_SYSTEM.md
+          test -s docs/SETUP.md
