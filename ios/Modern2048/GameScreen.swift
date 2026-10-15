@@ -66,58 +66,7 @@ struct GameScreen: View {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
             }
-            GeometryReader { geometry in
-                let gap: CGFloat = 10
-                let side = (geometry.size.width - 20 - gap * 3) / 4
-                let step = side + gap
-                ZStack(alignment: .topLeading) {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
-                        ForEach(0..<16, id: \.self) { index in
-                            let value = game.board[index]
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(slideInProgress ? theme.empty : (value == 0 ? theme.empty : (highContrast ? contrastTile(value) : theme.tile(value))))
-                                if value != 0 && !slideInProgress {
-                                    Text("\(value)")
-                                        .font(.system(size: value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
-                                         .foregroundStyle(highContrast ? Color.black : (theme == .midnight ? Color.black : theme.ink))
-                                }
-                            }
-                            .frame(height: side)
-                            .accessibilityLabel(value == 0 ? "Boş hücre" : String(value) + " taşı")
-                            .scaleEffect((revealedCells.contains(index) || mergedCells.contains(index)) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
-                            .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
-                        }
-                    }
-                    if slideInProgress {
-                        ForEach(Array(slidingTiles.enumerated()), id: \.offset) { _, tile in
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 14).fill((highContrast ? contrastTile(tile.value) : theme.tile(tile.value)))
-                                Text("\(tile.value)")
-                                    .font(.system(size: tile.value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
-                                    .foregroundStyle(highContrast ? Color.black : (theme == .midnight ? Color.black : theme.ink))
-                            }
-                            .frame(width: side, height: side)
-                            .offset(
-                                x: CGFloat(tile.from % 4) * step + CGFloat(tile.to % 4 - tile.from % 4) * step * slideProgress,
-                                y: CGFloat(tile.from / 4) * step + CGFloat(tile.to / 4 - tile.from / 4) * step * slideProgress
-                            )
-                        }
-                    }
-                }
-                .padding(10)
-                .background(theme.board, in: RoundedRectangle(cornerRadius: 24))
-                .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { gesture in
-                    guard !slideInProgress && !game.lost else { return }
-                    let dx = gesture.translation.width
-                    let dy = gesture.translation.height
-                    let direction: MoveDirection = abs(dx) > abs(dy)
-                        ? (dx > 0 ? .right : .left)
-                        : (dy > 0 ? .down : .up)
-                    performMove(direction)
-                })
-            }
-            .aspectRatio(1, contentMode: .fit)
+            gameBoard
             if directionalControls {
                 VStack(spacing: 2) {
                     Button("↑ Yukarı") { performMove(.up) }
@@ -344,6 +293,61 @@ struct GameScreen: View {
         winAcknowledged = false
         GameStorage.save(game)
         startRanked()
+    }
+
+    private var gameBoard: some View {
+            GeometryReader { geometry in
+                let gap: CGFloat = 10
+                let side = (geometry.size.width - 20 - gap * 3) / 4
+                let step = side + gap
+                ZStack(alignment: .topLeading) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
+                        ForEach(0..<16, id: \.self) { index in
+                            let value = game.board[index]
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(slideInProgress ? theme.empty : (value == 0 ? theme.empty : (highContrast ? contrastTile(value) : theme.tile(value))))
+                                if value != 0 && !slideInProgress {
+                                    Text("\(value)")
+                                        .font(.system(size: value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
+                                         .foregroundStyle(highContrast ? Color.black : (theme == .midnight ? Color.black : theme.ink))
+                                }
+                            }
+                            .frame(height: side)
+                            .accessibilityLabel(value == 0 ? "Boş hücre" : String(value) + " taşı")
+                            .scaleEffect((revealedCells.contains(index) || mergedCells.contains(index)) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
+                            .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
+                        }
+                    }
+                    if slideInProgress {
+                        ForEach(Array(slidingTiles.enumerated()), id: \.offset) { _, tile in
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 14).fill((highContrast ? contrastTile(tile.value) : theme.tile(tile.value)))
+                                Text("\(tile.value)")
+                                    .font(.system(size: tile.value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
+                                    .foregroundStyle(highContrast ? Color.black : (theme == .midnight ? Color.black : theme.ink))
+                            }
+                            .frame(width: side, height: side)
+                            .offset(
+                                x: CGFloat(tile.from % 4) * step + CGFloat(tile.to % 4 - tile.from % 4) * step * slideProgress,
+                                y: CGFloat(tile.from / 4) * step + CGFloat(tile.to / 4 - tile.from / 4) * step * slideProgress
+                            )
+                        }
+                    }
+                }
+                .padding(10)
+                .background(theme.board, in: RoundedRectangle(cornerRadius: 24))
+                .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { gesture in
+                    guard !slideInProgress && !game.lost else { return }
+                    let dx = gesture.translation.width
+                    let dy = gesture.translation.height
+                    let direction: MoveDirection = abs(dx) > abs(dy)
+                        ? (dx > 0 ? .right : .left)
+                        : (dy > 0 ? .down : .up)
+                    performMove(direction)
+                })
+            }
+            .aspectRatio(1, contentMode: .fit)
     }
 
     private var gameOverSheet: some View {
