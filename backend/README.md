@@ -8,7 +8,7 @@ Android and iOS use the same `/v1/leaderboard?mode=classic&playerId=...` and `PO
 3. `npx wrangler d1 create modern2048-leaderboard`
 4. Copy the resulting database ID into `wrangler.toml`.
 5. `npm run migrate && npm run deploy`
-6. Set Android `LEADERBOARD_BASE_URL` Gradle property and iOS `LEADERBOARD_BASE_URL` build setting to the deployed HTTPS Worker URL. Never put a placeholder URL into production.
+6. Set Android `LEADERBOARD_BASE_URL` Gradle property and iOS `LEADERBOARD_BASE_URL` build setting to the deployed HTTPS Worker URL. Never put a placeholder URL into production.\n\nAndroid example: `./gradlew :app:assembleDebug -PLEADERBOARD_BASE_URL=https://modern2048-leaderboard.<your-subdomain>.workers.dev` (run in `android/`). For iOS, set `LEADERBOARD_BASE_URL` in your Xcode build configuration (e.g. `xcodebuild ... LEADERBOARD_BASE_URL=https://...`), regenerate project using XcodeGen first. If no URL is configured, the game shows an offline/unconfigured leaderboard message and remains playable.
 
 ## API
 `GET /v1/leaderboard?mode=classic&playerId=<UUID>` returns `{mode,entries:[{playerId,nickname,score,updatedAt,rank}],me:{rank,score}|null}`.
