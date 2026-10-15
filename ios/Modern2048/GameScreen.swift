@@ -186,30 +186,93 @@ struct GameScreen: View {
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
-                Form {
-                    Section("Görünüm") {
-                        Picker("Tema", selection: $themeRaw) {
-                            ForEach(GameTheme.allCases) { option in
-                                Text(option.title).tag(option.rawValue)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("Kendine göre oyna")
+                                .font(.title2.bold())
+                                .foregroundStyle(theme.ink)
+                            Text("Görünümü ve oyun deneyimini kişiselleştir.")
+                                .font(.subheadline)
+                                .foregroundStyle(theme.ink.opacity(0.65))
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            settingsHeading("GÖRÜNÜM")
+                            HStack(spacing: 10) {
+                                ForEach(GameTheme.allCases) { option in
+                                    Button {
+                                        themeRaw = option.rawValue
+                                    } label: {
+                                        VStack(spacing: 9) {
+                                            HStack(spacing: 3) {
+                                                ForEach([2, 8, 32], id: \.self) { value in
+                                                    Text("\(value)")
+                                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                        .foregroundStyle(Color.black)
+                                                        .frame(maxWidth: .infinity)
+                                                        .frame(height: 25)
+                                                        .background(option.tile(value), in: RoundedRectangle(cornerRadius: 6))
+                                                }
+                                            }
+                                            Text(option.title)
+                                                .font(.system(size: 12, weight: .semibold))
+                                                .lineLimit(1)
+                                            Label(theme == option ? "Seçili" : "Seç", systemImage: theme == option ? "checkmark.circle.fill" : "circle")
+                                                .font(.system(size: 11))
+                                        }
+                                        .foregroundStyle(option.ink)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(10)
+                                        .background(option.board, in: RoundedRectangle(cornerRadius: 18))
+                                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(theme == option ? option.accent : .clear, lineWidth: 2))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("\(option.title) teması")
+                                    .accessibilityAddTraits(theme == option ? .isSelected : [])
+                                }
                             }
                         }
-                        .pickerStyle(.segmented)
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("ERİŞİLEBİLİRLİK")
+                            VStack(spacing: 0) {
+                                settingsToggle("Yüksek kontrast", subtitle: "Taşları daha belirgin göster", value: $highContrast)
+                                Divider()
+                                settingsToggle("Büyük taş sayıları", subtitle: "Taş değerlerini daha kolay oku", value: $largeNumbers)
+                                Divider()
+                                settingsToggle("Yön tuşları", subtitle: "Kaydırmadan da hamle yap", value: $directionalControls)
+                            }
+                            .padding(.horizontal, 14)
+                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
+                        }
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("OYUN DENEYİMİ")
+                            VStack(spacing: 0) {
+                                settingsToggle("Ses efektleri", subtitle: "Birleşme ve başarı sesleri", value: $soundEnabled)
+                                Divider()
+                                settingsToggle("Titreşim", subtitle: "Dokunsal geri bildirim", value: $hapticsEnabled)
+                                Divider()
+                                settingsToggle("Animasyonları azalt", subtitle: "Daha sakin geçişler", value: $reducedMotion)
+                            }
+                            .padding(.horizontal, 14)
+                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
+                        }
                     }
-                    Section("Erişilebilirlik") {
-                        Toggle("Yüksek kontrast", isOn: $highContrast)
-                        Toggle("Büyük taş sayıları", isOn: $largeNumbers)
-                        Toggle("Yön tuşlarını göster", isOn: $directionalControls)
-                    }
-                    Section("Oyun") {
-                    Toggle("Ses efektleri", isOn: $soundEnabled)
-                    Toggle("Titreşim", isOn: $hapticsEnabled)
-                    Toggle("Animasyonları azalt", isOn: $reducedMotion)
+                    .padding(20)
+                    .frame(maxWidth: 560)
+                    .frame(maxWidth: .infinity)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("Oyun ayarları")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Bitti") { showSettings = false }
+                            .fontWeight(.semibold)
+                            .tint(theme.accent)
                     }
                 }
-                .navigationTitle("Oyun Ayarları")
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showSettings = false } } }
             }
-            .presentationDetents([.medium])
+            .presentationDetents([.large])
         }
         .alert("Hedefe Ulaştın!", isPresented: Binding(
             get: { mode.reached(game.board) && !winAcknowledged && !game.lost },
@@ -253,6 +316,24 @@ struct GameScreen: View {
         } message: {
             Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
         }
+    }
+
+    private func settingsHeading(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .tracking(1.2)
+            .foregroundStyle(theme.accent)
+    }
+
+    private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
+        Toggle(isOn: value) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
+                Text(subtitle).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+            }
+        }
+        .tint(theme.accent)
+        .padding(.vertical, 12)
     }
 
     private func performMove(_ direction: MoveDirection) {
