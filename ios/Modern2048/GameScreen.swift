@@ -20,6 +20,7 @@ struct GameScreen: View {
     @State private var slidingTiles: [TileMotion] = []
     @State private var slideProgress: CGFloat = 0
     @State private var slideInProgress = false
+    @State private var animationToken = UUID()
     @State private var revealedCells: Set<Int> = []
     @State private var mergedCells: Set<Int> = []
     @AppStorage("modern2048.sound") private var soundEnabled = true
@@ -102,8 +103,11 @@ struct GameScreen: View {
                         slideProgress = 0
                         slideInProgress = true
                         withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
+                        let token = UUID()
+                        animationToken = token
                         Task { @MainActor in
                             try? await Task.sleep(nanoseconds: 180_000_000)
+                            guard animationToken == token else { return }
                             revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
                             mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
                             game = result.state
@@ -194,6 +198,12 @@ struct GameScreen: View {
     }
 
     private func restart() {
+        animationToken = UUID()
+        slideInProgress = false
+        slidingTiles = []
+        revealedCells = []
+        mergedCells = []
+        slideProgress = 0
         game = GameEngine.newGame()
         previous = nil
         rewardedContinue.reset()
