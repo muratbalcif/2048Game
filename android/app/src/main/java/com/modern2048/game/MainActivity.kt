@@ -3,6 +3,9 @@ package com.modern2048.game
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -12,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,6 +39,8 @@ class MainActivity : ComponentActivity() {
 private fun GameScreen() {
     val context = LocalContext.current
     val storage = remember(context) { GameStorage(context) }
+    val effects = rememberGameEffects(context)
+    DisposableEffect(effects) { onDispose { effects.release() } }
     var game by remember { mutableStateOf(storage.load() ?: GameEngine.newGame().also(storage::save)) }
     var previous by remember { mutableStateOf<GameState?>(null) }
     var best by remember { mutableIntStateOf(storage.best()) }
@@ -125,6 +131,7 @@ private fun GameScreen() {
                                     rewardedContinue = rewardedContinue.record(game)
                                     storage.saveReward(rewardedContinue)
                                     previous = game
+                                    effects.play(result.scoreDelta, !game.won && result.state.won)
                                     game = result.state
                                     best = maxOf(best, game.score)
                                     storage.save(game)
@@ -145,7 +152,8 @@ private fun GameScreen() {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     repeat(4) { col ->
                         val value = game.board[row * 4 + col]
-                        Box(
+                        AnimatedTile(value, Modifier.weight(1f).aspectRatio(1f))
+                        /*Box(
                             modifier = Modifier.weight(1f).aspectRatio(1f)
                                 .background(tileColor(value), RoundedCornerShape(14.dp)),
                             contentAlignment = Alignment.Center
@@ -156,7 +164,7 @@ private fun GameScreen() {
                                 fontSize = if (value >= 1024) 19.sp else 25.sp,
                                 color = ink
                             )
-                        }
+                        }*/
                     }
                 }
             }
@@ -198,4 +206,25 @@ private fun tileColor(value: Int): Color = when (value) {
     512 -> Color(0xFF6FCF97)
     1024 -> Color(0xFFB9A0FF)
     else -> Color(0xFFFFD15C)
+}
+
+@Composable
+private fun AnimatedTile(value: Int, modifier: Modifier = Modifier) {
+    val color by animateColorAsState(tileColor(value), label = "tile-color")
+    val scale by animateFloatAsState(
+        targetValue = if (value == 0) 0.96f else 1f,
+        animationSpec = spring(),
+        label = "tile-scale"
+    )
+    Box(
+        modifier = modifier.scale(scale).background(color, RoundedCornerShape(14.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (value != 0) Text(
+            value.toString(),
+            fontWeight = FontWeight.Bold,
+            fontSize = if (value >= 1024) 19.sp else 25.sp,
+            color = ink
+        )
+    }
 }
