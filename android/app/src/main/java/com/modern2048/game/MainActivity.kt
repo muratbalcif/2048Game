@@ -361,7 +361,7 @@ private fun GameScreen() {
                             }) { Text("Ödülü tekrar kontrol et") }
                         }
                     }
-                    if (verifiedSession == null && adReady && rewardedContinue.available) {
+                    if (!doubled && verifiedSession == null && adReady && rewardedContinue.available) {
                         OutlinedButton(
                             onClick = {
                                 val lostSnapshot = game
@@ -381,7 +381,7 @@ private fun GameScreen() {
                             shape = RoundedCornerShape(16.dp)
                         ) { Text("▶  Reklam İzle · 3 Hamle Geri Al", fontSize = 12.sp, color = selectedTheme.ink) }
                     }
-                    if (previous != null && verifiedSession == null) {
+                    if (!doubled && previous != null && verifiedSession == null) {
                         TextButton(onClick = {
                             previous?.let {
                                 game = it
@@ -666,10 +666,12 @@ private fun GameScreen() {
         Text("Kaydırarak aynı sayıları birleştir", color = selectedTheme.ink)
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(
-                onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
-                enabled = previous != null && !motionActive && verifiedSession == null
-            ) { Text("Geri Al", fontSize = 12.sp) }
+            if (doubledGameKey != "${game.score}:${game.board.joinToString(",")}") {
+                OutlinedButton(
+                    onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
+                    enabled = previous != null && !motionActive && verifiedSession == null
+                ) { Text("Geri Al", fontSize = 12.sp) }
+            }
             Button(onClick = { confirmRestart = true }) { Text("Yeni Oyun", fontSize = 12.sp) }
             OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
         }
