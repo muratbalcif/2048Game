@@ -29,7 +29,7 @@ struct GameScreen: View {
     private var mode: GameMode { GameMode(rawValue: modeRaw) ?? .classic }
     private var mergeRateLabel: String {
         let rate = progress.moves == 0 ? 0 : progress.merges * 100 / progress.moves
-        return "Hamle başına birleşme: %\(rate)"
+        return String(format: NSLocalizedString("Hamle başına birleşme: %%d", comment: "Merge rate"), rate)
     }
     @State private var previous: GameState?
     @State private var winAcknowledged = false
@@ -157,7 +157,7 @@ struct GameScreen: View {
             Button("Devam Et") { winAcknowledged = true }
             Button("Yeni Oyun") { restart() }
         } message: {
-            Text("\(mode.target ?? 2048) taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.")
+            Text(String(format: NSLocalizedString("%d taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.", comment: "Target reached"), mode.target ?? 2048))
         }
         .fullScreenCover(isPresented: Binding(
             get: { game.lost && !slideInProgress },
@@ -341,7 +341,7 @@ struct GameScreen: View {
                                 }
                             }
                             .frame(height: side)
-                            .accessibilityLabel(value == 0 ? "Boş hücre" : String(value) + " taşı")
+                            .accessibilityLabel(value == 0 ? NSLocalizedString("Boş hücre", comment: "Empty tile") : String(format: NSLocalizedString("%d taşı", comment: "Tile accessibility"), value))
                             .scaleEffect((revealedCells.contains(index) || mergedCells.contains(index)) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
                             .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
                         }
@@ -419,7 +419,7 @@ struct GameScreen: View {
                                     Text("\(entry.rank).")
                                         .fontWeight(.bold)
                                         .frame(width: 28, alignment: .leading)
-                                    Text(entry.nickname + (leaderboard.isMe(entry) ? " (Sen)" : ""))
+                                    Text(entry.nickname + (leaderboard.isMe(entry) ? " (" + NSLocalizedString("Sen", comment: "Current player") + ")" : ""))
                                         .fontWeight(leaderboard.isMe(entry) ? .bold : .regular)
                                     Spacer()
                                     Text("\(entry.score)").fontWeight(.semibold)
@@ -428,7 +428,7 @@ struct GameScreen: View {
                                 .foregroundStyle(theme.ink)
                             }
                             if let rank = leaderboard.myRank {
-                                Text("Senin sıran: #\(rank)")
+                                Text(String(format: NSLocalizedString("Senin sıran: #%d", comment: "Rank"), rank))
                                     .font(.caption.weight(.bold))
                                     .foregroundStyle(theme.accent)
                             }
@@ -456,7 +456,7 @@ struct GameScreen: View {
                                 rewardedAds.show(onRewardEarned: {
                                     guard game == snapshot, game.lost, doubledGameKey != claimKey else { return }
                                     rewardChecking = true
-                                    rewardMessage = "Google reklam ödülü doğrulanıyor…"
+                                    rewardMessage = NSLocalizedString("Google reklam ödülü doğrulanıyor…", comment: "Reward status")
                                     Task {
                                         var verified = false
                                         for _ in 0..<12 {
@@ -469,7 +469,7 @@ struct GameScreen: View {
                                             await leaderboard.load(mode: mode)
                                             rewardMessage = nil
                                         } else {
-                                            rewardMessage = "Ödül henüz doğrulanmadı. Biraz sonra tekrar kontrol et."
+                                            rewardMessage = NSLocalizedString("Ödül henüz doğrulanmadı. Biraz sonra tekrar kontrol et.", comment: "Reward status")
                                         }
                                         rewardChecking = false
                                     }
@@ -494,7 +494,7 @@ struct GameScreen: View {
                                                 await leaderboard.load(mode: mode)
                                                 self.rewardMessage = nil
                                             } else {
-                                                self.rewardMessage = "Ödül henüz doğrulanmadı."
+                                                self.rewardMessage = NSLocalizedString("Ödül henüz doğrulanmadı.", comment: "Reward status")
                                             }
                                             rewardChecking = false
                                         }
@@ -571,8 +571,8 @@ struct GameScreen: View {
                         }
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Oyun performansı").font(.headline)
-                            Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
-                            Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
+                            Label(String(format: NSLocalizedString("Toplam birleşme: %d", comment: "Merges"), progress.merges), systemImage: "square.on.square")
+                            Label(String(format: NSLocalizedString("Oyun başına puan: %d", comment: "Average score"), progress.totalPoints / max(1, progress.gamesStarted)), systemImage: "chart.bar.fill")
                             Label(mergeRateLabel, systemImage: "arrow.triangle.merge")
                         }
                         .font(.subheadline).foregroundStyle(theme.ink)
@@ -645,7 +645,7 @@ struct GameScreen: View {
                                         .overlay(RoundedRectangle(cornerRadius: 18).stroke(theme == option ? option.accent : .clear, lineWidth: 2))
                                     }
                                     .buttonStyle(.plain)
-                                    .accessibilityLabel("\(option.title) teması")
+                                    .accessibilityLabel(option.title)
                                     .accessibilityAddTraits(theme == option ? .isSelected : [])
                                 }
                             }
@@ -708,7 +708,7 @@ struct GameScreen: View {
                         }
                         if leaderboard.isLoading { ProgressView().frame(maxWidth: .infinity) }
                         if let rank = leaderboard.myRank {
-                            Text("Senin sıralaman  #\(rank)")
+                            Text(String(format: NSLocalizedString("Senin sıralaman  #%d", comment: "Rank"), rank))
                                 .font(.title3.bold()).foregroundStyle(theme.accent)
                                 .frame(maxWidth: .infinity, alignment: .leading).padding(18)
                                 .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
@@ -724,7 +724,7 @@ struct GameScreen: View {
                             HStack(spacing: 12) {
                                 Text(entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : entry.rank == 3 ? "🥉" : "#\(entry.rank)")
                                     .font(.headline).frame(width: 44, alignment: .leading)
-                                Text(entry.nickname + (leaderboard.isMe(entry) ? " (Sen)" : ""))
+                                Text(entry.nickname + (leaderboard.isMe(entry) ? " (" + NSLocalizedString("Sen", comment: "Current player") + ")" : ""))
                                     .fontWeight(leaderboard.isMe(entry) ? .bold : .medium)
                                 Spacer()
                                 Text(entry.score.formatted()).font(.headline.bold()).foregroundStyle(theme.accent)
