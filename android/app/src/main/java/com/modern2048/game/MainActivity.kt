@@ -220,7 +220,7 @@ private fun GameScreen() {
     }
     if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text(stringResource(R.string.win_title)) },
-            text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
+            text = { Text(stringResource(R.string.target_reached_desc, gameMode.target ?: 2048)) },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text(stringResource(R.string.continue)) } },
             dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text(stringResource(R.string.new_game)) } })
     }
@@ -259,7 +259,7 @@ private fun GameScreen() {
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Text("🏆  Global Liderlik", fontWeight = FontWeight.Bold, fontSize = 14.sp,
+                            Text(stringResource(R.string.leaderboard_gameover), fontWeight = FontWeight.Bold, fontSize = 14.sp,
                                 color = selectedTheme.ink, modifier = Modifier.weight(1f))
                             TextButton(onClick = {
                                 scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false }
@@ -269,13 +269,13 @@ private fun GameScreen() {
                         ranking.error?.let { Text(it, fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .7f)) }
                         ranking.entries.forEach { entry ->
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("${entry.rank}. ${entry.name}" + if (entry.mine) " (Sen)" else "",
+                                Text("${entry.rank}. ${entry.name}" + if (entry.mine) stringResource(R.string.you_suffix) else "",
                                     fontSize = 12.sp, fontWeight = if (entry.mine) FontWeight.Bold else FontWeight.Normal,
                                     color = selectedTheme.ink, modifier = Modifier.weight(1f))
                                 Text(entry.score.toString(), fontSize = 12.sp, color = selectedTheme.ink)
                             }
                         }
-                        ranking.myRank?.let { Text("Senin sıran: #$it", fontSize = 12.sp,
+                        ranking.myRank?.let { Text(stringResource(R.string.your_rank, it), fontSize = 12.sp,
                             fontWeight = FontWeight.Bold, color = selectedTheme.accent) }
                     }
                     Button(
@@ -439,19 +439,19 @@ private fun GameScreen() {
                 Text(stringResource(R.string.statistics), fontSize = 29.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
                 Text(stringResource(R.string.stats_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ScoreCard("TOPLAM PUAN", "%,d".format(progress.totalPoints), Modifier.weight(1f), selectedTheme)
-                    ScoreCard("EN BÜYÜK TAŞ", progress.bestTile.toString(), Modifier.weight(1f), selectedTheme)
+                    ScoreCard(stringResource(R.string.total_score), "%,d".format(progress.totalPoints), Modifier.weight(1f), selectedTheme)
+                    ScoreCard(stringResource(R.string.biggest_tile), progress.bestTile.toString(), Modifier.weight(1f), selectedTheme)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ScoreCard("OYUN", progress.gamesStarted.toString(), Modifier.weight(1f), selectedTheme)
-                    ScoreCard("HAMLE", progress.moves.toString(), Modifier.weight(1f), selectedTheme)
+                    ScoreCard(stringResource(R.string.games), progress.gamesStarted.toString(), Modifier.weight(1f), selectedTheme)
+                    ScoreCard(stringResource(R.string.moves), progress.moves.toString(), Modifier.weight(1f), selectedTheme)
                 }
                 Surface(color = selectedTheme.board.copy(alpha = .7f), shape = RoundedCornerShape(20.dp)) {
                     Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(stringResource(R.string.performance), fontWeight = FontWeight.Bold, color = selectedTheme.ink)
-                        Text("Toplam birleşme: ${progress.merges}", color = selectedTheme.ink)
-                        Text("Oyun başına ortalama puan: ${progress.totalPoints / progress.gamesStarted.coerceAtLeast(1)}", color = selectedTheme.ink)
-                        Text("Hamle başına birleşme: %${if (progress.moves == 0) 0 else progress.merges * 100 / progress.moves}", color = selectedTheme.ink)
+                        Text(stringResource(R.string.total_merges, progress.merges), color = selectedTheme.ink)
+                        Text(stringResource(R.string.avg_score, progress.totalPoints / progress.gamesStarted.coerceAtLeast(1)), color = selectedTheme.ink)
+                        Text(stringResource(R.string.merge_rate, if (progress.moves == 0) 0 else progress.merges * 100 / progress.moves), color = selectedTheme.ink)
                     }
                 }
                 Text(stringResource(R.string.achievements), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = selectedTheme.ink)
@@ -461,7 +461,7 @@ private fun GameScreen() {
                         Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(if (achievement.unlocked) "✦" else "○", color = selectedTheme.accent, fontSize = 21.sp)
                             Spacer(Modifier.width(12.dp))
-                            Text(achievement.title, fontWeight = FontWeight.SemiBold, color = selectedTheme.ink)
+                            Text(stringResource(when (achievement.id) { "first_merge" -> R.string.ach_first_merge; "hundred_moves" -> R.string.ach_hundred_moves; "tile_128" -> R.string.ach_tile_128; "tile_512" -> R.string.ach_tile_512; "tile_2048" -> R.string.ach_tile_2048; else -> R.string.ach_five_games }), fontWeight = FontWeight.SemiBold, color = selectedTheme.ink)
                         }
                     }
                 }
@@ -487,7 +487,7 @@ private fun GameScreen() {
                 if (rankingLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
                 ranking.myRank?.let { rank ->
                     Surface(color = selectedTheme.accent.copy(alpha = .12f), shape = RoundedCornerShape(18.dp)) {
-                        Text("Senin sıralaman  #$rank", Modifier.fillMaxWidth().padding(18.dp),
+                        Text(stringResource(R.string.your_ranking, rank), Modifier.fillMaxWidth().padding(18.dp),
                             color = selectedTheme.accent, fontWeight = FontWeight.Bold, fontSize = 19.sp)
                     }
                 }
@@ -500,7 +500,7 @@ private fun GameScreen() {
                         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(if (entry.rank == 1) "🥇" else if (entry.rank == 2) "🥈" else if (entry.rank == 3) "🥉" else "#${entry.rank}",
                                 modifier = Modifier.width(44.dp), fontWeight = FontWeight.Bold, color = selectedTheme.ink)
-                            Text(entry.name + if (entry.mine) " (Sen)" else "", modifier = Modifier.weight(1f),
+                            Text(entry.name + if (entry.mine) stringResource(R.string.you_suffix) else "", modifier = Modifier.weight(1f),
                                 fontWeight = if (entry.mine) FontWeight.Bold else FontWeight.Medium, color = selectedTheme.ink)
                             Text("%,d".format(entry.score), fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
                         }
@@ -547,7 +547,7 @@ private fun GameScreen() {
                                     ) { Text(number.toString(), fontSize = 10.sp, color = Color(0xFF24243A), fontWeight = FontWeight.Bold) }
                                 }
                             }
-                            Text(option.title, fontSize = 12.sp, color = option.ink, fontWeight = if (active) FontWeight.Bold else FontWeight.Medium)
+                            Text(stringResource(when (option) { GameTheme.SUNSET -> R.string.theme_sunset; GameTheme.OCEAN -> R.string.theme_ocean; GameTheme.MIDNIGHT -> R.string.theme_midnight }), fontSize = 12.sp, color = option.ink, fontWeight = if (active) FontWeight.Bold else FontWeight.Medium)
                             Text(if (active) stringResource(R.string.selected) else stringResource(R.string.select), fontSize = 11.sp, color = if (active) option.accent else option.ink.copy(alpha = .65f))
                         }
                     }
@@ -565,9 +565,9 @@ private fun GameScreen() {
                 Text(stringResource(R.string.experience), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
                 Surface(shape = RoundedCornerShape(20.dp), color = selectedTheme.board.copy(alpha = .75f)) {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-                        SettingsToggle("Ses efektleri", stringResource(R.string.sound), soundEnabled, selectedTheme.ink) { soundEnabled = it; storage.saveSoundEnabled(it) }
+                        SettingsToggle(stringResource(R.string.sound_effects), stringResource(R.string.sound), soundEnabled, selectedTheme.ink) { soundEnabled = it; storage.saveSoundEnabled(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
-                        SettingsToggle(stringResource(R.string.vibration), "Hamlelerde dokunsal geri bildirim", hapticsEnabled, selectedTheme.ink) { hapticsEnabled = it; storage.saveHapticsEnabled(it) }
+                        SettingsToggle(stringResource(R.string.vibration), stringResource(R.string.haptic_desc), hapticsEnabled, selectedTheme.ink) { hapticsEnabled = it; storage.saveHapticsEnabled(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
                         SettingsToggle(stringResource(R.string.reduce_motion), stringResource(R.string.reduce_motion_desc), reducedMotion, selectedTheme.ink) { reducedMotion = it; storage.saveReducedMotion(it) }
                     }
