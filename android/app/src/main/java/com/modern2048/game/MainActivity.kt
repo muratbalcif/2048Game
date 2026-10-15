@@ -219,10 +219,10 @@ private fun GameScreen() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
                 onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
-                enabled = previous != null
+                enabled = previous != null && !motionActive
             ) { Text("Geri Al") }
-            Button(onClick = { confirmRestart = true }) { Text("Yeni Oyun") }
-            OutlinedButton(onClick = { showSettings = true }) { Text("Ayarlar") }
+            Button(onClick = { confirmRestart = true }, enabled = !motionActive) { Text("Yeni Oyun") }
+            OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar") }
         }
     }
 }
