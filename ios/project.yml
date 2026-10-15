@@ -17,14 +17,18 @@ targets:
     platform: iOS
     sources:
       - Modern2048
+    info:
+      path: Modern2048/Info.plist
+      properties:
+        GADApplicationIdentifier: "ca-app-pub-9057596586284356~7218954891"
+        LeaderboardBaseURL: "$(LEADERBOARD_BASE_URL)"
     dependencies:
       - package: GoogleMobileAds
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.modern2048.game
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_LeaderboardBaseURL: "$(LEADERBOARD_BASE_URL)"
-        INFOPLIST_KEY_GADApplicationIdentifier: "ca-app-pub-9057596586284356~7218954891"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Modern2048/Info.plist
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_STYLE: Automatic
