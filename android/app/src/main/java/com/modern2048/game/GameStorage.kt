@@ -8,6 +8,24 @@ import org.json.JSONObject
 class GameStorage(context: Context) {
     private val prefs = context.getSharedPreferences("modern2048", Context.MODE_PRIVATE)
 
+    fun saveVerified(session: VerifiedGame?) {
+        val editor = prefs.edit()
+        if (session == null) editor.remove("verified_session")
+        else editor.putString("verified_session", JSONObject()
+            .put("sessionId", session.sessionId).put("playerId", session.playerId)
+            .put("seed", session.seed).put("moves", session.moves).toString())
+        editor.apply()
+    }
+
+    fun loadVerified(): VerifiedGame? = runCatching {
+        val raw = prefs.getString("verified_session", null) ?: return null
+        val json = JSONObject(raw)
+        val session = VerifiedGame(json.getString("sessionId"), json.getString("playerId"),
+            json.getLong("seed"), json.getString("moves"))
+        if (session.moves.length > 20000 || session.moves.any { it !in "UDLR" }) return null
+        session
+    }.getOrNull()
+
     fun loadTheme(): GameTheme = GameTheme.entries.firstOrNull { it.name == prefs.getString("theme", "SUNSET") } ?: GameTheme.SUNSET
     fun saveTheme(value: GameTheme) { prefs.edit().putString("theme", value.name).apply() }
     fun loadMode(): GameMode = runCatching {
