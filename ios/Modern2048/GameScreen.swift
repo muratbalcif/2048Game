@@ -12,6 +12,7 @@ struct GameScreen: View {
     @StateObject private var rewardedAds = RewardedAds()
     @StateObject private var leaderboard = LeaderboardClient()
     @State private var verifiedSession: VerifiedSession? = VerifiedSession.load()
+    @State private var rewardedScoreSession: VerifiedSession?
     @State private var startingVerified = false
     @State private var effects = GameEffects()
     @State private var rewardedContinue = GameStorage.loadReward()
@@ -463,7 +464,7 @@ struct GameScreen: View {
                                     let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
                                     bestScore = max(bestScore, doubled)
                                     GameStorage.saveBest(bestScore)
-                                }, sessionId: verifiedSession?.sessionId, playerId: verifiedSession?.playerId)
+                                }, sessionId: (rewardedScoreSession ?? verifiedSession)?.sessionId, playerId: (rewardedScoreSession ?? verifiedSession)?.playerId)
                             } label: {
                                 Label("Reklam İzle · 2× Puan", systemImage: "play.rectangle.fill")
                                     .font(.subheadline.weight(.semibold))
@@ -517,6 +518,7 @@ struct GameScreen: View {
                 if let session = verifiedSession {
                     if VerifiedEngine.replay(session.seed, session.moves)?.score == game.score {
                         if await leaderboard.finalizeVerified(session, score: game.score) {
+                            rewardedScoreSession = session
                             verifiedSession = nil
                             VerifiedSession.save(nil)
                         }
@@ -630,6 +632,7 @@ struct GameScreen: View {
     }
 
     private func restart() {
+        rewardedScoreSession = nil
         progress.nextGame()
         GameStorage.saveProgress(progress)
         animationToken = UUID()
