@@ -91,7 +91,9 @@ struct GameScreen: View {
         )) {
             if rewardedAds.isReady && rewardedContinue.available {
                 Button("Reklam İzle · 3 Hamle Geri Al") {
+                    let lostSnapshot = game
                     rewardedAds.show {
+                        guard game == lostSnapshot else { return }
                         if let restored = rewardedContinue.redeem(current: game) {
                             game = restored
                             GameStorage.saveReward(rewardedContinue)
