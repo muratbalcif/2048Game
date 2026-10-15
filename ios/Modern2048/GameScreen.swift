@@ -457,13 +457,13 @@ struct GameScreen: View {
                             Button {
                                 let snapshot = game
                                 let claimKey = "\(game.score):\(game.board.map(String.init).joined(separator: ","))"
-                                rewardedAds.show {
+                                rewardedAds.show(onRewardEarned: {
                                     guard game == snapshot, game.lost, doubledGameKey != claimKey else { return }
                                     doubledGameKey = claimKey
                                     let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
                                     bestScore = max(bestScore, doubled)
                                     GameStorage.saveBest(bestScore)
-                                }
+                                }, sessionId: verifiedSession?.sessionId, playerId: verifiedSession?.playerId)
                             } label: {
                                 Label("Reklam İzle · 2× Puan", systemImage: "play.rectangle.fill")
                                     .font(.subheadline.weight(.semibold))
