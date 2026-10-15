@@ -15,6 +15,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     private var loadGeneration = 0
 
     func load() {
+        #if DEBUG
         guard !loading, !presenting, ad == nil else { return }
         loading = true
         loadGeneration += 1
@@ -35,6 +36,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
             }
             loading = false
         }
+        #endif
     }
 
     func show(onRewardEarned: @escaping () -> Void) {
