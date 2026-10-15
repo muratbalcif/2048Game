@@ -121,7 +121,7 @@ struct GameScreen: View {
                 }
             }
         }
-        .onChange(of: scenePhase) { _, phase in
+        .onChange(of: scenePhase) { phase in
             if phase == .background || phase == .inactive {
                 if !slideInProgress { GameStorage.save(game) }
                 GameStorage.saveReward(rewardedContinue)
