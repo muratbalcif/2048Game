@@ -24,7 +24,8 @@ class GameStorage(context: Context) {
         if (board.any { it < 0 || (it != 0 && (it < 2 || (it and (it - 1)) != 0)) }) return null
         val score = json.getInt("score")
         if (score < 0) return null
-        GameState(board, score, json.getBoolean("won"), json.getBoolean("lost"))
+        val lost = !GameEngine.canMove(board)
+        GameState(board, score, json.optBoolean("won", false), lost)
     }.getOrNull()
 
     fun save(state: GameState) {
@@ -49,7 +50,7 @@ class GameStorage(context: Context) {
             require(board.all { it == 0 || (it >= 2 && (it and (it - 1)) == 0) })
             val score = entry.getInt("score")
             require(score >= 0)
-            GameState(board, score, entry.getBoolean("won"), entry.getBoolean("lost"))
+            GameState(board, score, entry.optBoolean("won", false), !GameEngine.canMove(board))
         }
         RewardedContinue(history, json.getBoolean("used"))
     }.getOrDefault(RewardedContinue())
