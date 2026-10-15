@@ -8,6 +8,11 @@ import org.json.JSONObject
 class GameStorage(context: Context) {
     private val prefs = context.getSharedPreferences("modern2048", Context.MODE_PRIVATE)
 
+    fun loadMode(): GameMode = runCatching {
+        GameMode.valueOf(prefs.getString("mode", GameMode.CLASSIC.name)!!)
+    }.getOrDefault(GameMode.CLASSIC)
+    fun saveMode(mode: GameMode) { prefs.edit().putString("mode", mode.name).apply() }
+
     fun load(): GameState? = runCatching {
         val raw = prefs.getString("game", null) ?: return null
         val json = JSONObject(raw)
