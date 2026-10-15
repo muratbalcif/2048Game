@@ -45,6 +45,7 @@ struct GameScreen: View {
                 .font(.system(size: 48, weight: .black, design: .rounded))
                 .foregroundStyle(theme.accent)
             Button(mode.title + "  ▾") { showModePicker = true }
+                .disabled(slideInProgress)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.ink)
             HStack(spacing: 12) {
@@ -61,11 +62,11 @@ struct GameScreen: View {
                             let value = game.board[index]
                             ZStack {
                                 RoundedRectangle(cornerRadius: 14)
-                                    .fill(slideInProgress ? theme.empty : (value == 0 ? Palette.empty : (highContrast ? contrastTile(value) : theme.tile(value))))
+                                    .fill(slideInProgress ? theme.empty : (value == 0 ? theme.empty : (highContrast ? contrastTile(value) : theme.tile(value))))
                                 if value != 0 && !slideInProgress {
                                     Text("\(value)")
                                         .font(.system(size: value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
-                                        .foregroundStyle(Palette.ink)
+                                        .foregroundStyle(highContrast ? Color.black : theme.ink)
                                 }
                             }
                             .frame(height: side)
@@ -80,7 +81,7 @@ struct GameScreen: View {
                                 RoundedRectangle(cornerRadius: 14).fill((highContrast ? contrastTile(tile.value) : theme.tile(tile.value)))
                                 Text("\(tile.value)")
                                     .font(.system(size: tile.value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
-                                    .foregroundStyle(Palette.ink)
+                                    .foregroundStyle(theme.ink)
                             }
                             .frame(width: side, height: side)
                             .offset(
@@ -93,7 +94,7 @@ struct GameScreen: View {
                 .padding(10)
                 .background(theme.board, in: RoundedRectangle(cornerRadius: 24))
                 .gesture(DragGesture(minimumDistance: 20).onEnded { gesture in
-                    guard !slideInProgress else { return }
+                    guard !slideInProgress && !game.lost else { return }
                     let dx = gesture.translation.width
                     let dy = gesture.translation.height
                     let direction: MoveDirection = abs(dx) > abs(dy)
