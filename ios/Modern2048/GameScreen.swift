@@ -29,9 +29,9 @@ struct GameScreen: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 14) {
             Text("2048")
-                .font(.system(size: 56, weight: .black, design: .rounded))
+                .font(.system(size: 48, weight: .black, design: .rounded))
                 .foregroundStyle(Palette.purple)
             Text("Modern Puzzle").foregroundStyle(Palette.ink)
             HStack(spacing: 12) {
@@ -119,7 +119,7 @@ struct GameScreen: View {
             }
             .aspectRatio(1, contentMode: .fit)
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(Palette.ink)
-            HStack {
+            HStack(spacing: 8) {
                 Button("Geri Al") {
                     if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
                 }
@@ -129,6 +129,7 @@ struct GameScreen: View {
                 Button("Ayarlar") { showSettings = true }
                     .disabled(slideInProgress)
             }
+            .font(.system(size: 13, weight: .semibold))
             .buttonStyle(.borderedProminent)
             Spacer()
         }
