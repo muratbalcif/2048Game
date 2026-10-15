@@ -149,7 +149,7 @@ async function verifyAdMobSignature(signed: string, signature: string, keyId: st
     const decoded = Uint8Array.from(atob(signature.replace(/-/g,"+").replace(/_/g,"/")), c => c.charCodeAt(0));
     // AdMob uses ASN.1 DER ECDSA signatures; WebCrypto requires IEEE-P1363 r||s.
     const raw = ecdsaDerToRaw(decoded);
-    return await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},key,raw,new TextEncoder().encode(signed));
+    return await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"}, key, Uint8Array.from(raw), new TextEncoder().encode(signed));
   } catch { return false; }
 }
 function ecdsaDerToRaw(der: Uint8Array): Uint8Array {
