@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import GoogleMobileAds
 import UIKit
+import SwiftUI
 
 @MainActor
 final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
