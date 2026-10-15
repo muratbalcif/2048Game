@@ -9,8 +9,8 @@ private enum Palette {
 }
 
 struct GameScreen: View {
-    @State private var game = GameEngine.newGame()
-    @State private var bestScore = 0
+    @State private var game = GameStorage.load() ?? GameEngine.newGame()
+    @State private var bestScore = GameStorage.best
     @State private var previous: GameState?
 
     var body: some View {
@@ -51,17 +51,20 @@ struct GameScreen: View {
                     previous = game
                     withAnimation(.easeInOut(duration: 0.15)) { game = result.state }
                     bestScore = max(bestScore, game.score)
+                    GameStorage.save(game)
+                    GameStorage.saveBest(bestScore)
                 }
             })
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(Palette.ink)
             HStack {
                 Button("Geri Al") {
-                    if let previous { game = previous; self.previous = nil }
+                    if let previous { game = previous; self.previous = nil; GameStorage.save(game) }
                 }
                 .disabled(previous == nil)
                 Button("Yeni Oyun") {
                     game = GameEngine.newGame()
                     previous = nil
+                    GameStorage.save(game)
                 }
             }
             .buttonStyle(.borderedProminent)
