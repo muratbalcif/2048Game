@@ -88,4 +88,8 @@
     <string name="target_reached_desc">You reached the %1$d tile. Keep going for higher numbers.</string>
     <string name="tile_accessibility">%1$d tile</string>
     <string name="leaderboard_gameover">🏆  Global Leaderboard</string>
+    <string name="language">Language</string>
+    <string name="language_system">Phone language</string>
+    <string name="language_turkish">Türkçe</string>
+    <string name="language_english">English</string>
 </resources>
