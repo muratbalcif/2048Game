@@ -872,11 +872,7 @@ struct GameScreen: View {
                             HStack(spacing: 12) {
                                 Text(rankLabel(for: entry.rank))
                                     .font(.headline).frame(width: 44, alignment: .leading)
-                                Text(
-                                    leaderboard.isMe(entry)
-                                        ? "\(entry.nickname) (\(String(localized: "Sen")))"
-                                        : entry.nickname
-                                )
+                                Text(leaderboard.isMe(entry) ? "\(entry.nickname) (Sen)" : entry.nickname)
                                     .fontWeight(leaderboard.isMe(entry) ? .bold : .medium)
                                 Spacer()
                                 Text(entry.score.formatted()).font(.headline.bold()).foregroundStyle(theme.accent)
