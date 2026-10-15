@@ -299,7 +299,7 @@ private fun GameScreen() {
                         OutlinedButton(onClick = {
                             val snapshot = game
                             val claimKey = gameKey
-                            rewardedAds.show {
+                            rewardedAds.show(onRewardEarned = {
                                 if (game == snapshot && game.lost && doubledGameKey != claimKey) {
                                     doubledGameKey = claimKey
                                     storage.saveDoubledGameKey(claimKey)
@@ -307,7 +307,7 @@ private fun GameScreen() {
                                     best = maxOf(best, bonusScore)
                                     storage.saveBest(best)
                                 }
-                            }
+                            }, sessionId = verifiedSession?.sessionId, playerId = verifiedSession?.playerId)
                         }, modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(16.dp)) {
                             Text("▶  Reklam İzle · 2× Puan", fontSize = 12.sp, color = selectedTheme.ink)
