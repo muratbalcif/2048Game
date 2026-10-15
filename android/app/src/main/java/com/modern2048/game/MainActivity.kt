@@ -84,7 +84,7 @@ private fun GameScreen() {
                     }) { Text("Tekrar Oyna") }
                 }
             },
-            dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
+            dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
     }
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
