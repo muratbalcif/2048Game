@@ -19,6 +19,10 @@ jobs:
         run: |
           swiftc ios/Modern2048/GameEngine.swift ios/Modern2048/RewardedContinue.swift ios/tests/RewardedContinueSmoke.swift -o /tmp/rewarded-smoke
           /tmp/rewarded-smoke
+      - name: Run native Swift tile motion tests
+        run: |
+          swiftc ios/Modern2048/GameEngine.swift ios/Modern2048/TileMotion.swift ios/tests/TileMotionSmoke.swift -o /tmp/tile-motion-smoke
+          /tmp/tile-motion-smoke
       - name: Generate Xcode project
         working-directory: ios
         run: xcodegen generate
