@@ -4,7 +4,7 @@ enum GameTheme: String, CaseIterable, Identifiable {
     case sunset, ocean, midnight
     var id: String { rawValue }
     var title: String {
-        switch self { case .sunset: "Gün Batımı"; case .ocean: "Okyanus"; case .midnight: "Gece" }
+        switch self { case .sunset: NSLocalizedString("Gün Batımı", comment: "Theme"); case .ocean: NSLocalizedString("Okyanus", comment: "Theme"); case .midnight: NSLocalizedString("Gece", comment: "Theme") }
     }
     var canvas: Color {
         switch self { case .sunset: Color(red: 0.98, green: 0.97, blue: 0.96); case .ocean: Color(red: 0.92, green: 0.97, blue: 0.98); case .midnight: Color(red: 0.09, green: 0.10, blue: 0.16) }
