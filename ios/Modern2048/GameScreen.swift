@@ -27,6 +27,10 @@ struct GameScreen: View {
     @AppStorage("modern2048.mode") private var modeRaw = GameMode.classic.rawValue
     @State private var showModePicker = false
     private var mode: GameMode { GameMode(rawValue: modeRaw) ?? .classic }
+    private var mergeRateLabel: String {
+        let rate = progress.moves == 0 ? 0 : progress.merges * 100 / progress.moves
+        return "Hamle başına birleşme: %\(rate)"
+    }
     @State private var previous: GameState?
     @State private var winAcknowledged = false
     @State private var confirmRestart = false
@@ -205,7 +209,7 @@ struct GameScreen: View {
                             Text("Oyun performansı").font(.headline)
                             Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
                             Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
-                            Label("Hamle başına birleşme: %\(progress.moves == 0 ? 0 : progress.merges * 100 / progress.moves)", systemImage: "arrow.triangle.merge")
+                            Label(mergeRateLabel, systemImage: "arrow.triangle.merge")
                         }
                         .font(.subheadline).foregroundStyle(theme.ink)
                         .padding(18)
