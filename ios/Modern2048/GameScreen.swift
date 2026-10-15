@@ -20,6 +20,7 @@ struct GameScreen: View {
     @State private var slidingTiles: [TileMotion] = []
     @State private var slideProgress: CGFloat = 0
     @State private var slideInProgress = false
+    @State private var revealedCells: Set<Int> = []
     @AppStorage("modern2048.sound") private var soundEnabled = true
     @AppStorage("modern2048.haptics") private var hapticsEnabled = true
     @State private var showSettings = false
@@ -54,6 +55,7 @@ struct GameScreen: View {
                                 }
                             }
                             .frame(height: side)
+                            .scaleEffect(revealedCells.contains(index) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
                             .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
                         }
                     }
@@ -101,10 +103,13 @@ struct GameScreen: View {
                         withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
                         Task { @MainActor in
                             try? await Task.sleep(nanoseconds: 180_000_000)
+                            revealedCells = Set(result.state.board.indices.filter { result.state.board[$0] != 0 && !slidingTiles.contains(where: { $0.to == $0 }) })
                             game = result.state
                             slideInProgress = false
                             slidingTiles = []
                             slideProgress = 0
+                            try? await Task.sleep(nanoseconds: 180_000_000)
+                            revealedCells = []
                         }
                     }
                 })
