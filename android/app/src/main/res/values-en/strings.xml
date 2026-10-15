@@ -12,7 +12,7 @@
     <string name="down">↓ Down</string>
     <string name="right">Right →</string>
     <string name="win_title">Target Reached!</string>
-    <string name="continue">Continue</string>
+    <string name="devam">Continue</string>
     <string name="game_over">Game Over!</string>
     <string name="game_over_subtitle">Great attempt! Beat your record next time.</string>
     <string name="refresh">Refresh</string>

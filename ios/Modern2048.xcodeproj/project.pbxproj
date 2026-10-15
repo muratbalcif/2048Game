@@ -12,6 +12,7 @@
 		523548E951E4ADF8C2EFB756 /* GameStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4766B51C6233435F2861C2 /* GameStorage.swift */; };
 		66118E3DF9772AC2E8CA1225 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90440C2507CC589ACAD787BA /* GameEngine.swift */; };
 		7696E5E5A2553AE5F2B999F4 /* GameProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1ED3F64EF3DF374BF7CD02 /* GameProgress.swift */; };
+		797E9E990FCAD585B296DD12 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 33D41806E82BBA77DF0864CF /* Localizable.strings */; };
 		950615BFD1ECC9F8CC46E67C /* GameMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF29CAAF220BD5572982738C /* GameMode.swift */; };
 		A2F5A4EA9A3C2E14E82632E3 /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3779E59467F9CF0CEB78C033 /* Leaderboard.swift */; };
 		AF1041541532A0A3B0D4E44F /* TileMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6AD567D15027125C32EA971 /* TileMotion.swift */; };
@@ -26,10 +27,12 @@
 /* Begin PBXFileReference section */
 		0BE63F571159DD0911D847C1 /* RewardedContinue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedContinue.swift; sourceTree = "<group>"; };
 		1D63992AFDFDB5F28C69A663 /* GameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScreen.swift; sourceTree = "<group>"; };
+		315E1B9889B8CC89BC753CF5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3779E59467F9CF0CEB78C033 /* Leaderboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
 		440AEE616B570A27971D4FEC /* Modern2048.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Modern2048.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51227C1CA3054827EB34DF7F /* GameEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEffects.swift; sourceTree = "<group>"; };
 		5B4766B51C6233435F2861C2 /* GameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStorage.swift; sourceTree = "<group>"; };
+		6A9788C9AA36E1C8EA3FC60C /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTheme.swift; sourceTree = "<group>"; };
 		90440C2507CC589ACAD787BA /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
 		BCAB2AA55C6B46B3B975BD6C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -78,6 +81,7 @@
 				0BE63F571159DD0911D847C1 /* RewardedContinue.swift */,
 				C6AD567D15027125C32EA971 /* TileMotion.swift */,
 				D9D009D519651212ED4D18C6 /* VerifiedGame.swift */,
+				33D41806E82BBA77DF0864CF /* Localizable.strings */,
 			);
 			path = Modern2048;
 			sourceTree = "<group>";
@@ -98,6 +102,7 @@
 			buildConfigurationList = BB8BBC803A7FC872FA6562E1 /* Build configuration list for PBXNativeTarget "Modern2048" */;
 			buildPhases = (
 				50F1ACBB7E8AA13E74DF7057 /* Sources */,
+				A0A6B327016CF057C54DD304 /* Resources */,
 				C2FB814D4D0CE3FAD6966A64 /* Frameworks */,
 			);
 			buildRules = (
@@ -132,6 +137,7 @@
 			knownRegions = (
 				Base,
 				en,
+				tr,
 			);
 			mainGroup = 51A2AE2D3035E3DE24AF3451;
 			minimizedProjectReferenceProxies = 1;
@@ -147,6 +153,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A0A6B327016CF057C54DD304 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				797E9E990FCAD585B296DD12 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		50F1ACBB7E8AA13E74DF7057 /* Sources */ = {
@@ -170,6 +187,18 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		33D41806E82BBA77DF0864CF /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				315E1B9889B8CC89BC753CF5 /* en */,
+				6A9788C9AA36E1C8EA3FC60C /* tr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0640D7DF28652386CB723BFB /* Release */ = {

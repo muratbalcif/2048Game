@@ -12,7 +12,7 @@
     <string name="down">↓ Aşağı</string>
     <string name="right">Sağ →</string>
     <string name="win_title">Hedefe Ulaştın!</string>
-    <string name="continue">Devam Et</string>
+    <string name="devam">Devam Et</string>
     <string name="game_over">Oyun Bitti!</string>
     <string name="game_over_subtitle">Harika bir denemeydi! Bir sonraki oyunda rekorunu geçebilirsin.</string>
     <string name="refresh">Yenile</string>

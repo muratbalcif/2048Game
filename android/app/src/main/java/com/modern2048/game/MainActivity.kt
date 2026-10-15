@@ -226,7 +226,7 @@ private fun GameScreen() {
     if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text(stringResource(R.string.win_title)) },
             text = { Text(stringResource(R.string.target_reached_desc, gameMode.target ?: 2048)) },
-            confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text(stringResource(R.string.continue)) } },
+            confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text(stringResource(R.string.devam)) } },
             dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text(stringResource(R.string.new_game)) } })
     }
     if (!motionActive && game.lost) {
