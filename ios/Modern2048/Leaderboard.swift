@@ -52,7 +52,7 @@ final class LeaderboardClient: ObservableObject {
             error = nil
             return true
         } catch {
-            error = "Rumuz güncellenemedi. İnternet bağlantını kontrol et."
+            self.error = "Rumuz güncellenemedi. İnternet bağlantını kontrol et."
             return false
         }
     }
