@@ -10,6 +10,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.BoxWithConstraints
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -52,6 +53,15 @@ private fun GameScreen() {
     var mergedCells by remember { mutableStateOf<Set<Int>>(emptySet()) }
     val motionProgress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
+    var slideJob by remember { mutableStateOf<Job?>(null) }
+    fun resetMotion() {
+        slideJob?.cancel()
+        slideJob = null
+        motionActive = false
+        motion = emptyList()
+        revealedCells = emptySet()
+        mergedCells = emptySet()
+    }
     var previous by remember { mutableStateOf<GameState?>(null) }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
@@ -73,7 +83,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
             text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { resetMotion(); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (game.lost) {
         AlertDialog(onDismissRequest = {}, title = { Text("Oyun Bitti") },
@@ -167,7 +177,7 @@ private fun GameScreen() {
                                     if (!reducedMotion) {
                                         motion = TileMotionPlanner.plan(game.board, direction)
                                         motionActive = true
-                                        scope.launch {
+                                        slideJob = scope.launch {
                                             motionProgress.snapTo(0f)
                                             motionProgress.animateTo(1f, tween(160))
                                             val newCells = result.state.board.indices.filter { result.state.board[it] != 0 && motion.none { tile -> tile.to == it } }.toSet()
