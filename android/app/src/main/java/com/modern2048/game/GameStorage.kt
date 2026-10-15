@@ -61,6 +61,8 @@ class GameStorage(context: Context) {
             .put("used", reward.used).toString()).apply()
     }
 
+    fun reducedMotion(): Boolean = prefs.getBoolean("reduced_motion", false)
+    fun saveReducedMotion(enabled: Boolean) { prefs.edit().putBoolean("reduced_motion", enabled).apply() }
     fun soundEnabled(): Boolean = prefs.getBoolean("sound_enabled", true)
     fun hapticsEnabled(): Boolean = prefs.getBoolean("haptics_enabled", true)
     fun saveSoundEnabled(enabled: Boolean) { prefs.edit().putBoolean("sound_enabled", enabled).apply() }
