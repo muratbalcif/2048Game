@@ -22,6 +22,35 @@ enum GameStorage {
         }
     }
 
+    static func loadReward() -> RewardedContinue {
+        guard let data = UserDefaults.standard.data(forKey: "modern2048.reward"),
+              let record = try? JSONDecoder().decode(RewardRecord.self, from: data),
+              record.history.count <= 3,
+              record.history.allSatisfy({ state in
+                  state.board.count == 16 && state.score >= 0 &&
+                  state.board.allSatisfy({ $0 == 0 || ($0 >= 2 && ($0 & ($0 - 1)) == 0) })
+              }) else { return RewardedContinue() }
+        return RewardedContinue(
+            history: record.history.map { GameState(board: $0.board, score: $0.score, won: $0.won, lost: $0.lost) },
+            used: record.used
+        )
+    }
+
+    static func saveReward(_ reward: RewardedContinue) {
+        let record = RewardRecord(
+            history: reward.history.map { Snapshot(board: $0.board, score: $0.score, won: $0.won, lost: $0.lost) },
+            used: reward.used
+        )
+        if let data = try? JSONEncoder().encode(record) {
+            UserDefaults.standard.set(data, forKey: "modern2048.reward")
+        }
+    }
+
+    private struct RewardRecord: Codable {
+        let history: [Snapshot]
+        let used: Bool
+    }
+
     static var best: Int { UserDefaults.standard.integer(forKey: bestKey) }
 
     static func saveBest(_ score: Int) {
