@@ -2,6 +2,8 @@ package com.modern2048.game
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
@@ -49,6 +51,8 @@ private val boardColor = Color(0xFFE9E5E2)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val savedLanguage = getSharedPreferences("language_settings", MODE_PRIVATE).getString("language", "") ?: ""
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLanguage))
         setContent { MaterialTheme { GameScreen() } }
     }
 }
@@ -526,6 +530,31 @@ private fun GameScreen() {
                         Text(stringResource(R.string.settings_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                     }
                     TextButton(onClick = { showSettings = false }) { Text(stringResource(R.string.done), color = selectedTheme.accent) }
+                }
+                var languageExpanded by remember { mutableStateOf(false) }
+                val languagePrefs = remember(context) { context.getSharedPreferences("language_settings", android.content.Context.MODE_PRIVATE) }
+                var languageChoice by remember { mutableStateOf(languagePrefs.getString("language", "") ?: "") }
+                Column {
+                    Text(stringResource(R.string.language), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                    Box {
+                        OutlinedButton(onClick = { languageExpanded = true }) {
+                            Text(when (languageChoice) {
+                                "tr" -> stringResource(R.string.language_turkish)
+                                "en" -> stringResource(R.string.language_english)
+                                else -> stringResource(R.string.language_system)
+                            })
+                        }
+                        DropdownMenu(expanded = languageExpanded, onDismissRequest = { languageExpanded = false }) {
+                            listOf("" to R.string.language_system, "tr" to R.string.language_turkish, "en" to R.string.language_english).forEach { (code, label) ->
+                                DropdownMenuItem(text = { Text(stringResource(label)) }, onClick = {
+                                    languageExpanded = false
+                                    languageChoice = code
+                                    languagePrefs.edit().putString("language", code).apply()
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(code))
+                                })
+                            }
+                        }
+                    }
                 }
                 Text(stringResource(R.string.appearance), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
