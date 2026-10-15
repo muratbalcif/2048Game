@@ -19,4 +19,12 @@
 - Avoid reward stacking, multiple simultaneous ad presentations and forced ad viewing.
 
 ## Current implementation
-Pure native rewind models are present in both platforms. Actual AdMob SDK, UI integration, persistence, and rewarded callback wiring are pending; no simulated reward is granted.
+- Android and iOS use Google's official rewarded test app/unit IDs.
+- SDK load/present/earned-reward callbacks are wired to game-over UI.
+- The last three successful move snapshots and the one-use entitlement are persisted on both platforms.
+- Manual undo also removes the matching rewind-history entry.
+- Stale reward callbacks are ignored after the game state changes.
+- Android unit tests cover history bounds, redemption and one-time use.
+- Actual Android/iOS builds and device ad playback remain unverified.
+- Production release requires real ad unit IDs, privacy/consent review, and release QA.
+
