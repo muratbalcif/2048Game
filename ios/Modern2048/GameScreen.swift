@@ -32,7 +32,7 @@ struct GameScreen: View {
         let rate = progress.moves == 0 ? 0 : progress.merges * 100 / progress.moves
         return String(format: NSLocalizedString("Hamle başına birleşme: %%d", comment: "Merge rate"), rate)
     }
-    @State private var previous: GameState?
+    @State private var previous: GameState? = GameStorage.loadReward().history.last
     @State private var winAcknowledged = false
     @State private var confirmRestart = false
     @State private var slidingTiles: [TileMotion] = []
