@@ -48,7 +48,7 @@ struct GameScreen: View {
                                 RoundedRectangle(cornerRadius: 14)
                                     .fill(slideInProgress ? Palette.empty : (value == 0 ? Palette.empty : tileColor(value)))
                                 if value != 0 && !slideInProgress {
-                                    Text("\\(value)")
+                                    Text("\(value)")
                                         .font(.system(size: value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
                                         .foregroundStyle(Palette.ink)
                                 }
