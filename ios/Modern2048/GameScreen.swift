@@ -14,6 +14,8 @@ struct GameScreen: View {
     @State private var rewardedContinue = GameStorage.loadReward()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
     @State private var bestScore = GameStorage.best
+    @State private var progress = GameStorage.loadProgress()
+    @State private var showProgress = false
     @State private var previous: GameState?
     @State private var winAcknowledged = false
     @State private var confirmRestart = false
@@ -92,6 +94,9 @@ struct GameScreen: View {
                     rewardedContinue.record(old)
                     GameStorage.saveReward(rewardedContinue)
                     previous = old
+                    let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
+                    progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
+                    GameStorage.saveProgress(progress)
                     effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
                     bestScore = max(bestScore, result.state.score)
                     GameStorage.save(result.state)
@@ -135,12 +140,39 @@ struct GameScreen: View {
             }
             .font(.system(size: 13, weight: .semibold))
             .buttonStyle(.borderedProminent)
+            Button("İstatistikler ve Başarımlar") { showProgress = true }
+                .disabled(slideInProgress)
+                .font(.footnote)
             Spacer()
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.canvas.ignoresSafeArea())
         .onAppear { rewardedAds.load() }
+        .sheet(isPresented: $showProgress) {
+            NavigationStack {
+                List {
+                    Section("İstatistikler") {
+                        LabeledContent("Hamle", value: "\(progress.moves)")
+                        LabeledContent("Birleşme", value: "\(progress.merges)")
+                        LabeledContent("Oyun", value: "\(progress.gamesStarted)")
+                        LabeledContent("En büyük taş", value: "\(progress.bestTile)")
+                        LabeledContent("Toplam puan", value: "\(progress.totalPoints)")
+                    }
+                    Section("Başarımlar") {
+                        ForEach(GameAchievements.list(progress)) { achievement in
+                            HStack {
+                                Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
+                                    .foregroundStyle(achievement.unlocked ? .green : .secondary)
+                                Text(achievement.title)
+                            }
+                        }
+                    }
+                }
+                .navigationTitle("İstatistikler")
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showProgress = false } } }
+            }
+        }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 Form {
@@ -198,6 +230,8 @@ struct GameScreen: View {
     }
 
     private func restart() {
+        progress.nextGame()
+        GameStorage.saveProgress(progress)
         animationToken = UUID()
         slideInProgress = false
         slidingTiles = []
