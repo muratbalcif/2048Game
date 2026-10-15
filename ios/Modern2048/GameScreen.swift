@@ -12,6 +12,8 @@ struct GameScreen: View {
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
     @State private var bestScore = GameStorage.best
     @State private var previous: GameState?
+    @State private var winAcknowledged = false
+    @State private var confirmRestart = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -61,11 +63,7 @@ struct GameScreen: View {
                     if let previous { game = previous; self.previous = nil; GameStorage.save(game) }
                 }
                 .disabled(previous == nil)
-                Button("Yeni Oyun") {
-                    game = GameEngine.newGame()
-                    previous = nil
-                    GameStorage.save(game)
-                }
+                Button("Yeni Oyun") { confirmRestart = true }
             }
             .buttonStyle(.borderedProminent)
             Spacer()
@@ -73,6 +71,41 @@ struct GameScreen: View {
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.canvas.ignoresSafeArea())
+        .alert("2048! Harika!", isPresented: Binding(
+            get: { game.won && !winAcknowledged && !game.lost },
+            set: { if !$0 { winAcknowledged = true } }
+        )) {
+            Button("Devam Et") { winAcknowledged = true }
+            Button("Yeni Oyun") { restart() }
+        } message: {
+            Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.")
+        }
+        .alert("Oyun Bitti", isPresented: Binding(
+            get: { game.lost },
+            set: { _ in }
+        )) {
+            Button("Tekrar Oyna") { restart() }
+            if previous != nil {
+                Button("Geri Al") {
+                    if let previous { game = previous; self.previous = nil; GameStorage.save(game) }
+                }
+            }
+        } message: {
+            Text("Skorun: \(game.score)")
+        }
+        .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
+            Button("Yeni Oyun", role: .destructive) { restart() }
+            Button("Vazgeç", role: .cancel) {}
+        } message: {
+            Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
+        }
+    }
+
+    private func restart() {
+        game = GameEngine.newGame()
+        previous = nil
+        winAcknowledged = false
+        GameStorage.save(game)
     }
 
     private func tileColor(_ value: Int) -> Color {
