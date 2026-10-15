@@ -49,7 +49,7 @@ private fun GameScreen() {
     }
     var winAcknowledged by remember { mutableStateOf(false) }
     var confirmRestart by remember { mutableStateOf(false) }
-    if (game.won && !winAcknowledged) {
+    if (game.won && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
             text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
@@ -102,7 +102,7 @@ private fun GameScreen() {
         Text("2048", fontSize = 56.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6657E8))
         Text("Modern Puzzle", color = ink)
         Spacer(Modifier.height(24.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f))
             ScoreCard("REKOR", best.toString(), Modifier.weight(1f))
         }
