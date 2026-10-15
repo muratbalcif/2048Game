@@ -95,7 +95,7 @@ struct GameScreen: View {
                 }
                 .padding(10)
                 .background(theme.board, in: RoundedRectangle(cornerRadius: 24))
-                .gesture(DragGesture(minimumDistance: 20).onEnded { gesture in
+                .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { gesture in
                     guard !slideInProgress && !game.lost else { return }
                     let dx = gesture.translation.width
                     let dy = gesture.translation.height
@@ -118,7 +118,7 @@ struct GameScreen: View {
                 .buttonStyle(.bordered)
                 .disabled(slideInProgress)
             }
-            Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(Palette.ink)
+            Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(theme.ink)
             HStack(spacing: 8) {
                 Button("Geri Al") {
                     if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
