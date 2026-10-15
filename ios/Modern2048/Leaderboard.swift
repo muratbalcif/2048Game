@@ -69,6 +69,25 @@ final class LeaderboardClient: ObservableObject {
         } catch { return false }
     }
 
+    /// Read-only status; local SDK reward callbacks are not proof of SSV verification.
+    func isRewardVerified(_ session: VerifiedSession) async -> Bool {
+        guard let base else { return false }
+        var components = URLComponents(url: base.appendingPathComponent("v2/sessions/reward-status"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [
+            URLQueryItem(name: "sessionId", value: session.sessionId),
+            URLQueryItem(name: "playerId", value: session.playerId)
+        ]
+        guard let url = components?.url else { return false }
+        do {
+            var request = URLRequest(url: url)
+            request.timeoutInterval = 7
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200,
+                  let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return false }
+            return payload["credited"] as? Bool == true
+        } catch { return false }
+    }
+
     func load(mode: GameMode, finalScore: Int? = nil) async {
         guard let base else {
             error = "Global sıralama henüz etkin değil"
