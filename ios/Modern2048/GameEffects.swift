@@ -7,17 +7,16 @@ final class GameEffects {
     private let medium = UIImpactFeedbackGenerator(style: .medium)
     private let success = UINotificationFeedbackGenerator()
 
-    func play(scoreDelta: Int, won: Bool) {
-        guard !UIAccessibility.isReduceMotionEnabled else { return }
+    func play(scoreDelta: Int, won: Bool, sound: Bool = true, haptics: Bool = true) {
         if won {
-            success.notificationOccurred(.success)
-            AudioServicesPlaySystemSound(1057)
+            if haptics { success.notificationOccurred(.success) }
+            if sound { AudioServicesPlaySystemSound(1057) }
         } else if scoreDelta >= 64 {
-            medium.impactOccurred()
-            AudioServicesPlaySystemSound(1104)
+            if haptics { medium.impactOccurred() }
+            if sound { AudioServicesPlaySystemSound(1104) }
         } else if scoreDelta > 0 {
-            light.impactOccurred()
-            AudioServicesPlaySystemSound(1104)
+            if haptics { light.impactOccurred() }
+            if sound { AudioServicesPlaySystemSound(1104) }
         }
     }
 }
