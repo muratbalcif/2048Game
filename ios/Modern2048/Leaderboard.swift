@@ -59,7 +59,6 @@ final class LeaderboardClient: ObservableObject {
             var request = URLRequest(url: base.appendingPathComponent("v2/sessions/finalize"))
             request.httpMethod = "POST"
             request.timeoutInterval = 10
-            request.setValue("Content-Type", forHTTPHeaderField: "Content-Type")
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONSerialization.data(withJSONObject: [
                 "sessionId": session.sessionId, "playerId": session.playerId,
