@@ -11,19 +11,24 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     private var presenting = false
     private var earned = false
     private var presentationID = 0
+    private var loadGeneration = 0
 
     func load() {
         guard !loading, !presenting, ad == nil else { return }
         loading = true
+        loadGeneration += 1
+        let generation = loadGeneration
         Task {
             do {
                 let loaded = try await RewardedAd.load(
                     with: "ca-app-pub-3940256099942544/1712485313",
                     request: Request()
                 )
+                guard generation == loadGeneration else { return }
                 ad = loaded
                 isReady = true
             } catch {
+                guard generation == loadGeneration else { return }
                 ad = nil
                 isReady = false
             }
