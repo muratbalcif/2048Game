@@ -1,0 +1,15 @@
+.DS_Store
+.idea/
+.gradle/
+**/build/
+local.properties
+*.iml
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.ipa
+*.apk
+*.aab
+.env
+.env.*
+!.env.example
