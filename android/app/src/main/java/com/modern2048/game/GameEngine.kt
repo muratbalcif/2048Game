@@ -20,7 +20,11 @@ object GameEngine {
         return GameState(board = board)
     }
 
-    fun move(state: GameState, direction: Direction, random: Random = Random.Default): MoveResult {
+    fun move(state: GameState, direction: Direction, random: Random = Random.Default): MoveResult = moveInternal(state, direction, random, true)
+
+    fun moveWithoutSpawn(state: GameState, direction: Direction): MoveResult = moveInternal(state, direction, Random.Default, false)
+
+    private fun moveInternal(state: GameState, direction: Direction, random: Random, spawnTile: Boolean): MoveResult {
         require(state.board.size == 16)
         if (state.lost) return MoveResult(state, false, 0)
         val output = state.board.toMutableList()
@@ -51,7 +55,7 @@ object GameEngine {
             indices.forEachIndexed { index, position -> output[position] = merged.getOrElse(index) { 0 } }
         }
         if (output == state.board) return MoveResult(state, false, 0)
-        val spawned = spawn(output, random)
+        val spawned = if (spawnTile) spawn(output, random) else output
         return MoveResult(
             GameState(spawned, state.score + gained, state.won || spawned.any { it >= 2048 }, !canMove(spawned)),
             true,
