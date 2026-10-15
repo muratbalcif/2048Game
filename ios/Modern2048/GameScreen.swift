@@ -870,7 +870,7 @@ struct GameScreen: View {
                         }
                         ForEach(leaderboard.entries) { entry in
                             HStack(spacing: 12) {
-                                Text(entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : entry.rank == 3 ? "🥉" : "#\(entry.rank)")
+                                Text(rankLabel(for: entry.rank))
                                     .font(.headline).frame(width: 44, alignment: .leading)
                                 Text(
                                     leaderboard.isMe(entry)
@@ -908,6 +908,15 @@ struct GameScreen: View {
                 .task { await leaderboard.load(mode: mode) }
             }
             .presentationDetents([.large])
+    }
+
+    private func rankLabel(for rank: Int) -> String {
+        switch rank {
+        case 1: return "🥇"
+        case 2: return "🥈"
+        case 3: return "🥉"
+        default: return "#\(rank)"
+        }
     }
 
     private func tileColor(_ value: Int) -> Color {
