@@ -21,6 +21,7 @@ struct GameScreen: View {
     @State private var slideProgress: CGFloat = 0
     @State private var slideInProgress = false
     @State private var revealedCells: Set<Int> = []
+    @State private var mergedCells: Set<Int> = []
     @AppStorage("modern2048.sound") private var soundEnabled = true
     @AppStorage("modern2048.haptics") private var hapticsEnabled = true
     @State private var showSettings = false
@@ -55,7 +56,7 @@ struct GameScreen: View {
                                 }
                             }
                             .frame(height: side)
-                            .scaleEffect(revealedCells.contains(index) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
+                            .scaleEffect((revealedCells.contains(index) || mergedCells.contains(index)) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
                             .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
                         }
                     }
@@ -104,12 +105,14 @@ struct GameScreen: View {
                         Task { @MainActor in
                             try? await Task.sleep(nanoseconds: 180_000_000)
                             revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
+                            mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
                             game = result.state
                             slideInProgress = false
                             slidingTiles = []
                             slideProgress = 0
                             try? await Task.sleep(nanoseconds: 180_000_000)
                             revealedCells = []
+                            mergedCells = []
                         }
                     }
                 })
