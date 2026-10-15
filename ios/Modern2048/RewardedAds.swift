@@ -23,7 +23,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
         Task {
             do {
                 let loaded = try await RewardedAd.load(
-                    with: "ca-app-pub-3940256099942544/1712485313",
+                    with: "ca-app-pub-9057596586284356/7672496445",
                     request: Request()
                 )
                 guard generation == loadGeneration else { return }
