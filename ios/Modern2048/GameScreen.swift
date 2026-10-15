@@ -129,7 +129,6 @@ struct GameScreen: View {
                 }
                 .disabled(previous == nil || slideInProgress || verifiedSession != nil)
                 Button("Yeni Oyun") { confirmRestart = true }
-                    .disabled(slideInProgress)
                 Button("Ayarlar") { showSettings = true }
                     .disabled(slideInProgress)
             }
