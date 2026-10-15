@@ -64,7 +64,7 @@ struct GameScreen: View {
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(Palette.ink)
             HStack {
                 Button("Geri Al") {
-                    if let previous { game = previous; self.previous = nil; GameStorage.save(game) }
+                    if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
                 }
                 .disabled(previous == nil)
                 Button("Yeni Oyun") { confirmRestart = true }
