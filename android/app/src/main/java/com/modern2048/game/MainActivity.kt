@@ -96,16 +96,21 @@ private fun GameScreen() {
     val leaderboard = remember(context) { Leaderboard(context) }
     var ranking by remember { mutableStateOf(LeaderboardResult(emptyList(), null)) }
     var rankingLoading by remember { mutableStateOf(false) }
-    var verifiedSession by remember { mutableStateOf<VerifiedGame?>(null) }
+    var verifiedSession by remember { mutableStateOf(storage.loadVerified()?.takeIf { session ->
+        VerifiedEngine.replay(session.seed, session.moves)?.let { it.board == game.board && it.score == game.score } == true
+    }) }
+    LaunchedEffect(verifiedSession) { storage.saveVerified(verifiedSession) }
     var startingVerified by remember { mutableStateOf(false) }
     LaunchedEffect(game.lost, game.score, gameMode) {
         if (game.lost) {
             rankingLoading = true
             verifiedSession?.let { session ->
                 if (VerifiedEngine.replay(session.seed, session.moves)?.score == game.score) {
-                    leaderboard.finalizeVerified(session, game.score)
+                    if (leaderboard.finalizeVerified(session, game.score)) {
+                        verifiedSession = null
+                        storage.saveVerified(null)
+                    }
                 }
-                verifiedSession = null
             }
             ranking = leaderboard.load(gameMode)
             rankingLoading = false
@@ -185,6 +190,7 @@ private fun GameScreen() {
                 resetMotion()
                 verifiedSession = session
                 game = VerifiedEngine.initial(session.seed)
+                storage.saveVerified(session)
                 previous = null
                 rewardedContinue = rewardedContinue.reset()
                 storage.saveReward(rewardedContinue)
@@ -197,7 +203,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; verifiedSession = null; storage.saveVerified(null); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (!motionActive && game.lost) {
         Dialog(onDismissRequest = {}) {
@@ -257,6 +263,7 @@ private fun GameScreen() {
                             progress = progress.nextGame()
                             storage.saveProgress(progress)
                             verifiedSession = null
+                            storage.saveVerified(null)
                             game = GameEngine.newGame()
                             previous = null
                             rewardedContinue = rewardedContinue.reset()
@@ -303,7 +310,6 @@ private fun GameScreen() {
             }
         }
     }
-    if (verifiedSession != null && !game.lost) { /* Verified sessions disable undo and ad rewinds. */ }
     if (showModePicker) {
         AlertDialog(
             onDismissRequest = { showModePicker = false },
