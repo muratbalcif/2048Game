@@ -281,7 +281,8 @@ private fun GameScreen() {
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
     }
     Column(
-        Modifier.fillMaxSize().background(selectedTheme.canvas).padding(20.dp),
+        Modifier.fillMaxSize().background(selectedTheme.canvas)
+            .verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(12.dp))
@@ -349,7 +350,7 @@ private fun GameScreen() {
                 }
             }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
         if (directionalControls) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 OutlinedButton(onClick = { performMove(Direction.UP) }, enabled = !motionActive) { Text("↑ Yukarı") }
@@ -361,7 +362,7 @@ private fun GameScreen() {
             }
         }
         Text("Kaydırarak aynı sayıları birleştir", color = selectedTheme.ink)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
