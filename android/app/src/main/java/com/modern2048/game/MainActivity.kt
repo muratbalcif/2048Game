@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GameScreen() {
     val context = LocalContext.current
