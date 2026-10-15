@@ -89,6 +89,7 @@ private fun GameScreen() {
     val activity = context as ComponentActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
     var adReady by remember { mutableStateOf(false) }
+    var doubledGameKey by remember { mutableStateOf(storage.doubledGameKey()) }
     var rewardedContinue by remember { mutableStateOf(storage.loadReward()) }
     DisposableEffect(rewardedAds) {
         rewardedAds.onAvailabilityChanged = { adReady = it }
@@ -241,8 +242,10 @@ private fun GameScreen() {
                     Text("Harika bir denemeydi! Bir sonraki oyunda rekorunu geçebilirsin.",
                         fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .7f),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    val gameKey = "${game.score}:${game.board.joinToString(",")}"
+                    val doubled = doubledGameKey == gameKey
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        GameOverStat("SKOR", game.score.toString(), selectedTheme, Modifier.weight(1f))
+                        GameOverStat("SKOR", (if (doubled) game.score.toLong() * 2 else game.score.toLong()).toString(), selectedTheme, Modifier.weight(1f))
                         GameOverStat("REKOR", best.toString(), selectedTheme, Modifier.weight(1f))
                     }
                     Column(
@@ -289,6 +292,27 @@ private fun GameScreen() {
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
                     ) { Text("↻  Yeniden Oyna", fontWeight = FontWeight.Bold) }
+                    if (doubled) {
+                        Text("✓ 2× yerel bonus uygulandı · Global sıralama puanı değişmez",
+                            fontSize = 12.sp, color = selectedTheme.accent)
+                    } else if (adReady && game.score > 0) {
+                        OutlinedButton(onClick = {
+                            val snapshot = game
+                            val claimKey = gameKey
+                            rewardedAds.show {
+                                if (game == snapshot && game.lost && doubledGameKey != claimKey) {
+                                    doubledGameKey = claimKey
+                                    storage.saveDoubledGameKey(claimKey)
+                                    val bonusScore = (game.score.toLong() * 2).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                                    best = maxOf(best, bonusScore)
+                                    storage.saveBest(best)
+                                }
+                            }
+                        }, modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(16.dp)) {
+                            Text("▶  Reklam İzle · 2× Puan (Yerel)", fontSize = 12.sp, color = selectedTheme.ink)
+                        }
+                    }
                     if (verifiedSession == null && adReady && rewardedContinue.available) {
                         OutlinedButton(
                             onClick = {
