@@ -186,8 +186,7 @@ private fun GameScreen() {
                         }
                     )
                 }
-                .background(boardColor, RoundedCornerShape(24.dp)).padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .background(boardColor, RoundedCornerShape(24.dp)).padding(10.dp)
         ) {
             val cell = (maxWidth - 30.dp) / 4
             val step = cell + 10.dp
