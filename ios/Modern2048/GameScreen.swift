@@ -38,6 +38,7 @@ struct GameScreen: View {
     @State private var showSettings = false
     @AppStorage("modern2048.reducedMotion") private var reducedMotion = false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         VStack(spacing: 14) {
@@ -138,6 +139,13 @@ struct GameScreen: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas.ignoresSafeArea())
         .onAppear { rewardedAds.load() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background || phase == .inactive {
+                GameStorage.save(game)
+                GameStorage.saveReward(rewardedContinue)
+                GameStorage.saveProgress(progress)
+            }
+        }
         .confirmationDialog("Oyun Modu Seç", isPresented: $showModePicker) {
             ForEach(GameMode.allCases) { candidate in
                 Button(candidate.title) {
@@ -244,7 +252,7 @@ struct GameScreen: View {
     }
 
     private func performMove(_ direction: MoveDirection) {
-        guard !slideInProgress else { return }
+        guard !slideInProgress && !game.lost else { return }
         let result = GameEngine.move(game, direction)
         guard result.moved else { return }
         let old = game
@@ -277,6 +285,7 @@ struct GameScreen: View {
                 slidingTiles = []
                 slideProgress = 0
                 try? await Task.sleep(nanoseconds: 180_000_000)
+                guard animationToken == token else { return }
                 revealedCells = []
                 mergedCells = []
             }
@@ -321,7 +330,7 @@ struct GameScreen: View {
         VStack {
             Text(label).font(.caption).foregroundStyle(.secondary)
             Text(value).font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundStyle(Palette.ink)
+                .foregroundStyle(theme.ink)
         }
         .frame(maxWidth: .infinity)
         .padding(16)
