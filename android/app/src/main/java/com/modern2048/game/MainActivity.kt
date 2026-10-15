@@ -1,5 +1,6 @@
 package com.modern2048.game
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GameScreen() {
