@@ -10,6 +10,7 @@ private enum Palette {
 
 struct GameScreen: View {
     @StateObject private var rewardedAds = RewardedAds()
+    @StateObject private var leaderboard = LeaderboardClient()
     @State private var effects = GameEffects()
     @State private var rewardedContinue = GameStorage.loadReward()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
@@ -308,6 +309,41 @@ struct GameScreen: View {
                             scoreCard("SKOR", "\(game.score)")
                             scoreCard("REKOR", "\(bestScore)")
                         }
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Label("Global Liderlik", systemImage: "trophy.fill")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundStyle(theme.ink)
+                                Spacer()
+                                Button("Yenile") { Task { await leaderboard.load(mode: mode) } }
+                                    .font(.caption.weight(.semibold))
+                                    .tint(theme.accent)
+                            }
+                            if leaderboard.isLoading { ProgressView().frame(maxWidth: .infinity) }
+                            if let error = leaderboard.error {
+                                Text(error).font(.caption).foregroundStyle(theme.ink.opacity(0.7))
+                            }
+                            ForEach(leaderboard.entries) { entry in
+                                HStack {
+                                    Text("\(entry.rank).")
+                                        .fontWeight(.bold)
+                                        .frame(width: 28, alignment: .leading)
+                                    Text(entry.nickname + (leaderboard.isMe(entry) ? " (Sen)" : ""))
+                                        .fontWeight(leaderboard.isMe(entry) ? .bold : .regular)
+                                    Spacer()
+                                    Text("\(entry.score)").fontWeight(.semibold)
+                                }
+                                .font(.system(size: 13, design: .rounded))
+                                .foregroundStyle(theme.ink)
+                            }
+                            if let rank = leaderboard.myRank {
+                                Text("Senin sıran: #\(rank)")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(theme.accent)
+                            }
+                        }
+                        .padding(16)
+                        .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 18))
                         Button {
                             restart()
                         } label: {
@@ -361,6 +397,9 @@ struct GameScreen: View {
                 }
             }
             .interactiveDismissDisabled()
+            .task(id: "\(mode.rawValue)-\(game.score)") {
+                await leaderboard.load(mode: mode, finalScore: game.score)
+            }
         }
         .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
             Button("Yeni Oyun", role: .destructive) { restart() }
