@@ -66,7 +66,7 @@ struct GameScreen: View {
                                 if value != 0 && !slideInProgress {
                                     Text("\(value)")
                                         .font(.system(size: value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
-                                        .foregroundStyle(highContrast ? Color.black : theme.ink)
+                                         .foregroundStyle(highContrast ? Color.black : (theme == .midnight ? Color.black : theme.ink))
                                 }
                             }
                             .frame(height: side)
@@ -81,7 +81,7 @@ struct GameScreen: View {
                                 RoundedRectangle(cornerRadius: 14).fill((highContrast ? contrastTile(tile.value) : theme.tile(tile.value)))
                                 Text("\(tile.value)")
                                     .font(.system(size: tile.value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
-                                    .foregroundStyle(theme.ink)
+                                    .foregroundStyle(highContrast ? Color.black : (theme == .midnight ? Color.black : theme.ink))
                             }
                             .frame(width: side, height: side)
                             .offset(
