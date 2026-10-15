@@ -129,7 +129,7 @@ struct GameScreen: View {
             Button("Tekrar Oyna") { restart() }
             if previous != nil {
                 Button("Geri Al") {
-                    if let previous { game = previous; self.previous = nil; GameStorage.save(game) }
+                    if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
                 }
             }
         } message: {
