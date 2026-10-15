@@ -19,6 +19,7 @@ struct GameScreen: View {
     @State private var bestScore = GameStorage.best
     @State private var progress = GameStorage.loadProgress()
     @State private var showProgress = false
+    @State private var showLeaderboard = false
     @AppStorage("modern2048.mode") private var modeRaw = GameMode.classic.rawValue
     @State private var showModePicker = false
     private var mode: GameMode { GameMode(rawValue: modeRaw) ?? .classic }
@@ -138,7 +139,10 @@ struct GameScreen: View {
             }
             .font(.system(size: 13, weight: .semibold))
             .buttonStyle(.borderedProminent)
-            Button("İstatistikler ve Başarımlar") { showProgress = true }
+            HStack(spacing: 14) {
+                Button("🏆 Sıralama") { showLeaderboard = true }
+                Button("İstatistikler ve Başarımlar") { showProgress = true }
+            }
                 .disabled(slideInProgress)
                 .font(.footnote)
         }
@@ -181,27 +185,101 @@ struct GameScreen: View {
         } message: { Text("Mod değiştirildiğinde yeni oyun başlar.") }
         .sheet(isPresented: $showProgress) {
             NavigationStack {
-                List {
-                    Section("İstatistikler") {
-                        LabeledContent("Hamle", value: "\(progress.moves)")
-                        LabeledContent("Birleşme", value: "\(progress.merges)")
-                        LabeledContent("Oyun", value: "\(progress.gamesStarted)")
-                        LabeledContent("En büyük taş", value: "\(progress.bestTile)")
-                        LabeledContent("Toplam puan", value: "\(progress.totalPoints)")
-                    }
-                    Section("Başarımlar") {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("Her hamle gelişiminin bir parçası")
+                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
+                        HStack(spacing: 12) {
+                            scoreCard("TOPLAM PUAN", progress.totalPoints.formatted())
+                            scoreCard("EN BÜYÜK TAŞ", "\(progress.bestTile)")
+                        }
+                        HStack(spacing: 12) {
+                            scoreCard("OYUN", "\(progress.gamesStarted)")
+                            scoreCard("HAMLE", "\(progress.moves)")
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Oyun performansı").font(.headline)
+                            Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
+                            Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
+                            Label("Hamle başına birleşme: %\(progress.moves == 0 ? 0 : progress.merges * 100 / progress.moves)", systemImage: "arrow.triangle.merge")
+                        }
+                        .font(.subheadline).foregroundStyle(theme.ink)
+                        .padding(18)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(theme.board.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
+                        Text("Başarımlar").font(.title3.bold()).foregroundStyle(theme.ink)
                         ForEach(GameAchievements.list(progress)) { achievement in
-                            HStack {
+                            HStack(spacing: 12) {
                                 Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
-                                    .foregroundStyle(achievement.unlocked ? .green : .secondary)
-                                Text(achievement.title)
+                                    .foregroundStyle(theme.accent)
+                                Text(achievement.title).fontWeight(.semibold).foregroundStyle(theme.ink)
+                                Spacer()
                             }
+                            .padding(16)
+                            .background(achievement.unlocked ? theme.accent.opacity(0.12) : theme.board.opacity(0.65),
+                                        in: RoundedRectangle(cornerRadius: 16))
                         }
                     }
+                    .padding(20)
                 }
+                .background(theme.canvas.ignoresSafeArea())
                 .navigationTitle("İstatistikler")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showProgress = false } } }
             }
+            .presentationDetents([.large])
+        }
+        .sheet(isPresented: $showLeaderboard) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Dünyanın dört bir yanından oyuncular")
+                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
+                        HStack {
+                            Text(mode.title).font(.headline).foregroundStyle(theme.accent)
+                            Spacer()
+                            Button("Yenile", systemImage: "arrow.clockwise") {
+                                Task { await leaderboard.load(mode: mode) }
+                            }.font(.subheadline)
+                        }
+                        if leaderboard.isLoading { ProgressView().frame(maxWidth: .infinity) }
+                        if let rank = leaderboard.myRank {
+                            Text("Senin sıralaman  #\(rank)")
+                                .font(.title3.bold()).foregroundStyle(theme.accent)
+                                .frame(maxWidth: .infinity, alignment: .leading).padding(18)
+                                .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
+                        }
+                        if let error = leaderboard.error {
+                            Text(error).font(.subheadline).foregroundStyle(theme.ink.opacity(0.7))
+                        }
+                        if !leaderboard.isLoading && leaderboard.entries.isEmpty && leaderboard.error == nil {
+                            Text("Henüz doğrulanmış skor yok. İlk sırayı sen al!")
+                                .foregroundStyle(theme.ink)
+                        }
+                        ForEach(leaderboard.entries) { entry in
+                            HStack(spacing: 12) {
+                                Text(entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : entry.rank == 3 ? "🥉" : "#\(entry.rank)")
+                                    .font(.headline).frame(width: 44, alignment: .leading)
+                                Text(entry.nickname + (leaderboard.isMe(entry) ? " (Sen)" : ""))
+                                    .fontWeight(leaderboard.isMe(entry) ? .bold : .medium)
+                                Spacer()
+                                Text(entry.score.formatted()).font(.headline.bold()).foregroundStyle(theme.accent)
+                            }
+                            .foregroundStyle(theme.ink)
+                            .padding(16)
+                            .background(leaderboard.isMe(entry) ? theme.accent.opacity(0.12) : theme.board.opacity(0.7),
+                                        in: RoundedRectangle(cornerRadius: 16))
+                        }
+                    }
+                    .padding(20)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("🏆 Global sıralama")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showLeaderboard = false } } }
+                .task { await leaderboard.load(mode: mode) }
+            }
+            .presentationDetents([.large])
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {

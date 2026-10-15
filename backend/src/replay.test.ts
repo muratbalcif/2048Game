@@ -12,7 +12,7 @@ describe("deterministic verified replay", () => {
     const game = newGame(seed);
     const directions = ["L", "R", "U", "D"] as const;
     const direction = directions.find(d => move(game.state, d, game.seed).moved);
-    assert.ok(direction);
+    if (!direction) throw new Error("Expected at least one valid move");
     const result = move(game.state, direction, game.seed);
     assert.deepEqual(replay(seed, direction)?.state, result.state);
   });

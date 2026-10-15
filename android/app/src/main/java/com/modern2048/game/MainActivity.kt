@@ -80,6 +80,7 @@ private fun GameScreen() {
     var gameMode by remember { mutableStateOf(storage.loadMode()) }
     var showModePicker by remember { mutableStateOf(false) }
     var showProgress by remember { mutableStateOf(false) }
+    var showLeaderboard by remember { mutableStateOf(false) }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
@@ -342,17 +343,83 @@ private fun GameScreen() {
         )
     }
     if (showProgress) {
-        AlertDialog(onDismissRequest = { showProgress = false }, title = { Text("İstatistikler ve Başarımlar") },
-            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Hamle: ${progress.moves}  ·  Birleşme: ${progress.merges}")
-                Text("Oyun: ${progress.gamesStarted}  ·  En büyük taş: ${progress.bestTile}")
-                Text("Toplam puan: ${progress.totalPoints}")
-                HorizontalDivider()
-                GameAchievements.list(progress).forEach { achievement ->
-                    Text("${if (achievement.unlocked) "✓" else "○"}  ${achievement.title}",
-                        color = if (achievement.unlocked) ink else Color.Gray)
+        ModalBottomSheet(onDismissRequest = { showProgress = false },
+            containerColor = selectedTheme.canvas) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp).padding(bottom = 36.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                Text("İstatistikler", fontSize = 29.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                Text("Her hamle gelişiminin bir parçası", fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ScoreCard("TOPLAM PUAN", "%,d".format(progress.totalPoints), Modifier.weight(1f), selectedTheme)
+                    ScoreCard("EN BÜYÜK TAŞ", progress.bestTile.toString(), Modifier.weight(1f), selectedTheme)
                 }
-            } }, confirmButton = { TextButton(onClick = { showProgress = false }) { Text("Kapat") } })
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ScoreCard("OYUN", progress.gamesStarted.toString(), Modifier.weight(1f), selectedTheme)
+                    ScoreCard("HAMLE", progress.moves.toString(), Modifier.weight(1f), selectedTheme)
+                }
+                Surface(color = selectedTheme.board.copy(alpha = .7f), shape = RoundedCornerShape(20.dp)) {
+                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("Oyun performansı", fontWeight = FontWeight.Bold, color = selectedTheme.ink)
+                        Text("Toplam birleşme: ${progress.merges}", color = selectedTheme.ink)
+                        Text("Oyun başına ortalama puan: ${progress.totalPoints / progress.gamesStarted.coerceAtLeast(1)}", color = selectedTheme.ink)
+                        Text("Hamle başına birleşme: %${if (progress.moves == 0) 0 else progress.merges * 100 / progress.moves}", color = selectedTheme.ink)
+                    }
+                }
+                Text("Başarımlar", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = selectedTheme.ink)
+                GameAchievements.list(progress).forEach { achievement ->
+                    Surface(color = if (achievement.unlocked) selectedTheme.accent.copy(alpha = .10f) else selectedTheme.board.copy(alpha = .5f),
+                        shape = RoundedCornerShape(15.dp)) {
+                        Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(if (achievement.unlocked) "✦" else "○", color = selectedTheme.accent, fontSize = 21.sp)
+                            Spacer(Modifier.width(12.dp))
+                            Text(achievement.title, fontWeight = FontWeight.SemiBold, color = selectedTheme.ink)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (showLeaderboard) {
+        LaunchedEffect(showLeaderboard, gameMode) {
+            rankingLoading = true
+            ranking = leaderboard.load(gameMode)
+            rankingLoading = false
+        }
+        ModalBottomSheet(onDismissRequest = { showLeaderboard = false }, containerColor = selectedTheme.canvas) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp).padding(bottom = 36.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text("🏆 Global sıralama", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                Text("Dünyanın dört bir yanından oyuncular", fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(gameMode.title, color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    TextButton(onClick = { scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false } }) { Text("↻ Yenile") }
+                }
+                if (rankingLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
+                ranking.myRank?.let { rank ->
+                    Surface(color = selectedTheme.accent.copy(alpha = .12f), shape = RoundedCornerShape(18.dp)) {
+                        Text("Senin sıralaman  #$rank", Modifier.fillMaxWidth().padding(18.dp),
+                            color = selectedTheme.accent, fontWeight = FontWeight.Bold, fontSize = 19.sp)
+                    }
+                }
+                ranking.error?.let { Text(it, color = selectedTheme.ink.copy(alpha = .7f)) }
+                if (!rankingLoading && ranking.entries.isEmpty() && ranking.error == null)
+                    Text("Henüz doğrulanmış skor yok. İlk sırayı sen al!", color = selectedTheme.ink)
+                ranking.entries.forEach { entry ->
+                    Surface(color = if (entry.mine) selectedTheme.accent.copy(alpha = .12f) else selectedTheme.board.copy(alpha = .65f),
+                        shape = RoundedCornerShape(16.dp)) {
+                        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(if (entry.rank == 1) "🥇" else if (entry.rank == 2) "🥈" else if (entry.rank == 3) "🥉" else "#${entry.rank}",
+                                modifier = Modifier.width(44.dp), fontWeight = FontWeight.Bold, color = selectedTheme.ink)
+                            Text(entry.name + if (entry.mine) " (Sen)" else "", modifier = Modifier.weight(1f),
+                                fontWeight = if (entry.mine) FontWeight.Bold else FontWeight.Medium, color = selectedTheme.ink)
+                            Text("%,d".format(entry.score), fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
+                        }
+                    }
+                }
+            }
+        }
     }
     if (showSettings) {
         ModalBottomSheet(
@@ -434,6 +501,7 @@ private fun GameScreen() {
         Spacer(Modifier.height(12.dp))
         Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
         TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
+        TextButton(onClick = { showLeaderboard = true }) { Text("🏆 Sıralama", color = selectedTheme.accent) }
         TextButton(onClick = { startRanked() }, enabled = !startingVerified && !motionActive && verifiedSession == null) { Text(if (startingVerified) "Bağlanıyor..." else if (verifiedSession != null) "🏆 Sıralamalı oyun" else "🏆 Sıralamalı başlat") }
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
