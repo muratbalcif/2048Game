@@ -98,7 +98,9 @@ export default {
       const sessionId = params.get("custom_data");
       const playerId = params.get("user_id");
       const rewardItem = params.get("reward_item");
-      if (!signature || !keyId || !transactionId || !isId(sessionId) || !isId(playerId) || rewardItem !== "double_score")
+      // AdMob's URL verification callback may omit user_id/custom_data and use
+      // a different reward_item. Authenticate Google first; never grant on these.
+      if (!signature || !keyId || !transactionId)
         return json({ error: "invalid_reward" }, 400);
       // Google signs the exact raw query preceding &signature=...&key_id=... .
       const raw = url.search.slice(1);
@@ -108,10 +110,12 @@ export default {
       const signed = raw.slice(0, signatureIndex);
       if (!(await verifyAdMobSignature(signed, signature, keyId)))
         return json({ error: "invalid_signature" }, 403);
+      if (!isId(sessionId) || !isId(playerId) || rewardItem !== "double_score")
+        return json({ ok: true, credited: false }, 200);
       const session = await env.DB.prepare(
         "SELECT player_id,mode,base_score,finalized_at FROM verified_sessions WHERE session_id=?"
       ).bind(sessionId).first<{player_id:string;mode:Mode;base_score:number|null;finalized_at:number|null}>();
-      if (!session || session.player_id !== playerId) return json({ error: "unknown_session" }, 404);
+      if (!session || session.player_id !== playerId) return json({ ok: true, credited: false }, 200);
       const now = Date.now();
       await env.DB.prepare(
         "INSERT OR IGNORE INTO verified_ad_rewards(transaction_id,session_id,player_id,reward_type,verified_at) VALUES(?,?,?,'double_score',?)"
