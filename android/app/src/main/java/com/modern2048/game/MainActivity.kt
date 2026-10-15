@@ -171,6 +171,14 @@ private fun GameScreen() {
     if (showSettings) {
         AlertDialog(onDismissRequest = { showSettings = false }, title = { Text("Oyun Ayarları") },
             text = { Column {
+                Text("Tema", fontWeight = FontWeight.Bold)
+                GameTheme.entries.forEach { option ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = selectedTheme == option, onClick = { selectedTheme = option; storage.saveTheme(option) })
+                        Text(option.title)
+                    }
+                }
+                HorizontalDivider()
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Ses efektleri", modifier = Modifier.weight(1f))
                     Switch(checked = soundEnabled, onCheckedChange = { soundEnabled = it; storage.saveSoundEnabled(it) })
