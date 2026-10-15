@@ -496,9 +496,9 @@ private fun GameScreen() {
                 Text(stringResource(R.string.leaderboard_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 androidx.compose.material3.OutlinedTextField(value = nicknameDraft, onValueChange = { if (it.length <= 20) { nicknameDraft = it; nicknameSaved = false } }, label = { Text("Oyuncu rumuzun") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 val validNickname = nicknameDraft.trim().matches(Regex("[\\p{L}\\p{N} _.-]{2,20}"))
-                Button(onClick = { leaderboard.nickname = nicknameDraft; nicknameDraft = leaderboard.nickname; nicknameSaved = true }, enabled = validNickname && nicknameDraft.trim() != leaderboard.nickname) { Text("Rumuzu kaydet") }
-                 if (nicknameSaved) Text("Rumuz cihazda kaydedildi. Global sıralama yeni oyunla güncellenir.", fontSize = 12.sp, color = selectedTheme.accent)
-                Text("Rumuzun yeni sıralamalı oyununla birlikte global listede güncellenir.", fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                Button(onClick = { scope.launch { nicknameSaved = leaderboard.updateNickname(nicknameDraft); if (nicknameSaved) { nicknameDraft = leaderboard.nickname; ranking = leaderboard.load(gameMode) } } }, enabled = validNickname && nicknameDraft.trim() != leaderboard.nickname) { Text("Rumuzu kaydet") }
+                 if (nicknameSaved) Text("Rumuz ve mevcut skorun global sıralamada güncellendi.", fontSize = 12.sp, color = selectedTheme.accent)
+                Text("Rumuz değiştiğinde mevcut skorun ve oyuncu kimliğin korunur.", fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(when (gameMode) { GameMode.CLASSIC -> R.string.classic; GameMode.TARGET_1024 -> R.string.target_1024; GameMode.ENDLESS -> R.string.endless }), color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     TextButton(onClick = { scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false } }) { Text(stringResource(R.string.refresh_icon)) }
