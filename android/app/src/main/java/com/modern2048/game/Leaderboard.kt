@@ -21,6 +21,27 @@ class Leaderboard(private val context: Context) {
     var nickname: String
         get() = prefs.getString("nickname", null) ?: "Oyuncu-${playerId.take(6)}"
         set(value) { prefs.edit().putString("nickname", value.trim()).apply() }
+    suspend fun updateNickname(value: String): Boolean = withContext(Dispatchers.IO) {
+        val name = value.trim()
+        val sessionId = prefs.getString("proof_session_id", null)
+        if (!name.matches(Regex("[\\p{L}\\p{N} _.-]{2,20}")) ||
+            sessionId == null || !configured) return@withContext false
+        try {
+            val body = JSONObject().put("playerId", playerId).put("sessionId", sessionId)
+                .put("nickname", name).toString()
+            val conn = URL("$base/v2/players/nickname").openConnection() as HttpURLConnection
+            conn.requestMethod = "PATCH"
+            conn.connectTimeout = 10000
+            conn.readTimeout = 10000
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.outputStream.use { it.write(body.toByteArray()) }
+            val ok = conn.responseCode == 200
+            conn.disconnect()
+            if (ok) nickname = name
+            ok
+        } catch (_: Exception) { false }
+    }
     private val base = BuildConfig.LEADERBOARD_BASE_URL.trimEnd('/')
     val configured: Boolean get() = base.startsWith("https://") && !base.contains("REPLACE_")
     private fun mode(value: GameMode): String = when (value) {
@@ -48,6 +69,7 @@ class Leaderboard(private val context: Context) {
             if (conn.responseCode != 201) { conn.disconnect(); return@withContext null }
             val json = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
             conn.disconnect()
+            prefs.edit().putString("proof_session_id", json.getString("sessionId")).apply()
             VerifiedGame(json.getString("sessionId"), playerId, json.getLong("seed"))
         } catch (_: Exception) { null }
     }

@@ -40,6 +40,26 @@ export default {
       }
       return json({ mode, entries: entries.results.map((entry, index) => ({ ...entry, rank: index + 1 })), me });
     }
+    // A session ID is a server-issued bearer capability tied to one player.
+    // Never accept playerId alone as authorization for changing a nickname.
+    if (request.method === "PATCH" && url.pathname === "/v2/players/nickname") {
+      const payload = await parsePayload(request);
+      if (payload instanceof Response) return payload;
+      const playerId = payload.playerId;
+      const sessionId = payload.sessionId;
+      const name = nickname(payload.nickname);
+      if (!isId(playerId) || !isId(sessionId) || !name)
+        return json({ error: "invalid_nickname_request" }, 400);
+      const proof = await env.DB.prepare(
+        "SELECT session_id FROM verified_sessions WHERE session_id=? AND player_id=?"
+      ).bind(sessionId, playerId).first();
+      if (!proof) return json({ error: "unauthorized_session" }, 403);
+      const updated = await env.DB.prepare(
+        "UPDATE players SET nickname=?,updated_at=? WHERE player_id=?"
+      ).bind(name, Date.now(), playerId).run();
+      if (updated.meta.changes !== 1) return json({ error: "player_not_found" }, 404);
+      return json({ ok: true, nickname: name });
+    }
     if (request.method === "POST" && url.pathname === "/v2/sessions") {
       const payload = await parsePayload(request);
       if (payload instanceof Response) return payload;

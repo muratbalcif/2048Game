@@ -816,19 +816,23 @@ struct GameScreen: View {
                                 if value.count > 20 { nicknameDraft = String(value.prefix(20)) }
                             }
                         Button("Rumuzu kaydet") {
-                            leaderboard.saveNickname(nicknameDraft)
-                            nicknameDraft = leaderboard.nickname
-                            nicknameSaved = true
+                            Task {
+                                nicknameSaved = await leaderboard.updateNickname(nicknameDraft)
+                                if nicknameSaved {
+                                    nicknameDraft = leaderboard.nickname
+                                    await leaderboard.load(mode: mode)
+                                }
+                            }
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(theme.accent)
                         if nicknameSaved {
-                            Text("Rumuz cihazda kaydedildi. Global sıralama yeni oyunla güncellenir.")
+                            Text("Rumuz ve mevcut skorun global sıralamada güncellendi.")
                                 .font(.caption)
                                 .foregroundStyle(theme.accent)
                         }
                             .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
-                        Text("Rumuzun yeni sıralamalı oyununla birlikte global listede güncellenir.")
+                        Text("Rumuz değiştiğinde mevcut skorun ve oyuncu kimliğin korunur.")
                             .font(.caption).foregroundStyle(.secondary)
                         HStack {
                             Text(mode.title).font(.headline).foregroundStyle(theme.accent)
