@@ -32,6 +32,7 @@
 		5B4766B51C6233435F2861C2 /* GameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStorage.swift; sourceTree = "<group>"; };
 		80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTheme.swift; sourceTree = "<group>"; };
 		90440C2507CC589ACAD787BA /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
+		BCAB2AA55C6B46B3B975BD6C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BF1ED3F64EF3DF374BF7CD02 /* GameProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameProgress.swift; sourceTree = "<group>"; };
 		C6AD567D15027125C32EA971 /* TileMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileMotion.swift; sourceTree = "<group>"; };
 		CF29CAAF220BD5572982738C /* GameMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMode.swift; sourceTree = "<group>"; };
@@ -70,6 +71,7 @@
 				1D63992AFDFDB5F28C69A663 /* GameScreen.swift */,
 				5B4766B51C6233435F2861C2 /* GameStorage.swift */,
 				80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */,
+				BCAB2AA55C6B46B3B975BD6C /* Info.plist */,
 				3779E59467F9CF0CEB78C033 /* Leaderboard.swift */,
 				EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */,
 				FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */,
@@ -298,9 +300,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-9057596586284356~7218954891";
-				INFOPLIST_KEY_LeaderboardBaseURL = "$(LEADERBOARD_BASE_URL)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Modern2048/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -319,9 +320,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-9057596586284356~7218954891";
-				INFOPLIST_KEY_LeaderboardBaseURL = "$(LEADERBOARD_BASE_URL)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Modern2048/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

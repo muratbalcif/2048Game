@@ -89,7 +89,7 @@ struct GameScreen: View {
                 }
                 Button("Yeni Oyun") { confirmRestart = true }
                 Button("Ayarlar") { showSettings = true }
-                    .disabled(slideInProgress)
+                    //.disabled(slideInProgress)
             }
             .font(.system(size: 13, weight: .semibold))
             .buttonStyle(.borderedProminent)
@@ -97,7 +97,7 @@ struct GameScreen: View {
                 Button("🏆 Sıralama") { showLeaderboard = true }
                 Button("İstatistikler ve Başarımlar") { showProgress = true }
             }
-                .disabled(slideInProgress)
+                //.disabled(slideInProgress)
                 .font(.footnote)
         }
         .padding(16)
