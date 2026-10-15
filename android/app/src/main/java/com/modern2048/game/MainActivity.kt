@@ -85,7 +85,7 @@ private fun GameScreen() {
         revealedCells = emptySet()
         mergedCells = emptySet()
     }
-    var previous by remember { mutableStateOf<GameState?>(null) }
+    var previous by remember { mutableStateOf(storage.loadReward().history.lastOrNull()) }
     var progress by remember { mutableStateOf(storage.loadProgress()) }
     var gameMode by remember { mutableStateOf(storage.loadMode()) }
     var showModePicker by remember { mutableStateOf(false) }
