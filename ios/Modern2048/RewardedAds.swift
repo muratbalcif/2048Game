@@ -46,7 +46,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
               let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else { return }
         if let sessionId, let playerId {
             let options = ServerSideVerificationOptions()
-            options.customRewardString = sessionId
+            options.customRewardText = sessionId
             options.userIdentifier = playerId
             ready.serverSideVerificationOptions = options
         }
