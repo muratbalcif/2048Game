@@ -3,6 +3,10 @@ options:
   bundleIdPrefix: com.modern2048
   deploymentTarget:
     iOS: "16.0"
+packages:
+  GoogleMobileAds:
+    url: https://github.com/googleads/swift-package-manager-google-mobile-ads.git
+    from: "12.0.0"
 settings:
   base:
     SWIFT_VERSION: "5.9"
@@ -12,6 +16,11 @@ targets:
     platform: iOS
     sources:
       - Modern2048
+    dependencies:
+      - package: GoogleMobileAds
+    info:
+      properties:
+        GADApplicationIdentifier: "ca-app-pub-3940256099942544~1458002511"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.modern2048.game
