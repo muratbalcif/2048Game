@@ -54,10 +54,6 @@ struct GameScreen: View {
                 .disabled(slideInProgress)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.ink)
-            Button(startingVerified ? "Bağlanıyor..." : verifiedSession == nil ? "🏆 Sıralamalı başlat" : "🏆 Sıralamalı oyun") { startRanked() }
-                .disabled(startingVerified || slideInProgress || verifiedSession != nil)
-                .font(.subheadline.weight(.semibold))
-                .tint(theme.accent)
             HStack(spacing: 12) {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
@@ -133,7 +129,6 @@ struct GameScreen: View {
                 }
                 .disabled(previous == nil || slideInProgress || verifiedSession != nil)
                 Button("Yeni Oyun") { confirmRestart = true }
-                    .disabled(slideInProgress)
                 Button("Ayarlar") { showSettings = true }
                     .disabled(slideInProgress)
             }
@@ -147,14 +142,17 @@ struct GameScreen: View {
                 .font(.footnote)
         }
         .padding(16)
+        .padding(.bottom, 32)
         .frame(maxWidth: 560)
         .frame(maxWidth: .infinity)
         }
+        .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 12) }
         .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas.ignoresSafeArea())
         .onAppear {
             rewardedAds.load()
+            if verifiedSession == nil && !game.lost { startRanked() }
             if let session = verifiedSession {
                 guard let replayed = VerifiedEngine.replay(session.seed, session.moves),
                       replayed.board == game.board && replayed.score == game.score else {
@@ -626,6 +624,7 @@ struct GameScreen: View {
         GameStorage.saveReward(rewardedContinue)
         winAcknowledged = false
         GameStorage.save(game)
+        startRanked()
     }
 
     private func tileColor(_ value: Int) -> Color {
