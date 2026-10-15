@@ -93,6 +93,16 @@ private fun GameScreen() {
     LaunchedEffect(gameMode, game.board) {
         if (!gameMode.reached(game.board)) winAcknowledged = false
     }
+    val leaderboard = remember(context) { Leaderboard(context) }
+    var ranking by remember { mutableStateOf(LeaderboardResult(emptyList(), null)) }
+    var rankingLoading by remember { mutableStateOf(false) }
+    LaunchedEffect(game.lost, game.score, gameMode) {
+        if (game.lost) {
+            rankingLoading = true
+            ranking = leaderboard.publishAndLoad(gameMode, game.score)
+            rankingLoading = false
+        }
+    }
     var confirmRestart by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var selectedTheme by remember { mutableStateOf(storage.loadTheme()) }
@@ -168,7 +178,7 @@ private fun GameScreen() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    Modifier.padding(24.dp),
+                    Modifier.padding(20.dp).verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
@@ -185,6 +195,31 @@ private fun GameScreen() {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         GameOverStat("SKOR", game.score.toString(), selectedTheme, Modifier.weight(1f))
                         GameOverStat("REKOR", best.toString(), selectedTheme, Modifier.weight(1f))
+                    }
+                    Column(
+                        Modifier.fillMaxWidth().background(selectedTheme.board.copy(alpha = .65f), RoundedCornerShape(18.dp))
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text("🏆  Global Liderlik", fontWeight = FontWeight.Bold, fontSize = 14.sp,
+                                color = selectedTheme.ink, modifier = Modifier.weight(1f))
+                            TextButton(onClick = {
+                                scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false }
+                            }) { Text("Yenile", fontSize = 11.sp, color = selectedTheme.accent) }
+                        }
+                        if (rankingLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
+                        ranking.error?.let { Text(it, fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .7f)) }
+                        ranking.entries.forEach { entry ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("${entry.rank}. ${entry.name}" + if (entry.mine) " (Sen)" else "",
+                                    fontSize = 12.sp, fontWeight = if (entry.mine) FontWeight.Bold else FontWeight.Normal,
+                                    color = selectedTheme.ink, modifier = Modifier.weight(1f))
+                                Text(entry.score.toString(), fontSize = 12.sp, color = selectedTheme.ink)
+                            }
+                        }
+                        ranking.myRank?.let { Text("Senin sıran: #$it", fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold, color = selectedTheme.accent) }
                     }
                     Button(
                         onClick = {
