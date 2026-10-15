@@ -451,7 +451,7 @@ struct GameScreen: View {
                         .foregroundStyle(.white)
                         .background(theme.accent, in: RoundedRectangle(cornerRadius: 17))
                         if doubledGameKey == "\(game.score):\(game.board.map(String.init).joined(separator: ","))" {
-                            Text("✓ 2× yerel bonus uygulandı · Global sıralama puanı değişmez")
+                            Text("✓ 2× puan ödülü uygulandı")
                                 .font(.caption).foregroundStyle(theme.accent)
                         } else if rewardedAds.isReady && game.score > 0 {
                             Button {
@@ -465,7 +465,7 @@ struct GameScreen: View {
                                     GameStorage.saveBest(bestScore)
                                 }
                             } label: {
-                                Label("Reklam İzle · 2× Puan (Yerel)", systemImage: "play.rectangle.fill")
+                                Label("Reklam İzle · 2× Puan", systemImage: "play.rectangle.fill")
                                     .font(.subheadline.weight(.semibold))
                                     .frame(maxWidth: .infinity).frame(height: 50)
                             }
