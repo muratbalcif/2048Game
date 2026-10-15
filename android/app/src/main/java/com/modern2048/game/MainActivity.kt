@@ -106,6 +106,7 @@ private fun GameScreen() {
     var verifiedSession by remember { mutableStateOf(storage.loadVerified()?.takeIf { session ->
         VerifiedEngine.replay(session.seed, session.moves)?.let { it.board == game.board && it.score == game.score } == true
     }) }
+    var rewardedScoreSession by remember { mutableStateOf<VerifiedGame?>(null) }
     LaunchedEffect(verifiedSession) { storage.saveVerified(verifiedSession) }
     var startingVerified by remember { mutableStateOf(false) }
     LaunchedEffect(game.lost, game.score, gameMode) {
@@ -114,6 +115,7 @@ private fun GameScreen() {
             verifiedSession?.let { session ->
                 if (VerifiedEngine.replay(session.seed, session.moves)?.score == game.score) {
                     if (leaderboard.finalizeVerified(session, game.score)) {
+                        rewardedScoreSession = session
                         verifiedSession = null
                         storage.saveVerified(null)
                     }
@@ -217,7 +219,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (!motionActive && game.lost) {
         Dialog(onDismissRequest = {}) {
@@ -279,6 +281,7 @@ private fun GameScreen() {
                             progress = progress.nextGame()
                             storage.saveProgress(progress)
                             verifiedSession = null
+                            rewardedScoreSession = null
                             storage.saveVerified(null)
                             game = GameEngine.newGame()
                             startRanked()
@@ -307,7 +310,7 @@ private fun GameScreen() {
                                     best = maxOf(best, bonusScore)
                                     storage.saveBest(best)
                                 }
-                            }, sessionId = verifiedSession?.sessionId, playerId = verifiedSession?.playerId)
+                            }, sessionId = (rewardedScoreSession ?: verifiedSession)?.sessionId, playerId = (rewardedScoreSession ?: verifiedSession)?.playerId)
                         }, modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(16.dp)) {
                             Text("▶  Reklam İzle · 2× Puan", fontSize = 12.sp, color = selectedTheme.ink)
