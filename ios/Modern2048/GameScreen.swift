@@ -658,6 +658,26 @@ struct GameScreen: View {
             .presentationDetents([.large])
     }
 
+    private func languageOption(_ title: String, code: String) -> some View {
+        let selected = selectedLanguage == code
+        return Button {
+            selectedLanguage = code
+        } label: {
+            Text(LocalizedStringKey(title))
+                .font(.system(size: 13, weight: selected ? .bold : .medium))
+                .foregroundStyle(selected ? Color.white : theme.ink)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 44)
+                .padding(.horizontal, 4)
+                .background(selected ? theme.accent : theme.board.opacity(0.9),
+                            in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12)
+                    .stroke(selected ? theme.accent : theme.ink.opacity(0.14), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
     private var settingsSheet: some View {
         NavigationStack {
                 ScrollView {
@@ -748,9 +768,14 @@ struct GameScreen: View {
                     .frame(maxWidth: .infinity)
                 }
                 .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("Oyun ayarları")
+                .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Oyun ayarları")
+                            .font(.headline)
+                            .foregroundStyle(theme.ink)
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Bitti") { showSettings = false }
                             .fontWeight(.semibold)
