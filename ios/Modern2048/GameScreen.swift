@@ -213,7 +213,141 @@ struct GameScreen: View {
             get: { game.lost && !slideInProgress },
             set: { _ in }
         )) {
-            ZStack {
+            gameOverSheet
+        }
+        .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
+            Button("Yeni Oyun", role: .destructive) { restart() }
+            Button("Vazgeç", role: .cancel) {}
+        } message: {
+            Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
+        }
+    }
+
+    private func settingsHeading(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .tracking(1.2)
+            .foregroundStyle(theme.accent)
+    }
+
+    private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
+        Toggle(isOn: value) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
+                Text(subtitle).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+            }
+        }
+        .tint(theme.accent)
+        .padding(.vertical, 12)
+    }
+
+    private func startRanked() {
+        guard !startingVerified && !slideInProgress else { return }
+        startingVerified = true
+        Task {
+            let session = await leaderboard.startVerified(mode: mode)
+            startingVerified = false
+            guard let session else { return }
+            animationToken = UUID()
+            slideInProgress = false
+            slidingTiles = []
+            verifiedSession = session
+            game = VerifiedEngine.initial(session.seed)
+            VerifiedSession.save(session)
+            previous = nil
+            rewardedContinue.reset()
+            GameStorage.saveReward(rewardedContinue)
+            GameStorage.save(game)
+            winAcknowledged = false
+        }
+    }
+
+    private func performMove(_ direction: MoveDirection) {
+        guard !slideInProgress && !game.lost else { return }
+        let result: MoveResult
+        if let session = verifiedSession {
+            guard let next = VerifiedEngine.replay(session.seed, session.moves + VerifiedEngine.letter(direction)) else { return }
+            result = MoveResult(state: next, moved: next.board != game.board, scoreDelta: next.score - game.score)
+        } else {
+            result = GameEngine.move(game, direction)
+        }
+        guard result.moved else { return }
+        if verifiedSession != nil {
+            verifiedSession?.moves += VerifiedEngine.letter(direction)
+            VerifiedSession.save(verifiedSession)
+        }
+        let old = game
+        rewardedContinue.record(old)
+        GameStorage.saveReward(rewardedContinue)
+        previous = old
+        let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
+        progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
+        GameStorage.saveProgress(progress)
+        effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
+        bestScore = max(bestScore, result.state.score)
+        GameStorage.save(result.state)
+        GameStorage.saveBest(bestScore)
+        if reducedMotion || systemReduceMotion {
+            game = result.state
+        } else {
+            slidingTiles = TileMotionPlanner.plan(old.board, direction)
+            slideProgress = 0
+            slideInProgress = true
+            withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
+            let token = UUID()
+            animationToken = token
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                guard animationToken == token else { return }
+                revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
+                mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
+                game = result.state
+                slideInProgress = false
+                slidingTiles = []
+                slideProgress = 0
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                guard animationToken == token else { return }
+                revealedCells = []
+                mergedCells = []
+            }
+        }
+    }
+
+    private func contrastTile(_ value: Int) -> Color {
+        if value == 0 { return theme == .midnight ? Color.black : Color.white }
+        return value >= 128 ? Color(red: 0.98, green: 0.77, blue: 0.13) : Color(red: 0.16, green: 0.72, blue: 0.88)
+    }
+
+    private func applyVerifiedDoubleScore(_ claimKey: String) {
+        doubledGameKey = claimKey
+        let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
+        bestScore = max(bestScore, doubled)
+        GameStorage.saveBest(bestScore)
+    }
+
+    private func restart() {
+        rewardedScoreSession = nil
+        progress.nextGame()
+        GameStorage.saveProgress(progress)
+        animationToken = UUID()
+        slideInProgress = false
+        slidingTiles = []
+        revealedCells = []
+        mergedCells = []
+        slideProgress = 0
+        verifiedSession = nil
+        VerifiedSession.save(nil)
+        game = GameEngine.newGame()
+        previous = nil
+        rewardedContinue.reset()
+        GameStorage.saveReward(rewardedContinue)
+        winAcknowledged = false
+        GameStorage.save(game)
+        startRanked()
+    }
+
+    private var gameOverSheet: some View {
+        ZStack {
                 theme.canvas.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 18) {
@@ -391,136 +525,6 @@ struct GameScreen: View {
                 }
                 await leaderboard.load(mode: mode)
             }
-        }
-        .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
-            Button("Yeni Oyun", role: .destructive) { restart() }
-            Button("Vazgeç", role: .cancel) {}
-        } message: {
-            Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
-        }
-    }
-
-    private func settingsHeading(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 12, weight: .bold, design: .rounded))
-            .tracking(1.2)
-            .foregroundStyle(theme.accent)
-    }
-
-    private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
-        Toggle(isOn: value) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
-                Text(subtitle).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
-            }
-        }
-        .tint(theme.accent)
-        .padding(.vertical, 12)
-    }
-
-    private func startRanked() {
-        guard !startingVerified && !slideInProgress else { return }
-        startingVerified = true
-        Task {
-            let session = await leaderboard.startVerified(mode: mode)
-            startingVerified = false
-            guard let session else { return }
-            animationToken = UUID()
-            slideInProgress = false
-            slidingTiles = []
-            verifiedSession = session
-            game = VerifiedEngine.initial(session.seed)
-            VerifiedSession.save(session)
-            previous = nil
-            rewardedContinue.reset()
-            GameStorage.saveReward(rewardedContinue)
-            GameStorage.save(game)
-            winAcknowledged = false
-        }
-    }
-
-    private func performMove(_ direction: MoveDirection) {
-        guard !slideInProgress && !game.lost else { return }
-        let result: MoveResult
-        if let session = verifiedSession {
-            guard let next = VerifiedEngine.replay(session.seed, session.moves + VerifiedEngine.letter(direction)) else { return }
-            result = MoveResult(state: next, moved: next.board != game.board, scoreDelta: next.score - game.score)
-        } else {
-            result = GameEngine.move(game, direction)
-        }
-        guard result.moved else { return }
-        if verifiedSession != nil {
-            verifiedSession?.moves += VerifiedEngine.letter(direction)
-            VerifiedSession.save(verifiedSession)
-        }
-        let old = game
-        rewardedContinue.record(old)
-        GameStorage.saveReward(rewardedContinue)
-        previous = old
-        let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
-        progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
-        GameStorage.saveProgress(progress)
-        effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
-        bestScore = max(bestScore, result.state.score)
-        GameStorage.save(result.state)
-        GameStorage.saveBest(bestScore)
-        if reducedMotion || systemReduceMotion {
-            game = result.state
-        } else {
-            slidingTiles = TileMotionPlanner.plan(old.board, direction)
-            slideProgress = 0
-            slideInProgress = true
-            withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
-            let token = UUID()
-            animationToken = token
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 180_000_000)
-                guard animationToken == token else { return }
-                revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
-                mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
-                game = result.state
-                slideInProgress = false
-                slidingTiles = []
-                slideProgress = 0
-                try? await Task.sleep(nanoseconds: 180_000_000)
-                guard animationToken == token else { return }
-                revealedCells = []
-                mergedCells = []
-            }
-        }
-    }
-
-    private func contrastTile(_ value: Int) -> Color {
-        if value == 0 { return theme == .midnight ? Color.black : Color.white }
-        return value >= 128 ? Color(red: 0.98, green: 0.77, blue: 0.13) : Color(red: 0.16, green: 0.72, blue: 0.88)
-    }
-
-    private func applyVerifiedDoubleScore(_ claimKey: String) {
-        doubledGameKey = claimKey
-        let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
-        bestScore = max(bestScore, doubled)
-        GameStorage.saveBest(bestScore)
-    }
-
-    private func restart() {
-        rewardedScoreSession = nil
-        progress.nextGame()
-        GameStorage.saveProgress(progress)
-        animationToken = UUID()
-        slideInProgress = false
-        slidingTiles = []
-        revealedCells = []
-        mergedCells = []
-        slideProgress = 0
-        verifiedSession = nil
-        VerifiedSession.save(nil)
-        game = GameEngine.newGame()
-        previous = nil
-        rewardedContinue.reset()
-        GameStorage.saveReward(rewardedContinue)
-        winAcknowledged = false
-        GameStorage.save(game)
-        startRanked()
     }
 
     private var progressSheet: some View {
