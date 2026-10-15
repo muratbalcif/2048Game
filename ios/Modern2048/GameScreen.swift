@@ -103,7 +103,7 @@ struct GameScreen: View {
                         withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
                         Task { @MainActor in
                             try? await Task.sleep(nanoseconds: 180_000_000)
-                            revealedCells = Set(result.state.board.indices.filter { result.state.board[$0] != 0 && !slidingTiles.contains(where: { $0.to == $0 }) })
+                            revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
                             game = result.state
                             slideInProgress = false
                             slidingTiles = []
