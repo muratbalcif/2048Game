@@ -9,6 +9,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     private var ad: RewardedAd?
     private var loading = false
     private var presenting = false
+    private var earned = false
 
     func load() {
         guard !loading, !presenting, ad == nil else { return }
@@ -35,13 +36,14 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
                   .compactMap({ $0 as? UIWindowScene }).first,
               let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else { return }
         presenting = true
+        earned = false
         ready.fullScreenContentDelegate = self
         ad = nil
         isReady = false
         ready.present(from: root) { [weak self] in
-            guard let self else { return }
+            guard let self, !self.earned else { return }
+            self.earned = true
             onRewardEarned()
-
         }
         // No reward is granted on dismissal; only this SDK reward callback.
     }
