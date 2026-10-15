@@ -826,12 +826,16 @@ struct GameScreen: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(theme.accent)
+                        .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
+                        if let nicknameError = leaderboard.error, !nicknameSaved {
+                            Text(nicknameError).font(.caption).foregroundStyle(.red)
+                        }
                         if nicknameSaved {
                             Text("Rumuz ve mevcut skorun global sıralamada güncellendi.")
                                 .font(.caption)
                                 .foregroundStyle(theme.accent)
                         }
-                            .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
+
                         Text("Rumuz değiştiğinde mevcut skorun ve oyuncu kimliğin korunur.")
                             .font(.caption).foregroundStyle(.secondary)
                         HStack {
