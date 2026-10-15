@@ -3,7 +3,7 @@ import GoogleMobileAds
 import UIKit
 
 @MainActor
-final class RewardedAds: ObservableObject {
+final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     @Published private(set) var isReady = false
     private var ad: RewardedAd?
     private var loading = false
@@ -34,14 +34,24 @@ final class RewardedAds: ObservableObject {
                   .compactMap({ $0 as? UIWindowScene }).first,
               let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else { return }
         presenting = true
+        ready.fullScreenContentDelegate = self
         ad = nil
         isReady = false
         ready.present(from: root) { [weak self] in
             guard let self else { return }
             onRewardEarned()
-            self.presenting = false
-            self.load()
+
         }
         // No reward is granted on dismissal; only this SDK reward callback.
+    }
+
+    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+        presenting = false
+        load()
+    }
+
+    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        presenting = false
+        load()
     }
 }
