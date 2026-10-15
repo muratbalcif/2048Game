@@ -93,6 +93,7 @@ private fun GameScreen() {
     var showLeaderboard by remember { mutableStateOf(false) }
     var nicknameDraft by remember { mutableStateOf("") }
     var nicknameSaved by remember { mutableStateOf(false) }
+    var nicknameError by remember { mutableStateOf(false) }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
@@ -494,10 +495,11 @@ private fun GameScreen() {
                 verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(stringResource(R.string.global_leaderboard), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
                 Text(stringResource(R.string.leaderboard_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
-                androidx.compose.material3.OutlinedTextField(value = nicknameDraft, onValueChange = { if (it.length <= 20) { nicknameDraft = it; nicknameSaved = false } }, label = { Text("Oyuncu rumuzun") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                androidx.compose.material3.OutlinedTextField(value = nicknameDraft, onValueChange = { if (it.length <= 20) { nicknameDraft = it; nicknameSaved = false; nicknameError = false } }, label = { Text("Oyuncu rumuzun") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 val validNickname = nicknameDraft.trim().matches(Regex("[\\p{L}\\p{N} _.-]{2,20}"))
-                Button(onClick = { scope.launch { nicknameSaved = leaderboard.updateNickname(nicknameDraft); if (nicknameSaved) { nicknameDraft = leaderboard.nickname; ranking = leaderboard.load(gameMode) } } }, enabled = validNickname && nicknameDraft.trim() != leaderboard.nickname) { Text("Rumuzu kaydet") }
+                Button(onClick = { scope.launch { nicknameSaved = leaderboard.updateNickname(nicknameDraft); nicknameError = !nicknameSaved; if (nicknameSaved) { nicknameDraft = leaderboard.nickname; ranking = leaderboard.load(gameMode) } } }, enabled = validNickname && nicknameDraft.trim() != leaderboard.nickname) { Text("Rumuzu kaydet") }
                  if (nicknameSaved) Text("Rumuz ve mevcut skorun global sıralamada güncellendi.", fontSize = 12.sp, color = selectedTheme.accent)
+                 if (nicknameError) Text("Rumuz sunucuda güncellenemedi. Backend yayını ve sıralamalı oyun oturumunu kontrol et.", fontSize = 12.sp, color = Color.Red)
                 Text("Rumuz değiştiğinde mevcut skorun ve oyuncu kimliğin korunur.", fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(when (gameMode) { GameMode.CLASSIC -> R.string.classic; GameMode.TARGET_1024 -> R.string.target_1024; GameMode.ENDLESS -> R.string.endless }), color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))

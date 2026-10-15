@@ -32,7 +32,7 @@ final class LeaderboardClient: ObservableObject {
         let name = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard name.range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) != nil,
               let base,
-              let sessionId = UserDefaults.standard.string(forKey: "modern2048.leaderboard.proofSessionId") else {
+              let sessionId = UserDefaults.standard.string(forKey: "modern2048.leaderboard.proofSessionId") ?? VerifiedSession.load()?.sessionId else {
             error = "Rumuzu güncellemek için önce sıralamalı bir oyun başlatmalısın."
             return false
         }
@@ -52,7 +52,7 @@ final class LeaderboardClient: ObservableObject {
             error = nil
             return true
         } catch {
-            error = "Rumuz güncellenemedi. İnternet bağlantını kontrol et."
+            self.error = "Rumuz güncellenemedi. İnternet bağlantını kontrol et."
             return false
         }
     }
