@@ -20,7 +20,7 @@ android {
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true; buildConfig = true }
     defaultConfig {
-        buildConfigField("String", "LEADERBOARD_BASE_URL", "\\\"${providers.gradleProperty("LEADERBOARD_BASE_URL").orElse("").get()}\\\"")
+        buildConfigField("String", "LEADERBOARD_BASE_URL", "\"${providers.gradleProperty("LEADERBOARD_BASE_URL").orElse("").get()}\"")
     }
 }
 dependencies {
