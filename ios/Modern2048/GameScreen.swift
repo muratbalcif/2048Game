@@ -9,6 +9,8 @@ private enum Palette {
 }
 
 struct GameScreen: View {
+    @StateObject private var rewardedAds = RewardedAds()
+    @State private var rewardedContinue = RewardedContinue()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
     @State private var bestScore = GameStorage.best
     @State private var previous: GameState?
@@ -50,6 +52,7 @@ struct GameScreen: View {
                     : (dy > 0 ? .down : .up)
                 let result = GameEngine.move(game, direction)
                 if result.moved {
+                    rewardedContinue.record(game)
                     previous = game
                     withAnimation(.easeInOut(duration: 0.15)) { game = result.state }
                     bestScore = max(bestScore, game.score)
@@ -71,6 +74,7 @@ struct GameScreen: View {
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.canvas.ignoresSafeArea())
+        .onAppear { rewardedAds.load() }
         .alert("2048! Harika!", isPresented: Binding(
             get: { game.won && !winAcknowledged && !game.lost },
             set: { if !$0 { winAcknowledged = true } }
@@ -84,6 +88,17 @@ struct GameScreen: View {
             get: { game.lost },
             set: { _ in }
         )) {
+            if rewardedAds.isReady && rewardedContinue.available {
+                Button("Reklam İzle · 3 Hamle Geri Al") {
+                    rewardedAds.show {
+                        if let restored = rewardedContinue.redeem(current: game) {
+                            game = restored
+                            previous = nil
+                            GameStorage.save(game)
+                        }
+                    }
+                }
+            }
             Button("Tekrar Oyna") { restart() }
             if previous != nil {
                 Button("Geri Al") {
@@ -104,6 +119,7 @@ struct GameScreen: View {
     private func restart() {
         game = GameEngine.newGame()
         previous = nil
+        rewardedContinue.reset()
         winAcknowledged = false
         GameStorage.save(game)
     }
