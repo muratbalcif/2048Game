@@ -8,6 +8,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.BoxWithConstraints
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
@@ -505,7 +507,7 @@ private fun GameScreen() {
     }
     Column(
         Modifier.fillMaxSize().background(selectedTheme.canvas)
-            .verticalScroll(rememberScrollState()).padding(16.dp),
+            .verticalScroll(rememberScrollState()).padding(16.dp).navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(12.dp))
@@ -597,6 +599,7 @@ private fun GameScreen() {
             OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
         }
         TextButton(onClick = { showProgress = true }, enabled = !motionActive) { Text("İstatistikler ve Başarımlar") }
+        Spacer(Modifier.height(8.dp))
     }
 }
 
