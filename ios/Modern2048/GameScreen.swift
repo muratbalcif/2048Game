@@ -192,143 +192,13 @@ struct GameScreen: View {
             Button("Vazgeç", role: .cancel) {}
         } message: { Text("Mod değiştirildiğinde yeni oyun başlar.") }
         .sheet(isPresented: $showProgress) {
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        Text("Her hamle gelişiminin bir parçası")
-                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
-                        HStack(spacing: 12) {
-                            scoreCard("TOPLAM PUAN", progress.totalPoints.formatted())
-                            scoreCard("EN BÜYÜK TAŞ", "\(progress.bestTile)")
-                        }
-                        HStack(spacing: 12) {
-                            scoreCard("OYUN", "\(progress.gamesStarted)")
-                            scoreCard("HAMLE", "\(progress.moves)")
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Oyun performansı").font(.headline)
-                            Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
-                            Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
-                            Label(mergeRateLabel, systemImage: "arrow.triangle.merge")
-                        }
-                        .font(.subheadline).foregroundStyle(theme.ink)
-                        .padding(18)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(theme.board.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
-                        Text("Başarımlar").font(.title3.bold()).foregroundStyle(theme.ink)
-                        ForEach(GameAchievements.list(progress)) { achievement in
-                            HStack(spacing: 12) {
-                                Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
-                                    .foregroundStyle(theme.accent)
-                                Text(achievement.title).fontWeight(.semibold).foregroundStyle(theme.ink)
-                                Spacer()
-                            }
-                            .padding(16)
-                            .background(achievement.unlocked ? theme.accent.opacity(0.12) : theme.board.opacity(0.65),
-                                        in: RoundedRectangle(cornerRadius: 16))
-                        }
-                    }
-                    .padding(20)
-                }
-                .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("İstatistikler")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showProgress = false } } }
-            }
-            .presentationDetents([.large])
+            progressSheet
         }
         .sheet(isPresented: $showLeaderboard) {
             leaderboardSheet
         }
         .sheet(isPresented: $showSettings) {
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Kendine göre oyna")
-                                .font(.title2.bold())
-                                .foregroundStyle(theme.ink)
-                            Text("Görünümü ve oyun deneyimini kişiselleştir.")
-                                .font(.subheadline)
-                                .foregroundStyle(theme.ink.opacity(0.65))
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            settingsHeading("GÖRÜNÜM")
-                            HStack(spacing: 10) {
-                                ForEach(GameTheme.allCases) { option in
-                                    Button {
-                                        themeRaw = option.rawValue
-                                    } label: {
-                                        VStack(spacing: 9) {
-                                            HStack(spacing: 3) {
-                                                ForEach([2, 8, 32], id: \.self) { value in
-                                                    Text("\(value)")
-                                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                                        .foregroundStyle(Color.black)
-                                                        .frame(maxWidth: .infinity)
-                                                        .frame(height: 25)
-                                                        .background(option.tile(value), in: RoundedRectangle(cornerRadius: 6))
-                                                }
-                                            }
-                                            Text(option.title)
-                                                .font(.system(size: 12, weight: .semibold))
-                                                .lineLimit(1)
-                                            Label(theme == option ? "Seçili" : "Seç", systemImage: theme == option ? "checkmark.circle.fill" : "circle")
-                                                .font(.system(size: 11))
-                                        }
-                                        .foregroundStyle(option.ink)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(10)
-                                        .background(option.board, in: RoundedRectangle(cornerRadius: 18))
-                                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(theme == option ? option.accent : .clear, lineWidth: 2))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel("\(option.title) teması")
-                                    .accessibilityAddTraits(theme == option ? .isSelected : [])
-                                }
-                            }
-                        }
-                        VStack(alignment: .leading, spacing: 10) {
-                            settingsHeading("ERİŞİLEBİLİRLİK")
-                            VStack(spacing: 0) {
-                                settingsToggle("Yüksek kontrast", subtitle: "Taşları daha belirgin göster", value: $highContrast)
-                                Divider()
-                                settingsToggle("Büyük taş sayıları", subtitle: "Taş değerlerini daha kolay oku", value: $largeNumbers)
-                                Divider()
-                                settingsToggle("Yön tuşları", subtitle: "Kaydırmadan da hamle yap", value: $directionalControls)
-                            }
-                            .padding(.horizontal, 14)
-                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
-                        }
-                        VStack(alignment: .leading, spacing: 10) {
-                            settingsHeading("OYUN DENEYİMİ")
-                            VStack(spacing: 0) {
-                                settingsToggle("Ses efektleri", subtitle: "Birleşme ve başarı sesleri", value: $soundEnabled)
-                                Divider()
-                                settingsToggle("Titreşim", subtitle: "Dokunsal geri bildirim", value: $hapticsEnabled)
-                                Divider()
-                                settingsToggle("Animasyonları azalt", subtitle: "Daha sakin geçişler", value: $reducedMotion)
-                            }
-                            .padding(.horizontal, 14)
-                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
-                        }
-                    }
-                    .padding(20)
-                    .frame(maxWidth: 560)
-                    .frame(maxWidth: .infinity)
-                }
-                .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("Oyun ayarları")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Bitti") { showSettings = false }
-                            .fontWeight(.semibold)
-                            .tint(theme.accent)
-                    }
-                }
-            }
-            .presentationDetents([.large])
+            settingsSheet
         }
         .alert("Hedefe Ulaştın!", isPresented: Binding(
             get: { mode.reached(game.board) && !winAcknowledged && !game.lost },
@@ -343,7 +213,141 @@ struct GameScreen: View {
             get: { game.lost && !slideInProgress },
             set: { _ in }
         )) {
-            ZStack {
+            gameOverSheet
+        }
+        .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
+            Button("Yeni Oyun", role: .destructive) { restart() }
+            Button("Vazgeç", role: .cancel) {}
+        } message: {
+            Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
+        }
+    }
+
+    private func settingsHeading(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .tracking(1.2)
+            .foregroundStyle(theme.accent)
+    }
+
+    private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
+        Toggle(isOn: value) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
+                Text(subtitle).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+            }
+        }
+        .tint(theme.accent)
+        .padding(.vertical, 12)
+    }
+
+    private func startRanked() {
+        guard !startingVerified && !slideInProgress else { return }
+        startingVerified = true
+        Task {
+            let session = await leaderboard.startVerified(mode: mode)
+            startingVerified = false
+            guard let session else { return }
+            animationToken = UUID()
+            slideInProgress = false
+            slidingTiles = []
+            verifiedSession = session
+            game = VerifiedEngine.initial(session.seed)
+            VerifiedSession.save(session)
+            previous = nil
+            rewardedContinue.reset()
+            GameStorage.saveReward(rewardedContinue)
+            GameStorage.save(game)
+            winAcknowledged = false
+        }
+    }
+
+    private func performMove(_ direction: MoveDirection) {
+        guard !slideInProgress && !game.lost else { return }
+        let result: MoveResult
+        if let session = verifiedSession {
+            guard let next = VerifiedEngine.replay(session.seed, session.moves + VerifiedEngine.letter(direction)) else { return }
+            result = MoveResult(state: next, moved: next.board != game.board, scoreDelta: next.score - game.score)
+        } else {
+            result = GameEngine.move(game, direction)
+        }
+        guard result.moved else { return }
+        if verifiedSession != nil {
+            verifiedSession?.moves += VerifiedEngine.letter(direction)
+            VerifiedSession.save(verifiedSession)
+        }
+        let old = game
+        rewardedContinue.record(old)
+        GameStorage.saveReward(rewardedContinue)
+        previous = old
+        let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
+        progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
+        GameStorage.saveProgress(progress)
+        effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
+        bestScore = max(bestScore, result.state.score)
+        GameStorage.save(result.state)
+        GameStorage.saveBest(bestScore)
+        if reducedMotion || systemReduceMotion {
+            game = result.state
+        } else {
+            slidingTiles = TileMotionPlanner.plan(old.board, direction)
+            slideProgress = 0
+            slideInProgress = true
+            withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
+            let token = UUID()
+            animationToken = token
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                guard animationToken == token else { return }
+                revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
+                mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
+                game = result.state
+                slideInProgress = false
+                slidingTiles = []
+                slideProgress = 0
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                guard animationToken == token else { return }
+                revealedCells = []
+                mergedCells = []
+            }
+        }
+    }
+
+    private func contrastTile(_ value: Int) -> Color {
+        if value == 0 { return theme == .midnight ? Color.black : Color.white }
+        return value >= 128 ? Color(red: 0.98, green: 0.77, blue: 0.13) : Color(red: 0.16, green: 0.72, blue: 0.88)
+    }
+
+    private func applyVerifiedDoubleScore(_ claimKey: String) {
+        doubledGameKey = claimKey
+        let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
+        bestScore = max(bestScore, doubled)
+        GameStorage.saveBest(bestScore)
+    }
+
+    private func restart() {
+        rewardedScoreSession = nil
+        progress.nextGame()
+        GameStorage.saveProgress(progress)
+        animationToken = UUID()
+        slideInProgress = false
+        slidingTiles = []
+        revealedCells = []
+        mergedCells = []
+        slideProgress = 0
+        verifiedSession = nil
+        VerifiedSession.save(nil)
+        game = GameEngine.newGame()
+        previous = nil
+        rewardedContinue.reset()
+        GameStorage.saveReward(rewardedContinue)
+        winAcknowledged = false
+        GameStorage.save(game)
+        startRanked()
+    }
+
+    private var gameOverSheet: some View {
+        ZStack {
                 theme.canvas.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 18) {
@@ -521,136 +525,144 @@ struct GameScreen: View {
                 }
                 await leaderboard.load(mode: mode)
             }
-        }
-        .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
-            Button("Yeni Oyun", role: .destructive) { restart() }
-            Button("Vazgeç", role: .cancel) {}
-        } message: {
-            Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
-        }
     }
 
-    private func settingsHeading(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 12, weight: .bold, design: .rounded))
-            .tracking(1.2)
-            .foregroundStyle(theme.accent)
-    }
-
-    private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
-        Toggle(isOn: value) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
-                Text(subtitle).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+    private var progressSheet: some View {
+        NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("Her hamle gelişiminin bir parçası")
+                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
+                        HStack(spacing: 12) {
+                            scoreCard("TOPLAM PUAN", progress.totalPoints.formatted())
+                            scoreCard("EN BÜYÜK TAŞ", "\(progress.bestTile)")
+                        }
+                        HStack(spacing: 12) {
+                            scoreCard("OYUN", "\(progress.gamesStarted)")
+                            scoreCard("HAMLE", "\(progress.moves)")
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Oyun performansı").font(.headline)
+                            Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
+                            Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
+                            Label(mergeRateLabel, systemImage: "arrow.triangle.merge")
+                        }
+                        .font(.subheadline).foregroundStyle(theme.ink)
+                        .padding(18)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(theme.board.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
+                        Text("Başarımlar").font(.title3.bold()).foregroundStyle(theme.ink)
+                        ForEach(GameAchievements.list(progress)) { achievement in
+                            HStack(spacing: 12) {
+                                Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
+                                    .foregroundStyle(theme.accent)
+                                Text(achievement.title).fontWeight(.semibold).foregroundStyle(theme.ink)
+                                Spacer()
+                            }
+                            .padding(16)
+                            .background(achievement.unlocked ? theme.accent.opacity(0.12) : theme.board.opacity(0.65),
+                                        in: RoundedRectangle(cornerRadius: 16))
+                        }
+                    }
+                    .padding(20)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("İstatistikler")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showProgress = false } } }
             }
-        }
-        .tint(theme.accent)
-        .padding(.vertical, 12)
+            .presentationDetents([.large])
     }
 
-    private func startRanked() {
-        guard !startingVerified && !slideInProgress else { return }
-        startingVerified = true
-        Task {
-            let session = await leaderboard.startVerified(mode: mode)
-            startingVerified = false
-            guard let session else { return }
-            animationToken = UUID()
-            slideInProgress = false
-            slidingTiles = []
-            verifiedSession = session
-            game = VerifiedEngine.initial(session.seed)
-            VerifiedSession.save(session)
-            previous = nil
-            rewardedContinue.reset()
-            GameStorage.saveReward(rewardedContinue)
-            GameStorage.save(game)
-            winAcknowledged = false
-        }
-    }
-
-    private func performMove(_ direction: MoveDirection) {
-        guard !slideInProgress && !game.lost else { return }
-        let result: MoveResult
-        if let session = verifiedSession {
-            guard let next = VerifiedEngine.replay(session.seed, session.moves + VerifiedEngine.letter(direction)) else { return }
-            result = MoveResult(state: next, moved: next.board != game.board, scoreDelta: next.score - game.score)
-        } else {
-            result = GameEngine.move(game, direction)
-        }
-        guard result.moved else { return }
-        if verifiedSession != nil {
-            verifiedSession?.moves += VerifiedEngine.letter(direction)
-            VerifiedSession.save(verifiedSession)
-        }
-        let old = game
-        rewardedContinue.record(old)
-        GameStorage.saveReward(rewardedContinue)
-        previous = old
-        let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
-        progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
-        GameStorage.saveProgress(progress)
-        effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
-        bestScore = max(bestScore, result.state.score)
-        GameStorage.save(result.state)
-        GameStorage.saveBest(bestScore)
-        if reducedMotion || systemReduceMotion {
-            game = result.state
-        } else {
-            slidingTiles = TileMotionPlanner.plan(old.board, direction)
-            slideProgress = 0
-            slideInProgress = true
-            withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
-            let token = UUID()
-            animationToken = token
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 180_000_000)
-                guard animationToken == token else { return }
-                revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
-                mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
-                game = result.state
-                slideInProgress = false
-                slidingTiles = []
-                slideProgress = 0
-                try? await Task.sleep(nanoseconds: 180_000_000)
-                guard animationToken == token else { return }
-                revealedCells = []
-                mergedCells = []
+    private var settingsSheet: some View {
+        NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("Kendine göre oyna")
+                                .font(.title2.bold())
+                                .foregroundStyle(theme.ink)
+                            Text("Görünümü ve oyun deneyimini kişiselleştir.")
+                                .font(.subheadline)
+                                .foregroundStyle(theme.ink.opacity(0.65))
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            settingsHeading("GÖRÜNÜM")
+                            HStack(spacing: 10) {
+                                ForEach(GameTheme.allCases) { option in
+                                    Button {
+                                        themeRaw = option.rawValue
+                                    } label: {
+                                        VStack(spacing: 9) {
+                                            HStack(spacing: 3) {
+                                                ForEach([2, 8, 32], id: \.self) { value in
+                                                    Text("\(value)")
+                                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                        .foregroundStyle(Color.black)
+                                                        .frame(maxWidth: .infinity)
+                                                        .frame(height: 25)
+                                                        .background(option.tile(value), in: RoundedRectangle(cornerRadius: 6))
+                                                }
+                                            }
+                                            Text(option.title)
+                                                .font(.system(size: 12, weight: .semibold))
+                                                .lineLimit(1)
+                                            Label(theme == option ? "Seçili" : "Seç", systemImage: theme == option ? "checkmark.circle.fill" : "circle")
+                                                .font(.system(size: 11))
+                                        }
+                                        .foregroundStyle(option.ink)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(10)
+                                        .background(option.board, in: RoundedRectangle(cornerRadius: 18))
+                                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(theme == option ? option.accent : .clear, lineWidth: 2))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("\(option.title) teması")
+                                    .accessibilityAddTraits(theme == option ? .isSelected : [])
+                                }
+                            }
+                        }
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("ERİŞİLEBİLİRLİK")
+                            VStack(spacing: 0) {
+                                settingsToggle("Yüksek kontrast", subtitle: "Taşları daha belirgin göster", value: $highContrast)
+                                Divider()
+                                settingsToggle("Büyük taş sayıları", subtitle: "Taş değerlerini daha kolay oku", value: $largeNumbers)
+                                Divider()
+                                settingsToggle("Yön tuşları", subtitle: "Kaydırmadan da hamle yap", value: $directionalControls)
+                            }
+                            .padding(.horizontal, 14)
+                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
+                        }
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("OYUN DENEYİMİ")
+                            VStack(spacing: 0) {
+                                settingsToggle("Ses efektleri", subtitle: "Birleşme ve başarı sesleri", value: $soundEnabled)
+                                Divider()
+                                settingsToggle("Titreşim", subtitle: "Dokunsal geri bildirim", value: $hapticsEnabled)
+                                Divider()
+                                settingsToggle("Animasyonları azalt", subtitle: "Daha sakin geçişler", value: $reducedMotion)
+                            }
+                            .padding(.horizontal, 14)
+                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
+                        }
+                    }
+                    .padding(20)
+                    .frame(maxWidth: 560)
+                    .frame(maxWidth: .infinity)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("Oyun ayarları")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Bitti") { showSettings = false }
+                            .fontWeight(.semibold)
+                            .tint(theme.accent)
+                    }
+                }
             }
-        }
-    }
-
-    private func contrastTile(_ value: Int) -> Color {
-        if value == 0 { return theme == .midnight ? Color.black : Color.white }
-        return value >= 128 ? Color(red: 0.98, green: 0.77, blue: 0.13) : Color(red: 0.16, green: 0.72, blue: 0.88)
-    }
-
-    private func applyVerifiedDoubleScore(_ claimKey: String) {
-        doubledGameKey = claimKey
-        let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
-        bestScore = max(bestScore, doubled)
-        GameStorage.saveBest(bestScore)
-    }
-
-    private func restart() {
-        rewardedScoreSession = nil
-        progress.nextGame()
-        GameStorage.saveProgress(progress)
-        animationToken = UUID()
-        slideInProgress = false
-        slidingTiles = []
-        revealedCells = []
-        mergedCells = []
-        slideProgress = 0
-        verifiedSession = nil
-        VerifiedSession.save(nil)
-        game = GameEngine.newGame()
-        previous = nil
-        rewardedContinue.reset()
-        GameStorage.saveReward(rewardedContinue)
-        winAcknowledged = false
-        GameStorage.save(game)
-        startRanked()
+            .presentationDetents([.large])
     }
 
     private var leaderboardSheet: some View {
