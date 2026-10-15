@@ -16,6 +16,9 @@ struct GameScreen: View {
     @State private var bestScore = GameStorage.best
     @State private var progress = GameStorage.loadProgress()
     @State private var showProgress = false
+    @AppStorage("modern2048.mode") private var modeRaw = GameMode.classic.rawValue
+    @State private var showModePicker = false
+    private var mode: GameMode { GameMode(rawValue: modeRaw) ?? .classic }
     @State private var previous: GameState?
     @State private var winAcknowledged = false
     @State private var confirmRestart = false
@@ -36,7 +39,9 @@ struct GameScreen: View {
             Text("2048")
                 .font(.system(size: 48, weight: .black, design: .rounded))
                 .foregroundStyle(Palette.purple)
-            Text("Modern Puzzle").foregroundStyle(Palette.ink)
+            Button(mode.title + "  ▾") { showModePicker = true }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Palette.ink)
             HStack(spacing: 12) {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
@@ -149,6 +154,16 @@ struct GameScreen: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.canvas.ignoresSafeArea())
         .onAppear { rewardedAds.load() }
+        .confirmationDialog("Oyun Modu Seç", isPresented: $showModePicker) {
+            ForEach(GameMode.allCases) { candidate in
+                Button(candidate.title) {
+                    guard candidate != mode else { return }
+                    modeRaw = candidate.rawValue
+                    restart()
+                }
+            }
+            Button("Vazgeç", role: .cancel) {}
+        } message: { Text("Mod değiştirildiğinde yeni oyun başlar.") }
         .sheet(isPresented: $showProgress) {
             NavigationStack {
                 List {
@@ -185,14 +200,14 @@ struct GameScreen: View {
             }
             .presentationDetents([.medium])
         }
-        .alert("2048! Harika!", isPresented: Binding(
-            get: { game.won && !winAcknowledged && !game.lost },
+        .alert("Hedefe Ulaştın!", isPresented: Binding(
+            get: { mode.reached(game.board) && !winAcknowledged && !game.lost },
             set: { if !$0 { winAcknowledged = true } }
         )) {
             Button("Devam Et") { winAcknowledged = true }
             Button("Yeni Oyun") { restart() }
         } message: {
-            Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.")
+            Text("\(mode.target ?? 2048) taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.")
         }
         .alert("Oyun Bitti", isPresented: Binding(
             get: { game.lost },
