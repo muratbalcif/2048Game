@@ -143,9 +143,11 @@ struct GameScreen: View {
                 .font(.footnote)
         }
         .padding(16)
+        .padding(.bottom, 32)
         .frame(maxWidth: 560)
         .frame(maxWidth: .infinity)
         }
+        .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 12) }
         .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas.ignoresSafeArea())
