@@ -17,6 +17,9 @@ struct GameScreen: View {
     @State private var previous: GameState?
     @State private var winAcknowledged = false
     @State private var confirmRestart = false
+    @AppStorage("modern2048.sound") private var soundEnabled = true
+    @AppStorage("modern2048.haptics") private var hapticsEnabled = true
+    @State private var showSettings = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -58,7 +61,7 @@ struct GameScreen: View {
                     rewardedContinue.record(game)
                     GameStorage.saveReward(rewardedContinue)
                     previous = game
-                    effects.play(scoreDelta: result.scoreDelta, won: !game.won && result.state.won)
+                    effects.play(scoreDelta: result.scoreDelta, won: !game.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
                     withAnimation(.spring(response: 0.24, dampingFraction: 0.78)) { game = result.state }
                     bestScore = max(bestScore, game.score)
                     GameStorage.save(game)
@@ -72,6 +75,7 @@ struct GameScreen: View {
                 }
                 .disabled(previous == nil)
                 Button("Yeni Oyun") { confirmRestart = true }
+                Button("Ayarlar") { showSettings = true }
             }
             .buttonStyle(.borderedProminent)
             Spacer()
@@ -80,6 +84,17 @@ struct GameScreen: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.canvas.ignoresSafeArea())
         .onAppear { rewardedAds.load() }
+        .sheet(isPresented: $showSettings) {
+            NavigationStack {
+                Form {
+                    Toggle("Ses efektleri", isOn: $soundEnabled)
+                    Toggle("Titreşim", isOn: $hapticsEnabled)
+                }
+                .navigationTitle("Oyun Ayarları")
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showSettings = false } } }
+            }
+            .presentationDetents([.medium])
+        }
         .alert("2048! Harika!", isPresented: Binding(
             get: { game.won && !winAcknowledged && !game.lost },
             set: { if !$0 { winAcknowledged = true } }
