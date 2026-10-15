@@ -83,9 +83,9 @@ struct GameScreen: View {
             HStack(spacing: 8) {
                 if doubledGameKey != "\(game.score):\(game.board.map(String.init).joined(separator: ","))" {
                     Button("Geri Al") {
-                        if doubledGameKey != "\(game.score):\(game.board.map(String.init).joined(separator: ","))" && verifiedSession == nil, let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
+                        undoLastMove()
                     }
-                    .disabled(previous == nil || slideInProgress || verifiedSession != nil)
+                    .disabled(previous == nil || slideInProgress)
                 }
                 Button("Yeni Oyun") { confirmRestart = true }
                 Button("Ayarlar") { showSettings = true }
@@ -273,6 +273,32 @@ struct GameScreen: View {
         let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
         bestScore = max(bestScore, doubled)
         GameStorage.saveBest(bestScore)
+    }
+
+    private func undoLastMove() {
+        guard !slideInProgress, let restored = previous else { return }
+        let currentKey = "\(game.score):\(game.board.map(String.init).joined(separator: ","))"
+        guard doubledGameKey != currentKey else { return }
+
+        if var session = verifiedSession {
+            guard !session.moves.isEmpty else { return }
+            session.moves.removeLast()
+            guard let replayed = VerifiedEngine.replay(session.seed, session.moves),
+                  replayed.board == restored.board, replayed.score == restored.score else { return }
+            verifiedSession = session
+            VerifiedSession.save(session)
+        }
+
+        animationToken = UUID()
+        slidingTiles = []
+        slideInProgress = false
+        previous = nil
+        game = restored
+        if !rewardedContinue.history.isEmpty {
+            rewardedContinue.history.removeLast()
+        }
+        GameStorage.saveReward(rewardedContinue)
+        GameStorage.save(restored)
     }
 
     private func restart() {
