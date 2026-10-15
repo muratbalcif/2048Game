@@ -64,6 +64,8 @@ private fun GameScreen() {
     }
     var previous by remember { mutableStateOf<GameState?>(null) }
     var progress by remember { mutableStateOf(storage.loadProgress()) }
+    var gameMode by remember { mutableStateOf(storage.loadMode()) }
+    var showModePicker by remember { mutableStateOf(false) }
     var showProgress by remember { mutableStateOf(false) }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
@@ -81,9 +83,9 @@ private fun GameScreen() {
     var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
     var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
-    if (game.won && !game.lost && !winAcknowledged) {
-        AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
-            text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
+    if (gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
+        AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
+            text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
             dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
@@ -164,7 +166,7 @@ private fun GameScreen() {
     ) {
         Spacer(Modifier.height(12.dp))
         Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6657E8))
-        Text("Modern Puzzle", color = ink)
+        TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = ink) }
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f))
