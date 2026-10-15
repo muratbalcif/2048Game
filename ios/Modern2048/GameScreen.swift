@@ -892,6 +892,9 @@ struct GameScreen: View {
                 .background(theme.canvas.ignoresSafeArea())
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(theme.canvas, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarColorScheme(theme == .midnight ? .dark : .light, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .principal) {
                         Text("🏆 Global sıralama")
