@@ -314,7 +314,7 @@ private fun GameScreen() {
                         Button(
                             enabled = adReady && !rewardChecking && rewardSession != null,
                             onClick = {
-                                val session = rewardSession ?: return@OutlinedButton
+                                val session = rewardSession ?: return@Button
                                 val snapshot = game
                                 val claimKey = gameKey
                                 rewardedAds.show(onRewardEarned = {
