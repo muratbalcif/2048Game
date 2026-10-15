@@ -1,6 +1,6 @@
 import Foundation
 
-struct VerifiedSession {
+struct VerifiedSession: Codable {
     let sessionId: String
     let playerId: String
     let seed: UInt32
@@ -59,6 +59,23 @@ enum VerifiedEngine {
         case .down: return "D"
         case .left: return "L"
         case .right: return "R"
+        }
+    }
+}
+
+extension VerifiedSession {
+    static func load() -> VerifiedSession? {
+        guard let data = UserDefaults.standard.data(forKey: "modern2048.verifiedSession"),
+              let session = try? JSONDecoder().decode(VerifiedSession.self, from: data),
+              session.moves.count <= 20000,
+              session.moves.allSatisfy({ "UDLR".contains($0) }) else { return nil }
+        return session
+    }
+    static func save(_ session: VerifiedSession?) {
+        if let session, let data = try? JSONEncoder().encode(session) {
+            UserDefaults.standard.set(data, forKey: "modern2048.verifiedSession")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "modern2048.verifiedSession")
         }
     }
 }
