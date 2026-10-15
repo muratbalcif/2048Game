@@ -423,7 +423,7 @@ private fun GameScreen() {
                                 winAcknowledged = false
                             }
                             showModePicker = false
-                        }) { Text(candidate.title) }
+                        }) { Text(stringResource(when (candidate) { GameMode.CLASSIC -> R.string.classic; GameMode.TARGET_1024 -> R.string.target_1024; GameMode.ENDLESS -> R.string.endless })) }
                     }
                 }
             },
@@ -481,7 +481,7 @@ private fun GameScreen() {
                 Text(stringResource(R.string.global_leaderboard), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
                 Text(stringResource(R.string.leaderboard_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(gameMode.title, color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(stringResource(when (gameMode) { GameMode.CLASSIC -> R.string.classic; GameMode.TARGET_1024 -> R.string.target_1024; GameMode.ENDLESS -> R.string.endless }), color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     TextButton(onClick = { scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false } }) { Text(stringResource(R.string.refresh_icon)) }
                 }
                 if (rankingLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -588,7 +588,7 @@ private fun GameScreen() {
     ) {
         Spacer(Modifier.height(12.dp))
         Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
-        TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
+        TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(stringResource(when (gameMode) { GameMode.CLASSIC -> R.string.classic; GameMode.TARGET_1024 -> R.string.target_1024; GameMode.ENDLESS -> R.string.endless }) + " ▾", color = selectedTheme.ink) }
         TextButton(onClick = { showLeaderboard = true }) { Text(stringResource(R.string.leaderboard), color = selectedTheme.accent) }
 
         Spacer(Modifier.height(14.dp))
