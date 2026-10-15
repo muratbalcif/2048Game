@@ -310,7 +310,7 @@ private fun GameScreen() {
                             fontSize = 12.sp, color = selectedTheme.accent)
                     } else if (game.score > 0) {
                         val rewardSession = rewardedScoreSession ?: verifiedSession
-                        OutlinedButton(
+                        Button(
                             enabled = adReady && !rewardChecking && rewardSession != null,
                             onClick = {
                                 val session = rewardSession ?: return@OutlinedButton
@@ -344,11 +344,13 @@ private fun GameScreen() {
                                     }
                                 }, sessionId = session.sessionId, playerId = session.playerId)
                             },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(16.dp)
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
                         ) {
+                            Text("🎁  ", fontSize = 18.sp)
                             Text(if (rewardChecking) stringResource(R.string.reward_checking) else stringResource(R.string.watch_double),
-                                fontSize = 12.sp, color = selectedTheme.ink)
+                                fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                         rewardMessage?.let { Text(it, fontSize = 12.sp, color = selectedTheme.ink) }
                         if (!rewardChecking && rewardMessage != null && rewardSession != null) {
@@ -370,7 +372,7 @@ private fun GameScreen() {
                         }
                     }
                     if (!doubled && verifiedSession == null && adReady && rewardedContinue.available) {
-                        OutlinedButton(
+                        Button(
                             onClick = {
                                 val lostSnapshot = game
                                 rewardedAds.show( {
@@ -385,9 +387,13 @@ private fun GameScreen() {
                                     }
                                 })
                             },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) { Text(stringResource(R.string.watch_undo), fontSize = 12.sp, color = selectedTheme.ink) }
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
+                        ) {
+                            Text("↩  ", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(stringResource(R.string.watch_undo), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
                     }
                     if (!doubled && previous != null && verifiedSession == null) {
                         TextButton(onClick = {
