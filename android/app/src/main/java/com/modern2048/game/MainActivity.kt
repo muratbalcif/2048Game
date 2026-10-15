@@ -62,7 +62,9 @@ private fun GameScreen() {
                 Column {
                     if (adReady && rewardedContinue.available) {
                         TextButton(onClick = {
+                            val lostSnapshot = game
                             rewardedAds.show {
+                                if (game != lostSnapshot) return@show
                                 val (restored, next) = rewardedContinue.redeem(game)
                                 if (next.used && !rewardedContinue.used) {
                                     game = restored
