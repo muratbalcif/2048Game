@@ -13,6 +13,8 @@ struct GameScreen: View {
     @StateObject private var leaderboard = LeaderboardClient()
     @State private var verifiedSession: VerifiedSession? = VerifiedSession.load()
     @State private var rewardedScoreSession: VerifiedSession?
+    @State private var rewardChecking = false
+    @State private var rewardMessage: String?
     @State private var startingVerified = false
     @State private var effects = GameEffects()
     @State private var rewardedContinue = GameStorage.loadReward()
@@ -454,23 +456,58 @@ struct GameScreen: View {
                         if doubledGameKey == "\(game.score):\(game.board.map(String.init).joined(separator: ","))" {
                             Text("✓ 2× puan ödülü uygulandı")
                                 .font(.caption).foregroundStyle(theme.accent)
-                        } else if rewardedAds.isReady && game.score > 0 {
+                        } else if game.score > 0, let session = rewardedScoreSession ?? verifiedSession {
                             Button {
                                 let snapshot = game
                                 let claimKey = "\(game.score):\(game.board.map(String.init).joined(separator: ","))"
                                 rewardedAds.show(onRewardEarned: {
                                     guard game == snapshot, game.lost, doubledGameKey != claimKey else { return }
-                                    doubledGameKey = claimKey
-                                    let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
-                                    bestScore = max(bestScore, doubled)
-                                    GameStorage.saveBest(bestScore)
-                                }, sessionId: (rewardedScoreSession ?? verifiedSession)?.sessionId, playerId: (rewardedScoreSession ?? verifiedSession)?.playerId)
+                                    rewardChecking = true
+                                    rewardMessage = "Google reklam ödülü doğrulanıyor…"
+                                    Task {
+                                        var verified = false
+                                        for _ in 0..<12 {
+                                            verified = await leaderboard.isRewardVerified(session)
+                                            if verified { break }
+                                            try? await Task.sleep(for: .milliseconds(2500))
+                                        }
+                                        if verified && game == snapshot && game.lost && doubledGameKey != claimKey {
+                                            applyVerifiedDoubleScore(claimKey)
+                                            await leaderboard.load(mode: mode)
+                                            rewardMessage = nil
+                                        } else {
+                                            rewardMessage = "Ödül henüz doğrulanmadı. Biraz sonra tekrar kontrol et."
+                                        }
+                                        rewardChecking = false
+                                    }
+                                }, sessionId: session.sessionId, playerId: session.playerId)
                             } label: {
-                                Label("Reklam İzle · 2× Puan", systemImage: "play.rectangle.fill")
+                                Label(rewardChecking ? "Ödül doğrulanıyor…" : "Reklam İzle · 2× Puan",
+                                      systemImage: "play.rectangle.fill")
                                     .font(.subheadline.weight(.semibold))
                                     .frame(maxWidth: .infinity).frame(height: 50)
                             }
+                            .disabled(!rewardedAds.isReady || rewardChecking)
                             .buttonStyle(.bordered).tint(theme.accent)
+                            if let rewardMessage {
+                                Text(rewardMessage).font(.caption).foregroundStyle(theme.ink)
+                                if !rewardChecking {
+                                    Button("Ödülü tekrar kontrol et") {
+                                        rewardChecking = true
+                                        Task {
+                                            if await leaderboard.isRewardVerified(session), game.lost {
+                                                let key = "\(game.score):\(game.board.map(String.init).joined(separator: ","))"
+                                                if doubledGameKey != key { applyVerifiedDoubleScore(key) }
+                                                await leaderboard.load(mode: mode)
+                                                self.rewardMessage = nil
+                                            } else {
+                                                self.rewardMessage = "Ödül henüz doğrulanmadı."
+                                            }
+                                            rewardChecking = false
+                                        }
+                                    }.font(.caption)
+                                }
+                            }
                         }
                         if verifiedSession == nil && rewardedAds.isReady && rewardedContinue.available {
                             Button {
@@ -629,6 +666,13 @@ struct GameScreen: View {
     private func contrastTile(_ value: Int) -> Color {
         if value == 0 { return theme == .midnight ? Color.black : Color.white }
         return value >= 128 ? Color(red: 0.98, green: 0.77, blue: 0.13) : Color(red: 0.16, green: 0.72, blue: 0.88)
+    }
+
+    private func applyVerifiedDoubleScore(_ claimKey: String) {
+        doubledGameKey = claimKey
+        let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
+        bestScore = max(bestScore, doubled)
+        GameStorage.saveBest(bestScore)
     }
 
     private func restart() {
