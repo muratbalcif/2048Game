@@ -197,7 +197,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (!motionActive && game.lost) {
         Dialog(onDismissRequest = {}) {
@@ -256,6 +256,7 @@ private fun GameScreen() {
                             resetMotion()
                             progress = progress.nextGame()
                             storage.saveProgress(progress)
+                            verifiedSession = null
                             game = GameEngine.newGame()
                             previous = null
                             rewardedContinue = rewardedContinue.reset()
