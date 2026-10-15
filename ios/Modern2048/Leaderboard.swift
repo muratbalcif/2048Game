@@ -28,6 +28,34 @@ final class LeaderboardClient: ObservableObject {
         nickname = value.trimmingCharacters(in: .whitespacesAndNewlines)
         UserDefaults.standard.set(nickname, forKey: "modern2048.leaderboard.nickname")
     }
+    func updateNickname(_ value: String) async -> Bool {
+        let name = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard name.range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) != nil,
+              let base,
+              let sessionId = UserDefaults.standard.string(forKey: "modern2048.leaderboard.proofSessionId") else {
+            error = "Rumuzu güncellemek için önce sıralamalı bir oyun başlatmalısın."
+            return false
+        }
+        do {
+            var request = URLRequest(url: base.appendingPathComponent("v2/players/nickname"))
+            request.httpMethod = "PATCH"
+            request.timeoutInterval = 10
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: ["playerId": playerId, "sessionId": sessionId, "nickname": name])
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200,
+                  (try JSONSerialization.jsonObject(with: data) as? [String: Any])?["ok"] as? Bool == true else {
+                error = "Rumuz sunucuda güncellenemedi. Tekrar dene."
+                return false
+            }
+            saveNickname(name)
+            error = nil
+            return true
+        } catch {
+            error = "Rumuz güncellenemedi. İnternet bağlantını kontrol et."
+            return false
+        }
+    }
     private var playerId: String {
         if let id = UserDefaults.standard.string(forKey: idKey) { return id }
         let id = UUID().uuidString.lowercased()
@@ -54,6 +82,7 @@ final class LeaderboardClient: ObservableObject {
             guard (response as? HTTPURLResponse)?.statusCode == 201 else { return nil }
             let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
             guard let id = json?["sessionId"] as? String, let seed = json?["seed"] as? NSNumber else { return nil }
+            UserDefaults.standard.set(id, forKey: "modern2048.leaderboard.proofSessionId")
             return VerifiedSession(sessionId: id, playerId: playerId, seed: seed.uint32Value)
         } catch { self.error = "Sıralamalı oyun başlatılamadı"; return nil }
     }
