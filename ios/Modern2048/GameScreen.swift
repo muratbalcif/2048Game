@@ -53,6 +53,10 @@ struct GameScreen: View {
                 .disabled(slideInProgress)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.ink)
+            Button(startingVerified ? "Bağlanıyor..." : verifiedSession == nil ? "🏆 Sıralamalı başlat" : "🏆 Sıralamalı oyun") { startRanked() }
+                .disabled(startingVerified || slideInProgress || verifiedSession != nil)
+                .font(.subheadline.weight(.semibold))
+                .tint(theme.accent)
             HStack(spacing: 12) {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
@@ -157,6 +161,7 @@ struct GameScreen: View {
             ForEach(GameMode.allCases) { candidate in
                 Button(candidate.title) {
                     guard candidate != mode else { return }
+                    verifiedSession = nil
                     modeRaw = candidate.rawValue
                     restart()
                 }
