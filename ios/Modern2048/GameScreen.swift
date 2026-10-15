@@ -892,14 +892,14 @@ struct GameScreen: View {
                 }
                 .background(theme.canvas.ignoresSafeArea())
                 .navigationTitle("🏆 Global sıralama")
-                 
+
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(theme.canvas, for: .navigationBar)
                 .toolbarBackground(.visible, for: .navigationBar)
                 .toolbarColorScheme(theme == .midnight ? .dark : .light, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .principal) {
-                           
+
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Bitti") { showLeaderboard = false }
