@@ -141,7 +141,7 @@ struct GameScreen: View {
         .onAppear { rewardedAds.load() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background || phase == .inactive {
-                GameStorage.save(game)
+                if !slideInProgress { GameStorage.save(game) }
                 GameStorage.saveReward(rewardedContinue)
                 GameStorage.saveProgress(progress)
             }
