@@ -705,8 +705,28 @@ private fun GameScreen() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (doubledGameKey != "${game.score}:${game.board.joinToString(",")}") {
                 OutlinedButton(
-                    onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
-                    enabled = previous != null && !motionActive && verifiedSession == null
+                    onClick = {
+                        previous?.let { restored ->
+                            val session = verifiedSession
+                            val priorMoves = session?.moves?.dropLast(1)
+                            val valid = session == null || (session.moves.isNotEmpty() &&
+                                priorMoves != null && VerifiedEngine.replay(session.seed, priorMoves)?.let {
+                                    it.board == restored.board && it.score == restored.score
+                                } == true)
+                            if (valid) {
+                                if (session != null && priorMoves != null) {
+                                    verifiedSession = session.copy(moves = priorMoves)
+                                    storage.saveVerified(verifiedSession)
+                                }
+                                game = restored
+                                previous = null
+                                rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1))
+                                storage.saveReward(rewardedContinue)
+                                storage.save(game)
+                            }
+                        }
+                    },
+                    enabled = previous != null && !motionActive
                 ) { Text(stringResource(R.string.undo), fontSize = 12.sp) }
             }
             Button(onClick = { confirmRestart = true }) { Text(stringResource(R.string.new_game), fontSize = 12.sp) }
