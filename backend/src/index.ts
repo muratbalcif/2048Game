@@ -144,7 +144,7 @@ async function verifyAdMobSignature(signed: string, signature: string, keyId: st
     const body = await response.json() as {keys: {keyId:number; pem:string}[]};
     const entry = body.keys.find(k => String(k.keyId) === keyId);
     if (!entry) return false;
-    const der = Uint8Array.from(atob(entry.pem.replace(/-----[^-]+-----/g, "").replace(/\\s/g, "")), c => c.charCodeAt(0));
+    const der = Uint8Array.from(atob(entry.pem.replace(/-----[^-]+-----/g, "").replace(/\s/g, "")), c => c.charCodeAt(0));
     const key = await crypto.subtle.importKey("spki", der, {name:"ECDSA",namedCurve:"P-256"}, false, ["verify"]);
     const decoded = Uint8Array.from(atob(signature.replace(/-/g,"+").replace(/_/g,"/")), c => c.charCodeAt(0));
     // AdMob uses ASN.1 DER ECDSA signatures; WebCrypto requires IEEE-P1363 r||s.
