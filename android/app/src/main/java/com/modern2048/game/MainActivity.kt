@@ -80,6 +80,7 @@ private fun GameScreen() {
     var winAcknowledged by remember { mutableStateOf(false) }
     var confirmRestart by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    var selectedTheme by remember { mutableStateOf(storage.loadTheme()) }
     var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
     var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
@@ -191,12 +192,12 @@ private fun GameScreen() {
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
     }
     Column(
-        Modifier.fillMaxSize().background(canvas).padding(20.dp),
+        Modifier.fillMaxSize().background(selectedTheme.canvas).padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(12.dp))
-        Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6657E8))
-        TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = ink) }
+        Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
+        TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f))
@@ -257,7 +258,7 @@ private fun GameScreen() {
                         }
                     )
                 }
-                .background(boardColor, RoundedCornerShape(24.dp)).padding(10.dp)
+                .background(selectedTheme.board, RoundedCornerShape(24.dp)).padding(10.dp)
         ) {
             val cell = (maxWidth - 30.dp) / 4
             val step = cell + 10.dp
@@ -286,7 +287,7 @@ private fun GameScreen() {
             }
         }
         Spacer(Modifier.height(24.dp))
-        Text("Kaydırarak aynı sayıları birleştir", color = ink)
+        Text("Kaydırarak aynı sayıları birleştir", color = selectedTheme.ink)
         Spacer(Modifier.height(24.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
