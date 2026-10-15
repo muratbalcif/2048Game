@@ -25,6 +25,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -97,6 +100,18 @@ private fun GameScreen() {
     var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
     var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, storage) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                storage.save(game)
+                storage.saveReward(rewardedContinue)
+                storage.saveProgress(progress)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     val performMove: (Direction) -> Unit = { direction ->
         if (!motionActive && !game.lost) {
                                 val result = GameEngine.move(game, direction)
@@ -279,7 +294,7 @@ private fun GameScreen() {
         Spacer(Modifier.height(16.dp))
         BoxWithConstraints(
             modifier = Modifier.fillMaxWidth().aspectRatio(1f)
-                .pointerInput(game) {
+                .pointerInput(Unit) {
                     var drag = Offset.Zero
                     detectDragGestures(
                         onDragStart = { drag = Offset.Zero },
