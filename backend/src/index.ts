@@ -34,7 +34,11 @@ export default {
       const length = Number(request.headers.get("content-length") ?? 0);
       if (length > 4096) return json({ error: "too_large" }, 413);
       let body: Record<string, unknown>;
-      try { body = await request.json() as Record<string, unknown>; } catch { return json({ error: "invalid_json" }, 400); }
+      try {
+        const raw = await request.text();
+        if (raw.length > 4096) return json({ error: "too_large" }, 413);
+        body = JSON.parse(raw) as Record<string, unknown>;
+      } catch { return json({ error: "invalid_json" }, 400); }
       if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "invalid_submission" }, 400);
       const { playerId, mode, score } = body;
       const name = nickname(body.nickname);
