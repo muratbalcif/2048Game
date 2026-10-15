@@ -61,6 +61,11 @@ class GameStorage(context: Context) {
             .put("used", reward.used).toString()).apply()
     }
 
+    fun soundEnabled(): Boolean = prefs.getBoolean("sound_enabled", true)
+    fun hapticsEnabled(): Boolean = prefs.getBoolean("haptics_enabled", true)
+    fun saveSoundEnabled(enabled: Boolean) { prefs.edit().putBoolean("sound_enabled", enabled).apply() }
+    fun saveHapticsEnabled(enabled: Boolean) { prefs.edit().putBoolean("haptics_enabled", enabled).apply() }
+
     fun best(): Int = prefs.getInt("best", 0)
     fun saveBest(score: Int) { prefs.edit().putInt("best", maxOf(best(), score)).apply() }
 }
