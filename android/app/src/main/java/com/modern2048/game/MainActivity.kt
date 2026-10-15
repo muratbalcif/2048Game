@@ -135,15 +135,15 @@ private fun GameScreen() {
         Modifier.fillMaxSize().background(canvas).padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(32.dp))
-        Text("2048", fontSize = 56.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6657E8))
+        Spacer(Modifier.height(12.dp))
+        Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6657E8))
         Text("Modern Puzzle", color = ink)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f))
             ScoreCard("REKOR", best.toString(), Modifier.weight(1f))
         }
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(16.dp))
         BoxWithConstraints(
             modifier = Modifier.fillMaxWidth().aspectRatio(1f)
                 .pointerInput(game) {
@@ -226,13 +226,13 @@ private fun GameScreen() {
         Spacer(Modifier.height(24.dp))
         Text("Kaydırarak aynı sayıları birleştir", color = ink)
         Spacer(Modifier.height(24.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
                 enabled = previous != null && !motionActive
-            ) { Text("Geri Al") }
-            Button(onClick = { confirmRestart = true }, enabled = !motionActive) { Text("Yeni Oyun") }
-            OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar") }
+            ) { Text("Geri Al", fontSize = 12.sp) }
+            Button(onClick = { confirmRestart = true }, enabled = !motionActive) { Text("Yeni Oyun", fontSize = 12.sp) }
+            OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
         }
     }
 }
