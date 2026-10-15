@@ -58,9 +58,12 @@ private fun GameScreen() {
     val motionProgress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     var slideJob by remember { mutableStateOf<Job?>(null) }
+    var popJob by remember { mutableStateOf<Job?>(null) }
     fun resetMotion() {
         slideJob?.cancel()
+        popJob?.cancel()
         slideJob = null
+        popJob = null
         motionActive = false
         motion = emptyList()
         revealedCells = emptySet()
@@ -92,7 +95,7 @@ private fun GameScreen() {
     var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
     val performMove: (Direction) -> Unit = { direction ->
-        if (!motionActive) {
+        if (!motionActive && !game.lost) {
                                 val result = GameEngine.move(game, direction)
                                 if (result.moved) {
                                     rewardedContinue = rewardedContinue.record(game)
@@ -115,9 +118,12 @@ private fun GameScreen() {
                                             motionActive = false
                                             motion = emptyList()
                                             motionProgress.snapTo(0f)
-                                            kotlinx.coroutines.delay(180)
-                                            revealedCells = emptySet()
-                                            mergedCells = emptySet()
+                                            popJob?.cancel()
+                                            popJob = scope.launch {
+                                                kotlinx.coroutines.delay(180)
+                                                revealedCells = emptySet()
+                                                mergedCells = emptySet()
+                                            }
                                         }
                                     } else game = result.state
                                     best = maxOf(best, result.state.score)
@@ -126,13 +132,13 @@ private fun GameScreen() {
                                 }
         }
     }
-    if (gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
+    if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
             dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
-    if (game.lost) {
+    if (!motionActive && game.lost) {
         AlertDialog(onDismissRequest = {}, title = { Text("Oyun Bitti") },
             text = { Text("Skorun: ${game.score}. Tekrar denemeye hazır mısın?") },
             confirmButton = {
@@ -154,6 +160,7 @@ private fun GameScreen() {
                         }) { Text("Reklam İzle · 3 Hamle Geri Al") }
                     }
                     TextButton(onClick = {
+                        resetMotion()
                         progress = progress.nextGame()
                         storage.saveProgress(progress)
                         game = GameEngine.newGame()
@@ -251,7 +258,7 @@ private fun GameScreen() {
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
             text = { Text("Mevcut oyun ilerlemen sıfırlanacak. Rekorun korunacak.") },
-            confirmButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
+            confirmButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
     }
     Column(
