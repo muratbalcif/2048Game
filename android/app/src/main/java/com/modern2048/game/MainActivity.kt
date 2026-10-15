@@ -183,7 +183,7 @@ private fun GameScreen() {
         Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
-                onClick = { previous?.let { game = it; previous = null; storage.save(game) } },
+                onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
                 enabled = previous != null
             ) { Text("Geri Al") }
             Button(onClick = { confirmRestart = true }) { Text("Yeni Oyun") }
