@@ -73,12 +73,36 @@
     <string name="theme_sunset">Sunset</string>
     <string name="theme_ocean">Ocean</string>
     <string name="theme_midnight">Midnight</string>
+    <!-- Merge achievements -->
     <string name="ach_first_merge">First Merge</string>
-    <string name="ach_hundred_moves">100 Moves</string>
+    <string name="ach_merge_100">Merge Master</string>
+    <string name="ach_merge_500">Combo Master</string>
+    <string name="ach_merge_2000">Legendary Merger</string>
+
+    <!-- Tile achievements -->
+    <string name="ach_tile_64">First Steps</string>
     <string name="ach_tile_128">128 Tile</string>
+    <string name="ach_tile_256">256 Tile</string>
     <string name="ach_tile_512">512 Tile</string>
+    <string name="ach_tile_1024">Road to 1024</string>
     <string name="ach_tile_2048">2048 Master</string>
+    <string name="ach_tile_4096">4096 Legend</string>
+
+    <!-- Move achievements -->
+    <string name="ach_hundred_moves">100 Moves</string>
+    <string name="ach_moves_500">500 Moves</string>
+    <string name="ach_moves_1000">1000 Moves</string>
+    <string name="ach_moves_5000">Patience Master</string>
+
+    <!-- Game achievements -->
     <string name="ach_five_games">5 Games</string>
+    <string name="ach_games_25">Experienced Player</string>
+    <string name="ach_games_100">100 Games</string>
+
+    <!-- Score achievements -->
+    <string name="ach_points_10000">Score Hunter</string>
+    <string name="ach_points_100000">Score Legend</string>
+
     <string name="total_merges">Total merges: %1$d</string>
     <string name="avg_score">Average score per game: %1$d</string>
     <string name="merge_rate">Merges per move: %1$d%%</string>

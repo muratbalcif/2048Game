@@ -604,8 +604,8 @@ private fun GameScreen() {
                         SettingsToggle(stringResource(R.string.sound_effects), stringResource(R.string.sound), soundEnabled, selectedTheme.ink) { soundEnabled = it; storage.saveSoundEnabled(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
                         SettingsToggle(stringResource(R.string.vibration), stringResource(R.string.haptic_desc), hapticsEnabled, selectedTheme.ink) { hapticsEnabled = it; storage.saveHapticsEnabled(it) }
-                        HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
-                        SettingsToggle(stringResource(R.string.reduce_motion), stringResource(R.string.reduce_motion_desc), reducedMotion, selectedTheme.ink) { reducedMotion = it; storage.saveReducedMotion(it) }
+                        //HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
+                        //SettingsToggle(stringResource(R.string.reduce_motion), stringResource(R.string.reduce_motion_desc), reducedMotion, selectedTheme.ink) { reducedMotion = it; storage.saveReducedMotion(it) }
                     }
                 }
             }
@@ -664,7 +664,7 @@ private fun GameScreen() {
                 AnimatedTile(
                     value,
                     Modifier.size(cell).offset(x = step * (index % 4), y = step * (index / 4)),
-                    reducedMotion,
+                    true,
                     theme = selectedTheme,
                     highContrast = highContrast,
                     largeNumbers = largeNumbers,
@@ -744,7 +744,7 @@ private fun tileColor(value: Int): Color = when (value) {
 }
 
 @Composable
-private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false, theme: GameTheme = GameTheme.SUNSET, highContrast: Boolean = false, largeNumbers: Boolean = false, pop: Boolean = false) {
+private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = true, theme: GameTheme = GameTheme.SUNSET, highContrast: Boolean = false, largeNumbers: Boolean = false, pop: Boolean = false) {
     val color by animateColorAsState(if (highContrast) { if (value == 0) Color.White else if (value >= 128) Color(0xFFFFC400) else Color(0xFF20B6DF) } else theme.tile(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
     val scale by animateFloatAsState(
         targetValue = if (value == 0) 0.96f else 1f,

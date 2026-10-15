@@ -73,12 +73,36 @@
     <string name="theme_sunset">Gün Batımı</string>
     <string name="theme_ocean">Okyanus</string>
     <string name="theme_midnight">Gece</string>
+    <!-- Birleşme başarımları -->
     <string name="ach_first_merge">İlk Birleşme</string>
-    <string name="ach_hundred_moves">100 Hamle</string>
+    <string name="ach_merge_100">Birleşme Ustası</string>
+    <string name="ach_merge_500">Kombinasyon Ustası</string>
+    <string name="ach_merge_2000">Efsane Birleştirici</string>
+
+    <!-- Taş başarımları -->
+    <string name="ach_tile_64">İlk Adım</string>
     <string name="ach_tile_128">128 Taşı</string>
+    <string name="ach_tile_256">256 Taşı</string>
     <string name="ach_tile_512">512 Taşı</string>
+    <string name="ach_tile_1024">1024 Yolcusu</string>
     <string name="ach_tile_2048">2048 Ustası</string>
+    <string name="ach_tile_4096">4096 Efsanesi</string>
+
+    <!-- Hamle başarımları -->
+    <string name="ach_hundred_moves">100 Hamle</string>
+    <string name="ach_moves_500">500 Hamle</string>
+    <string name="ach_moves_1000">1000 Hamle</string>
+    <string name="ach_moves_5000">Sabır Ustası</string>
+
+    <!-- Oyun başarımları -->
     <string name="ach_five_games">5 Oyun</string>
+    <string name="ach_games_25">Deneyimli Oyuncu</string>
+    <string name="ach_games_100">100 Oyun</string>
+
+    <!-- Puan başarımları -->
+    <string name="ach_points_10000">Puan Avcısı</string>
+    <string name="ach_points_100000">Puan Efsanesi</string>
+
     <string name="total_merges">Toplam birleşme: %1$d</string>
     <string name="avg_score">Oyun başına ortalama puan: %1$d</string>
     <string name="merge_rate">Hamle başına birleşme: %1$d%%</string>
