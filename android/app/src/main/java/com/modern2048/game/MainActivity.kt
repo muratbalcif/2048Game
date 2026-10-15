@@ -96,10 +96,18 @@ private fun GameScreen() {
     val leaderboard = remember(context) { Leaderboard(context) }
     var ranking by remember { mutableStateOf(LeaderboardResult(emptyList(), null)) }
     var rankingLoading by remember { mutableStateOf(false) }
+    var verifiedSession by remember { mutableStateOf<VerifiedGame?>(null) }
+    var startingVerified by remember { mutableStateOf(false) }
     LaunchedEffect(game.lost, game.score, gameMode) {
         if (game.lost) {
             rankingLoading = true
-            ranking = leaderboard.publishAndLoad(gameMode, game.score)
+            verifiedSession?.let { session ->
+                if (VerifiedEngine.replay(session.seed, session.moves)?.score == game.score) {
+                    leaderboard.finalizeVerified(session, game.score)
+                }
+                verifiedSession = null
+            }
+            ranking = leaderboard.load(gameMode)
             rankingLoading = false
         }
     }
@@ -126,7 +134,11 @@ private fun GameScreen() {
     }
     val performMove: (Direction) -> Unit = { direction ->
         if (!motionActive && !game.lost) {
-                                val result = GameEngine.move(game, direction)
+                                val result = verifiedSession?.let { session ->
+                                     val next = VerifiedEngine.replay(session.seed, session.moves + VerifiedEngine.letter(direction))
+                                     if (next != null) MoveResult(next, next.board != game.board, next.score - game.score)
+                                     else MoveResult(game, false, 0)
+                                 } ?: GameEngine.move(game, direction)
                                 if (result.moved) {
                                     rewardedContinue = rewardedContinue.record(game)
                                     storage.saveReward(rewardedContinue)
@@ -163,6 +175,24 @@ private fun GameScreen() {
         }
     }
     val currentMove by rememberUpdatedState(performMove)
+    fun startRanked() {
+        if (startingVerified || motionActive) return
+        startingVerified = true
+        scope.launch {
+            val session = leaderboard.startVerified(gameMode)
+            startingVerified = false
+            if (session != null) {
+                resetMotion()
+                verifiedSession = session
+                game = VerifiedEngine.initial(session.seed)
+                previous = null
+                rewardedContinue = rewardedContinue.reset()
+                storage.saveReward(rewardedContinue)
+                winAcknowledged = false
+                storage.save(game)
+            }
+        }
+    }
     if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
@@ -237,7 +267,7 @@ private fun GameScreen() {
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
                     ) { Text("↻  Yeniden Oyna", fontWeight = FontWeight.Bold) }
-                    if (adReady && rewardedContinue.available) {
+                    if (verifiedSession == null && adReady && rewardedContinue.available) {
                         OutlinedButton(
                             onClick = {
                                 val lostSnapshot = game
@@ -257,7 +287,7 @@ private fun GameScreen() {
                             shape = RoundedCornerShape(16.dp)
                         ) { Text("▶  Reklam İzle · 3 Hamle Geri Al", fontSize = 12.sp, color = selectedTheme.ink) }
                     }
-                    if (previous != null) {
+                    if (previous != null && verifiedSession == null) {
                         TextButton(onClick = {
                             previous?.let {
                                 game = it
@@ -272,6 +302,7 @@ private fun GameScreen() {
             }
         }
     }
+    if (verifiedSession != null && !game.lost) { /* Verified sessions disable undo and ad rewinds. */ }
     if (showModePicker) {
         AlertDialog(
             onDismissRequest = { showModePicker = false },
@@ -395,6 +426,7 @@ private fun GameScreen() {
         Spacer(Modifier.height(12.dp))
         Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
         TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
+        TextButton(onClick = { startRanked() }, enabled = !startingVerified && !motionActive && verifiedSession == null) { Text(if (startingVerified) "Bağlanıyor..." else if (verifiedSession != null) "🏆 Sıralamalı oyun" else "🏆 Sıralamalı başlat") }
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f), selectedTheme)
@@ -473,7 +505,7 @@ private fun GameScreen() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
-                enabled = previous != null && !motionActive
+                enabled = previous != null && !motionActive && verifiedSession == null
             ) { Text("Geri Al", fontSize = 12.sp) }
             Button(onClick = { confirmRestart = true }, enabled = !motionActive) { Text("Yeni Oyun", fontSize = 12.sp) }
             OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
