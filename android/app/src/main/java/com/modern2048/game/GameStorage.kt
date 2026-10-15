@@ -61,6 +61,21 @@ class GameStorage(context: Context) {
             .put("used", reward.used).toString()).apply()
     }
 
+    fun loadProgress(): GameProgress = GameProgress(
+        moves = prefs.getInt("progress_moves", 0).coerceAtLeast(0),
+        merges = prefs.getInt("progress_merges", 0).coerceAtLeast(0),
+        gamesStarted = prefs.getInt("progress_games", 1).coerceAtLeast(1),
+        bestTile = prefs.getInt("progress_tile", 0).coerceAtLeast(0),
+        totalPoints = prefs.getLong("progress_points", 0).coerceAtLeast(0)
+    )
+    fun saveProgress(progress: GameProgress) {
+        prefs.edit().putInt("progress_moves", progress.moves)
+            .putInt("progress_merges", progress.merges)
+            .putInt("progress_games", progress.gamesStarted)
+            .putInt("progress_tile", progress.bestTile)
+            .putLong("progress_points", progress.totalPoints).apply()
+    }
+
     fun reducedMotion(): Boolean = prefs.getBoolean("reduced_motion", false)
     fun saveReducedMotion(enabled: Boolean) { prefs.edit().putBoolean("reduced_motion", enabled).apply() }
     fun soundEnabled(): Boolean = prefs.getBoolean("sound_enabled", true)
