@@ -120,9 +120,11 @@ struct GameScreen: View {
                 Button("Geri Al") {
                     if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
                 }
-                .disabled(previous == nil)
+                .disabled(previous == nil || slideInProgress)
                 Button("Yeni Oyun") { confirmRestart = true }
+                    .disabled(slideInProgress)
                 Button("Ayarlar") { showSettings = true }
+                    .disabled(slideInProgress)
             }
             .buttonStyle(.borderedProminent)
             Spacer()
