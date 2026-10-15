@@ -20,17 +20,17 @@ class GameEffects(context: Context) {
     }
     private var tone: ToneGenerator? = null
 
-    fun play(scoreDelta: Int, won: Boolean) {
+    fun play(scoreDelta: Int, won: Boolean, sound: Boolean = true, haptics: Boolean = true) {
         val duration = when {
             won -> 80L
             scoreDelta >= 64 -> 45L
             scoreDelta > 0 -> 25L
             else -> 12L
         }
-        vibrator?.takeIf { it.hasVibrator() }?.vibrate(
+        if (haptics) vibrator?.takeIf { it.hasVibrator() }?.vibrate(
             VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
         )
-        if (won || scoreDelta > 0) {
+        if (sound && (won || scoreDelta > 0)) {
             val generator = tone ?: runCatching {
                 ToneGenerator(AudioManager.STREAM_MUSIC, 30).also { tone = it }
             }.getOrNull()
