@@ -373,7 +373,7 @@ struct GameScreen: View {
                         .buttonStyle(.plain)
                         .foregroundStyle(.white)
                         .background(theme.accent, in: RoundedRectangle(cornerRadius: 17))
-                        if rewardedAds.isReady && rewardedContinue.available {
+                        if verifiedSession == nil && rewardedAds.isReady && rewardedContinue.available {
                             Button {
                                 let lostSnapshot = game
                                 rewardedAds.show {
@@ -394,7 +394,7 @@ struct GameScreen: View {
                             .buttonStyle(.bordered)
                             .tint(theme.accent)
                         }
-                        if let previous {
+                        if verifiedSession == nil, let previous {
                             Button {
                                 game = previous
                                 self.previous = nil
