@@ -39,11 +39,17 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
         #endif
     }
 
-    func show(onRewardEarned: @escaping () -> Void) {
+    func show(onRewardEarned: @escaping () -> Void, sessionId: String? = nil, playerId: String? = nil) {
         guard let ready = ad, !presenting,
               let scene = UIApplication.shared.connectedScenes
                   .compactMap({ $0 as? UIWindowScene }).first,
               let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else { return }
+        if let sessionId, let playerId {
+            let options = ServerSideVerificationOptions()
+            options.customRewardString = sessionId
+            options.userIdentifier = playerId
+            ready.serverSideVerificationOptions = options
+        }
         presenting = true
         presentationID += 1
         let currentPresentation = presentationID
