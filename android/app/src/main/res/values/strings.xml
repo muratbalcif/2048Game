@@ -88,4 +88,8 @@
     <string name="target_reached_desc">%1$d taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.</string>
     <string name="tile_accessibility">%1$d taşı</string>
     <string name="leaderboard_gameover">🏆  Global Liderlik</string>
+    <string name="language">Dil</string>
+    <string name="language_system">Telefon dili</string>
+    <string name="language_turkish">Türkçe</string>
+    <string name="language_english">English</string>
 </resources>
