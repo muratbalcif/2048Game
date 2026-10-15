@@ -181,18 +181,72 @@ struct GameScreen: View {
             .tracking(1.2)
             .foregroundStyle(theme.accent)
     }
-
-    private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
+    private func settingsToggle(
+        _ title: String,
+        subtitle: String,
+        value: Binding<Bool>
+    ) -> some View {
         Toggle(isOn: value) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(LocalizedStringKey(title)).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
-                Text(LocalizedStringKey(subtitle)).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+                Text(LocalizedStringKey(title))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(theme.ink)
+
+                Text(LocalizedStringKey(subtitle))
+                    .font(.system(size: 12))
+                    .foregroundStyle(theme.ink.opacity(0.65))
             }
         }
-        .tint(theme.accent)
+        .toggleStyle(BorderedSwitchStyle(
+            accent: theme.accent,
+            border: theme.ink.opacity(0.3)
+        ))
         .padding(.vertical, 12)
     }
+    private struct BorderedSwitchStyle: ToggleStyle {
+        let accent: Color
+        let border: Color
 
+        func makeBody(configuration: Configuration) -> some View {
+            Button {
+                configuration.isOn.toggle()
+            } label: {
+                HStack(spacing: 12) {
+                    configuration.label
+
+                    Spacer(minLength: 8)
+
+                    ZStack(
+                        alignment: configuration.isOn
+                            ? .trailing
+                            : .leading
+                    ) {
+                        Capsule()
+                            .fill(
+                                configuration.isOn
+                                    ? accent
+                                    : border.opacity(0.18)
+                            )
+
+                        Capsule()
+                            .strokeBorder(
+                                border,
+                                lineWidth: 0.5
+                            )
+
+                        Circle()
+                            .fill(.white)
+                            .frame(width: 26, height: 26)
+                            .padding(3)
+                    }
+                    .frame(width: 54, height: 32)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(.isButton)
+        }
+    }
     private func startRanked() {
         guard !startingVerified && !slideInProgress else { return }
         startingVerified = true
@@ -618,12 +672,15 @@ struct GameScreen: View {
                         }
                         VStack(alignment: .leading, spacing: 10) {
                             settingsHeading("Dil")
+
                             Picker("Dil", selection: $selectedLanguage) {
                                 Text("Telefon dili").tag("system")
                                 Text("Türkçe").tag("tr")
                                 Text("English").tag("en")
                             }
                             .pickerStyle(.segmented)
+                            .colorScheme(theme == .midnight ? .dark : .light)
+                            .tint(theme.accent)
                         }
                         VStack(alignment: .leading, spacing: 12) {
                             settingsHeading("GÖRÜNÜM")

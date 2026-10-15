@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		08A0FF4B221B8E77E37DF28A /* GameTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */; };
+		093503B12C771EE3240CD681 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EBB3A55C774FDEC2F90C57A6 /* Assets.xcassets */; };
 		1A598A25893FE4C904210DA4 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 418BA364F8FEF88635B5EAB9 /* GoogleMobileAds */; };
 		523548E951E4ADF8C2EFB756 /* GameStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4766B51C6233435F2861C2 /* GameStorage.swift */; };
 		66118E3DF9772AC2E8CA1225 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90440C2507CC589ACAD787BA /* GameEngine.swift */; };
@@ -40,6 +41,7 @@
 		C6AD567D15027125C32EA971 /* TileMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileMotion.swift; sourceTree = "<group>"; };
 		CF29CAAF220BD5572982738C /* GameMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMode.swift; sourceTree = "<group>"; };
 		D9D009D519651212ED4D18C6 /* VerifiedGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiedGame.swift; sourceTree = "<group>"; };
+		EBB3A55C774FDEC2F90C57A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modern2048App.swift; sourceTree = "<group>"; };
 		FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAds.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -67,6 +69,7 @@
 		86FBC8128F7BE0B53B09E77A /* Modern2048 */ = {
 			isa = PBXGroup;
 			children = (
+				EBB3A55C774FDEC2F90C57A6 /* Assets.xcassets */,
 				51227C1CA3054827EB34DF7F /* GameEffects.swift */,
 				90440C2507CC589ACAD787BA /* GameEngine.swift */,
 				CF29CAAF220BD5572982738C /* GameMode.swift */,
@@ -159,6 +162,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				093503B12C771EE3240CD681 /* Assets.xcassets in Resources */,
 				797E9E990FCAD585B296DD12 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
