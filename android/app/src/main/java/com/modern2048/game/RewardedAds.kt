@@ -28,7 +28,7 @@ class RewardedAds(private val activity: Activity) {
         loading = true
         RewardedAd.load(
             activity,
-            TEST_UNIT_ID,
+            REWARDED_UNIT_ID,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(loaded: RewardedAd) {
@@ -81,5 +81,6 @@ class RewardedAds(private val activity: Activity) {
 
     companion object {
         private const val TEST_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
+        private const val REWARDED_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
     }
 }

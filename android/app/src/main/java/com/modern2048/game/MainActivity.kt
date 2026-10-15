@@ -365,7 +365,7 @@ private fun GameScreen() {
                         OutlinedButton(
                             onClick = {
                                 val lostSnapshot = game
-                                rewardedAds.show {
+                                rewardedAds.show( {
                                     if (game != lostSnapshot) return@show
                                     val (restored, next) = rewardedContinue.redeem(game)
                                     if (next.used && !rewardedContinue.used) {
@@ -375,7 +375,7 @@ private fun GameScreen() {
                                         previous = null
                                         storage.save(game)
                                     }
-                                }
+                                })
                             },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(16.dp)
