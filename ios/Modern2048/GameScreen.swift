@@ -533,12 +533,16 @@ struct GameScreen: View {
                                 }, sessionId: session.sessionId, playerId: session.playerId)
                             } label: {
                                 Label(rewardChecking ? "Ödül doğrulanıyor…" : "Reklam İzle · 2× Puan",
-                                      systemImage: "play.rectangle.fill")
-                                    .font(.subheadline.weight(.semibold))
-                                    .frame(maxWidth: .infinity).frame(height: 50)
+                                      systemImage: "gift.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .frame(maxWidth: .infinity).frame(height: 56)
                             }
                             .disabled(!rewardedAds.isReady || rewardChecking || (rewardedScoreSession ?? verifiedSession) == nil)
-                            .buttonStyle(.bordered).tint(theme.accent)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.white)
+                            .background(theme.accent, in: RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.45), lineWidth: 1.5))
+                            .shadow(color: theme.accent.opacity(0.32), radius: 10, y: 5)
                             if let rewardMessage {
                                 Text(rewardMessage).font(.caption).foregroundStyle(theme.ink)
                                 if !rewardChecking, let session = rewardedScoreSession ?? verifiedSession {
@@ -572,13 +576,16 @@ struct GameScreen: View {
                                     }
                                 }
                             } label: {
-                                Label("Reklam İzle · 3 Hamle Geri Al", systemImage: "play.rectangle.fill")
-                                    .font(.subheadline.weight(.semibold))
+                                Label("Reklam İzle · 3 Hamle Geri Al", systemImage: "arrow.uturn.backward.circle.fill")
+                                    .font(.system(size: 16, weight: .bold))
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
+                                    .frame(height: 56)
                             }
-                            .buttonStyle(.bordered)
-                            .tint(theme.accent)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.white)
+                            .background(theme.accent, in: RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.45), lineWidth: 1.5))
+                            .shadow(color: theme.accent.opacity(0.32), radius: 10, y: 5)
                         }
                         if previous != nil {
                             Button {
