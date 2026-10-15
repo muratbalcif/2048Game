@@ -890,9 +890,18 @@ struct GameScreen: View {
                     .padding(20)
                 }
                 .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("🏆 Global sıralama")
+                .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showLeaderboard = false } } }
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("🏆 Global sıralama")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Bitti") { showLeaderboard = false }
+                    }
+                }
                 .task { await leaderboard.load(mode: mode) }
             }
             .presentationDetents([.large])
