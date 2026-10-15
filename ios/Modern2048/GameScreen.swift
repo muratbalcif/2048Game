@@ -11,7 +11,7 @@ private enum Palette {
 struct GameScreen: View {
     @StateObject private var rewardedAds = RewardedAds()
     @StateObject private var leaderboard = LeaderboardClient()
-    @State private var verifiedSession: VerifiedSession?
+    @State private var verifiedSession: VerifiedSession? = VerifiedSession.load()
     @State private var startingVerified = false
     @State private var effects = GameEffects()
     @State private var rewardedContinue = GameStorage.loadReward()
@@ -149,7 +149,17 @@ struct GameScreen: View {
         .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas.ignoresSafeArea())
-        .onAppear { rewardedAds.load() }
+        .onAppear {
+            rewardedAds.load()
+            if let session = verifiedSession {
+                guard let replayed = VerifiedEngine.replay(session.seed, session.moves),
+                      replayed.board == game.board && replayed.score == game.score else {
+                    verifiedSession = nil
+                    VerifiedSession.save(nil)
+                    return
+                }
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background || phase == .inactive {
                 if !slideInProgress { GameStorage.save(game) }
@@ -162,6 +172,7 @@ struct GameScreen: View {
                 Button(candidate.title) {
                     guard candidate != mode else { return }
                     verifiedSession = nil
+                    VerifiedSession.save(nil)
                     modeRaw = candidate.rawValue
                     restart()
                 }
@@ -407,9 +418,12 @@ struct GameScreen: View {
             .task(id: "\(mode.rawValue)-\(game.score)") {
                 if let session = verifiedSession {
                     if VerifiedEngine.replay(session.seed, session.moves)?.score == game.score {
-                        _ = await leaderboard.finalizeVerified(session, score: game.score)
+                        if await leaderboard.finalizeVerified(session, score: game.score) {
+                            verifiedSession = nil
+                            VerifiedSession.save(nil)
+                        }
                     }
-                    verifiedSession = nil
+                    if verifiedSession == nil { VerifiedSession.save(nil) }
                 }
                 await leaderboard.load(mode: mode)
             }
@@ -452,6 +466,7 @@ struct GameScreen: View {
             slidingTiles = []
             verifiedSession = session
             game = VerifiedEngine.initial(session.seed)
+            VerifiedSession.save(session)
             previous = nil
             rewardedContinue.reset()
             GameStorage.saveReward(rewardedContinue)
@@ -470,7 +485,10 @@ struct GameScreen: View {
             result = GameEngine.move(game, direction)
         }
         guard result.moved else { return }
-        if verifiedSession != nil { verifiedSession?.moves += VerifiedEngine.letter(direction) }
+        if verifiedSession != nil {
+            verifiedSession?.moves += VerifiedEngine.letter(direction)
+            VerifiedSession.save(verifiedSession)
+        }
         let old = game
         rewardedContinue.record(old)
         GameStorage.saveReward(rewardedContinue)
@@ -523,6 +541,7 @@ struct GameScreen: View {
         mergedCells = []
         slideProgress = 0
         verifiedSession = nil
+        VerifiedSession.save(nil)
         game = GameEngine.newGame()
         previous = nil
         rewardedContinue.reset()
