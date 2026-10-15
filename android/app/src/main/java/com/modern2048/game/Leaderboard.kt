@@ -67,6 +67,21 @@ class Leaderboard(private val context: Context) {
         } catch (_: Exception) { false }
     }
 
+    /** Returns true only after the backend records a Google-signed SSV reward. */
+    suspend fun isRewardVerified(session: VerifiedGame): Boolean = withContext(Dispatchers.IO) {
+        if (!configured) return@withContext false
+        try {
+            val conn = URL("$base/v2/sessions/reward-status?sessionId=${session.sessionId}&playerId=${session.playerId}")
+                .openConnection() as HttpURLConnection
+            conn.connectTimeout = 7000
+            conn.readTimeout = 7000
+            val verified = conn.responseCode == 200 &&
+                JSONObject(conn.inputStream.bufferedReader().use { it.readText() }).optBoolean("credited", false)
+            conn.disconnect()
+            verified
+        } catch (_: Exception) { false }
+    }
+
     suspend fun load(gameMode: GameMode): LeaderboardResult = withContext(Dispatchers.IO) {
         if (!configured) return@withContext LeaderboardResult(emptyList(), null, "Global sıralama henüz etkin değil")
         try {
