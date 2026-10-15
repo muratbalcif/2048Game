@@ -505,8 +505,9 @@ struct GameScreen: View {
                         if doubledGameKey == "\(game.score):\(game.board.map(String.init).joined(separator: ","))" {
                             Text("✓ 2× puan ödülü uygulandı")
                                 .font(.caption).foregroundStyle(theme.accent)
-                        } else if game.score > 0, let session = rewardedScoreSession ?? verifiedSession {
+                        } else if game.score > 0 {
                             Button {
+                                guard let session = rewardedScoreSession ?? verifiedSession else { return }
                                 let snapshot = game
                                 let claimKey = "\(game.score):\(game.board.map(String.init).joined(separator: ","))"
                                 rewardedAds.show(onRewardEarned: {
@@ -536,11 +537,11 @@ struct GameScreen: View {
                                     .font(.subheadline.weight(.semibold))
                                     .frame(maxWidth: .infinity).frame(height: 50)
                             }
-                            .disabled(!rewardedAds.isReady || rewardChecking)
+                            .disabled(!rewardedAds.isReady || rewardChecking || (rewardedScoreSession ?? verifiedSession) == nil)
                             .buttonStyle(.bordered).tint(theme.accent)
                             if let rewardMessage {
                                 Text(rewardMessage).font(.caption).foregroundStyle(theme.ink)
-                                if !rewardChecking {
+                                if !rewardChecking, let session = rewardedScoreSession ?? verifiedSession {
                                     Button("Ödülü tekrar kontrol et") {
                                         rewardChecking = true
                                         Task {
