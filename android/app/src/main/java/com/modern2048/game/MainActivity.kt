@@ -150,6 +150,7 @@ private fun GameScreen() {
                                 }
         }
     }
+    val currentMove by rememberUpdatedState(performMove)
     if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
@@ -305,7 +306,7 @@ private fun GameScreen() {
                                 } else {
                                     if (drag.y > 0) Direction.DOWN else Direction.UP
                                 }
-                                performMove(direction)
+                                currentMove(direction)
                             }
                         },
                         onDrag = { change, amount ->
