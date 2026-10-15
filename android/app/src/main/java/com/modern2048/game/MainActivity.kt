@@ -3,6 +3,7 @@ package com.modern2048.game
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.LocaleListCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,7 +49,7 @@ private val canvas = Color(0xFFFAF8F5)
 private val ink = Color(0xFF24243A)
 private val boardColor = Color(0xFFE9E5E2)
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val savedLanguage = getSharedPreferences("language_settings", MODE_PRIVATE).getString("language", "") ?: ""
