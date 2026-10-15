@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -218,10 +219,10 @@ private fun GameScreen() {
         if (verifiedSession == null && !game.lost) startRanked()
     }
     if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
-        AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
+        AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text(stringResource(R.string.win_title)) },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
-            confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text(stringResource(R.string.continue)) } },
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text(stringResource(R.string.new_game)) } })
     }
     if (!motionActive && game.lost) {
         Dialog(onDismissRequest = {}) {
@@ -242,15 +243,15 @@ private fun GameScreen() {
                     ) {
                         Text("★", fontSize = 38.sp, color = selectedTheme.accent)
                     }
-                    Text("Oyun Bitti!", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
-                    Text("Harika bir denemeydi! Bir sonraki oyunda rekorunu geçebilirsin.",
+                    Text(stringResource(R.string.game_over), fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                    Text(stringResource(R.string.game_over_subtitle),
                         fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .7f),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     val gameKey = "${game.score}:${game.board.joinToString(",")}"
                     val doubled = doubledGameKey == gameKey
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        GameOverStat("SKOR", (if (doubled) game.score.toLong() * 2 else game.score.toLong()).toString(), selectedTheme, Modifier.weight(1f))
-                        GameOverStat("REKOR", best.toString(), selectedTheme, Modifier.weight(1f))
+                        GameOverStat(stringResource(R.string.score), (if (doubled) game.score.toLong() * 2 else game.score.toLong()).toString(), selectedTheme, Modifier.weight(1f))
+                        GameOverStat(stringResource(R.string.best), best.toString(), selectedTheme, Modifier.weight(1f))
                     }
                     Column(
                         Modifier.fillMaxWidth().background(selectedTheme.board.copy(alpha = .65f), RoundedCornerShape(18.dp))
@@ -262,7 +263,7 @@ private fun GameScreen() {
                                 color = selectedTheme.ink, modifier = Modifier.weight(1f))
                             TextButton(onClick = {
                                 scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false }
-                            }) { Text("Yenile", fontSize = 11.sp, color = selectedTheme.accent) }
+                            }) { Text(stringResource(R.string.refresh), fontSize = 11.sp, color = selectedTheme.accent) }
                         }
                         if (rankingLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
                         ranking.error?.let { Text(it, fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .7f)) }
@@ -296,9 +297,9 @@ private fun GameScreen() {
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
-                    ) { Text("↻  Yeniden Oyna", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.replay), fontWeight = FontWeight.Bold) }
                     if (doubled) {
-                        Text("✓ 2× puan ödülü uygulandı",
+                        Text(stringResource(R.string.reward_success),
                             fontSize = 12.sp, color = selectedTheme.accent)
                     } else if (game.score > 0 && (rewardedScoreSession ?: verifiedSession) != null) {
                         val rewardSession = rewardedScoreSession ?: verifiedSession
@@ -311,7 +312,7 @@ private fun GameScreen() {
                                 rewardedAds.show(onRewardEarned = {
                                     if (game == snapshot && game.lost && doubledGameKey != claimKey) {
                                         rewardChecking = true
-                                        rewardMessage = "Google reklam ödülü doğrulanıyor…"
+                                        rewardMessage = stringResource(R.string.reward_wait)
                                         scope.launch {
                                             var verified = false
                                             repeat(12) {
@@ -329,7 +330,7 @@ private fun GameScreen() {
                                                 ranking = leaderboard.load(gameMode)
                                                 rewardMessage = null
                                             } else {
-                                                rewardMessage = "Ödül henüz doğrulanmadı. Biraz sonra tekrar kontrol et."
+                                                rewardMessage = stringResource(R.string.reward_retry)
                                             }
                                             rewardChecking = false
                                         }
@@ -339,7 +340,7 @@ private fun GameScreen() {
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text(if (rewardChecking) "Ödül doğrulanıyor…" else "▶  Reklam İzle · 2× Puan",
+                            Text(if (rewardChecking) stringResource(R.string.reward_checking) else stringResource(R.string.watch_double),
                                 fontSize = 12.sp, color = selectedTheme.ink)
                         }
                         rewardMessage?.let { Text(it, fontSize = 12.sp, color = selectedTheme.ink) }
@@ -355,10 +356,10 @@ private fun GameScreen() {
                                         storage.saveBest(best)
                                         ranking = leaderboard.load(gameMode)
                                         rewardMessage = null
-                                    } else rewardMessage = "Ödül henüz doğrulanmadı."
+                                    } else rewardMessage = stringResource(R.string.reward_pending)
                                     rewardChecking = false
                                 }
-                            }) { Text("Ödülü tekrar kontrol et") }
+                            }) { Text(stringResource(R.string.check_reward)) }
                         }
                     }
                     if (!doubled && verifiedSession == null && adReady && rewardedContinue.available) {
@@ -379,7 +380,7 @@ private fun GameScreen() {
                             },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(16.dp)
-                        ) { Text("▶  Reklam İzle · 3 Hamle Geri Al", fontSize = 12.sp, color = selectedTheme.ink) }
+                        ) { Text(stringResource(R.string.watch_undo), fontSize = 12.sp, color = selectedTheme.ink) }
                     }
                     if (!doubled && previous != null && verifiedSession == null) {
                         TextButton(onClick = {
@@ -390,7 +391,7 @@ private fun GameScreen() {
                                 storage.saveReward(rewardedContinue)
                                 storage.save(game)
                             }
-                        }) { Text("← Son Hamleyi Geri Al", color = selectedTheme.accent) }
+                        }) { Text(stringResource(R.string.no_undo), color = selectedTheme.accent) }
                     }
                 }
             }
@@ -399,10 +400,10 @@ private fun GameScreen() {
     if (showModePicker) {
         AlertDialog(
             onDismissRequest = { showModePicker = false },
-            title = { Text("Oyun Modu Seç") },
+            title = { Text(stringResource(R.string.mode_title)) },
             text = {
                 Column {
-                    Text("Mod değiştirildiğinde yeni oyun başlar.")
+                    Text(stringResource(R.string.mode_change))
                     GameMode.entries.forEach { candidate ->
                         TextButton(onClick = {
                             if (candidate != gameMode) {
@@ -426,7 +427,7 @@ private fun GameScreen() {
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showModePicker = false }) { Text("Vazgeç") } }
+            confirmButton = { TextButton(onClick = { showModePicker = false }) { Text(stringResource(R.string.cancel)) } }
         )
     }
     if (showProgress) {
@@ -435,8 +436,8 @@ private fun GameScreen() {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
                 .padding(horizontal = 22.dp).padding(bottom = 36.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                Text("İstatistikler", fontSize = 29.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
-                Text("Her hamle gelişiminin bir parçası", fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                Text(stringResource(R.string.statistics), fontSize = 29.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                Text(stringResource(R.string.stats_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     ScoreCard("TOPLAM PUAN", "%,d".format(progress.totalPoints), Modifier.weight(1f), selectedTheme)
                     ScoreCard("EN BÜYÜK TAŞ", progress.bestTile.toString(), Modifier.weight(1f), selectedTheme)
@@ -447,13 +448,13 @@ private fun GameScreen() {
                 }
                 Surface(color = selectedTheme.board.copy(alpha = .7f), shape = RoundedCornerShape(20.dp)) {
                     Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("Oyun performansı", fontWeight = FontWeight.Bold, color = selectedTheme.ink)
+                        Text(stringResource(R.string.performance), fontWeight = FontWeight.Bold, color = selectedTheme.ink)
                         Text("Toplam birleşme: ${progress.merges}", color = selectedTheme.ink)
                         Text("Oyun başına ortalama puan: ${progress.totalPoints / progress.gamesStarted.coerceAtLeast(1)}", color = selectedTheme.ink)
                         Text("Hamle başına birleşme: %${if (progress.moves == 0) 0 else progress.merges * 100 / progress.moves}", color = selectedTheme.ink)
                     }
                 }
-                Text("Başarımlar", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = selectedTheme.ink)
+                Text(stringResource(R.string.achievements), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = selectedTheme.ink)
                 GameAchievements.list(progress).forEach { achievement ->
                     Surface(color = if (achievement.unlocked) selectedTheme.accent.copy(alpha = .10f) else selectedTheme.board.copy(alpha = .5f),
                         shape = RoundedCornerShape(15.dp)) {
@@ -477,11 +478,11 @@ private fun GameScreen() {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
                 .padding(horizontal = 22.dp).padding(bottom = 36.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text("🏆 Global sıralama", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
-                Text("Dünyanın dört bir yanından oyuncular", fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                Text(stringResource(R.string.global_leaderboard), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                Text(stringResource(R.string.leaderboard_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(gameMode.title, color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    TextButton(onClick = { scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false } }) { Text("↻ Yenile") }
+                    TextButton(onClick = { scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false } }) { Text(stringResource(R.string.refresh_icon)) }
                 }
                 if (rankingLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
                 ranking.myRank?.let { rank ->
@@ -492,7 +493,7 @@ private fun GameScreen() {
                 }
                 ranking.error?.let { Text(it, color = selectedTheme.ink.copy(alpha = .7f)) }
                 if (!rankingLoading && ranking.entries.isEmpty() && ranking.error == null)
-                    Text("Henüz doğrulanmış skor yok. İlk sırayı sen al!", color = selectedTheme.ink)
+                    Text(stringResource(R.string.empty_leaderboard), color = selectedTheme.ink)
                 ranking.entries.forEach { entry ->
                     Surface(color = if (entry.mine) selectedTheme.accent.copy(alpha = .12f) else selectedTheme.board.copy(alpha = .65f),
                         shape = RoundedCornerShape(16.dp)) {
@@ -521,12 +522,12 @@ private fun GameScreen() {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("Oyun ayarları", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
-                        Text("Oyun deneyimini kendine göre düzenle", fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                        Text(stringResource(R.string.settings_title), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                        Text(stringResource(R.string.settings_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
                     }
-                    TextButton(onClick = { showSettings = false }) { Text("Bitti", color = selectedTheme.accent) }
+                    TextButton(onClick = { showSettings = false }) { Text(stringResource(R.string.done), color = selectedTheme.accent) }
                 }
-                Text("GÖRÜNÜM", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                Text(stringResource(R.string.appearance), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                     GameTheme.entries.forEach { option ->
                         val active = option == selectedTheme
@@ -547,38 +548,38 @@ private fun GameScreen() {
                                 }
                             }
                             Text(option.title, fontSize = 12.sp, color = option.ink, fontWeight = if (active) FontWeight.Bold else FontWeight.Medium)
-                            Text(if (active) "● Seçili" else "○ Seç", fontSize = 11.sp, color = if (active) option.accent else option.ink.copy(alpha = .65f))
+                            Text(if (active) stringResource(R.string.selected) else stringResource(R.string.select), fontSize = 11.sp, color = if (active) option.accent else option.ink.copy(alpha = .65f))
                         }
                     }
                 }
-                Text("ERİŞİLEBİLİRLİK", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                Text(stringResource(R.string.accessibility), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
                 Surface(shape = RoundedCornerShape(20.dp), color = selectedTheme.board.copy(alpha = .75f)) {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-                        SettingsToggle("Yüksek kontrast", "Taşları daha belirgin göster", highContrast, selectedTheme.ink) { highContrast = it; storage.saveHighContrast(it) }
+                        SettingsToggle(stringResource(R.string.high_contrast), stringResource(R.string.high_contrast_desc), highContrast, selectedTheme.ink) { highContrast = it; storage.saveHighContrast(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
-                        SettingsToggle("Büyük taş sayıları", "Taş değerlerini daha kolay oku", largeNumbers, selectedTheme.ink) { largeNumbers = it; storage.saveLargeNumbers(it) }
+                        SettingsToggle(stringResource(R.string.large_numbers), stringResource(R.string.large_numbers_desc), largeNumbers, selectedTheme.ink) { largeNumbers = it; storage.saveLargeNumbers(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
-                        SettingsToggle("Yön tuşları", "Kaydırmadan da hamle yap", directionalControls, selectedTheme.ink) { directionalControls = it; storage.saveDirectionalControls(it) }
+                        SettingsToggle(stringResource(R.string.direction_buttons), stringResource(R.string.direction_buttons_desc), directionalControls, selectedTheme.ink) { directionalControls = it; storage.saveDirectionalControls(it) }
                     }
                 }
-                Text("OYUN DENEYİMİ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                Text(stringResource(R.string.experience), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
                 Surface(shape = RoundedCornerShape(20.dp), color = selectedTheme.board.copy(alpha = .75f)) {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-                        SettingsToggle("Ses efektleri", "Birleşme ve başarı sesleri", soundEnabled, selectedTheme.ink) { soundEnabled = it; storage.saveSoundEnabled(it) }
+                        SettingsToggle("Ses efektleri", stringResource(R.string.sound), soundEnabled, selectedTheme.ink) { soundEnabled = it; storage.saveSoundEnabled(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
-                        SettingsToggle("Titreşim", "Hamlelerde dokunsal geri bildirim", hapticsEnabled, selectedTheme.ink) { hapticsEnabled = it; storage.saveHapticsEnabled(it) }
+                        SettingsToggle(stringResource(R.string.vibration), "Hamlelerde dokunsal geri bildirim", hapticsEnabled, selectedTheme.ink) { hapticsEnabled = it; storage.saveHapticsEnabled(it) }
                         HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
-                        SettingsToggle("Animasyonları azalt", "Daha sakin ve hızlı geçişler", reducedMotion, selectedTheme.ink) { reducedMotion = it; storage.saveReducedMotion(it) }
+                        SettingsToggle(stringResource(R.string.reduce_motion), stringResource(R.string.reduce_motion_desc), reducedMotion, selectedTheme.ink) { reducedMotion = it; storage.saveReducedMotion(it) }
                     }
                 }
             }
         }
     }
     if (confirmRestart) {
-        AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
-            text = { Text("Mevcut oyun ilerlemen sıfırlanacak. Rekorun korunacak.") },
-            confirmButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
-            dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
+        AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text(stringResource(R.string.restart_confirm)) },
+            text = { Text(stringResource(R.string.restart_message)) },
+            confirmButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text(stringResource(R.string.start)) } },
+            dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text(stringResource(R.string.cancel)) } })
     }
     Column(
         Modifier.fillMaxSize().background(selectedTheme.canvas)
@@ -588,12 +589,12 @@ private fun GameScreen() {
         Spacer(Modifier.height(12.dp))
         Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
         TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
-        TextButton(onClick = { showLeaderboard = true }) { Text("🏆 Sıralama", color = selectedTheme.accent) }
+        TextButton(onClick = { showLeaderboard = true }) { Text(stringResource(R.string.leaderboard), color = selectedTheme.accent) }
 
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f), selectedTheme)
-            ScoreCard("REKOR", best.toString(), Modifier.weight(1f), selectedTheme)
+            ScoreCard(stringResource(R.string.score), game.score.toString(), Modifier.weight(1f), selectedTheme)
+            ScoreCard(stringResource(R.string.best), best.toString(), Modifier.weight(1f), selectedTheme)
         }
         Spacer(Modifier.height(16.dp))
         BoxWithConstraints(
@@ -655,27 +656,27 @@ private fun GameScreen() {
         Spacer(Modifier.height(12.dp))
         if (directionalControls) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                OutlinedButton(onClick = { performMove(Direction.UP) }, enabled = !motionActive) { Text("↑ Yukarı") }
+                OutlinedButton(onClick = { performMove(Direction.UP) }, enabled = !motionActive) { Text(stringResource(R.string.up)) }
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    OutlinedButton(onClick = { performMove(Direction.LEFT) }, enabled = !motionActive) { Text("← Sol") }
-                    OutlinedButton(onClick = { performMove(Direction.DOWN) }, enabled = !motionActive) { Text("↓ Aşağı") }
-                    OutlinedButton(onClick = { performMove(Direction.RIGHT) }, enabled = !motionActive) { Text("Sağ →") }
+                    OutlinedButton(onClick = { performMove(Direction.LEFT) }, enabled = !motionActive) { Text(stringResource(R.string.left)) }
+                    OutlinedButton(onClick = { performMove(Direction.DOWN) }, enabled = !motionActive) { Text(stringResource(R.string.down)) }
+                    OutlinedButton(onClick = { performMove(Direction.RIGHT) }, enabled = !motionActive) { Text(stringResource(R.string.right)) }
                 }
             }
         }
-        Text("Kaydırarak aynı sayıları birleştir", color = selectedTheme.ink)
+        Text(stringResource(R.string.swipe_hint), color = selectedTheme.ink)
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (doubledGameKey != "${game.score}:${game.board.joinToString(",")}") {
                 OutlinedButton(
                     onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
                     enabled = previous != null && !motionActive && verifiedSession == null
-                ) { Text("Geri Al", fontSize = 12.sp) }
+                ) { Text(stringResource(R.string.undo), fontSize = 12.sp) }
             }
-            Button(onClick = { confirmRestart = true }) { Text("Yeni Oyun", fontSize = 12.sp) }
-            OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
+            Button(onClick = { confirmRestart = true }) { Text(stringResource(R.string.new_game), fontSize = 12.sp) }
+            OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text(stringResource(R.string.settings), fontSize = 12.sp) }
         }
-        TextButton(onClick = { showProgress = true }, enabled = !motionActive) { Text("İstatistikler ve Başarımlar") }
+        TextButton(onClick = { showProgress = true }, enabled = !motionActive) { Text(stringResource(R.string.stats_achievements)) }
         Spacer(Modifier.height(8.dp))
     }
 }
@@ -720,7 +721,7 @@ private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotio
     )
     Box(
         modifier = modifier.scale(scale * popScale).background(color, RoundedCornerShape(14.dp))
-            .semantics { contentDescription = if (value == 0) "Boş hücre" else "$value taşı" },
+            .semantics { contentDescription = if (value == 0) stringResource(R.string.empty_cell) else "$value taşı" },
         contentAlignment = Alignment.Center
     ) {
         if (value != 0) Text(
