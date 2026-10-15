@@ -18,7 +18,7 @@ class GameEffects(context: Context) {
         @Suppress("DEPRECATION")
         app.getSystemService(Vibrator::class.java)
     }
-    private val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 30)
+    private var tone: ToneGenerator? = null
 
     fun play(scoreDelta: Int, won: Boolean) {
         val duration = when {
@@ -30,11 +30,16 @@ class GameEffects(context: Context) {
         vibrator?.takeIf { it.hasVibrator() }?.vibrate(
             VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
         )
-        if (won) tone.startTone(ToneGenerator.TONE_PROP_ACK, 140)
-        else if (scoreDelta > 0) tone.startTone(ToneGenerator.TONE_PROP_BEEP, 65)
+        if (won || scoreDelta > 0) {
+            val generator = tone ?: runCatching {
+                ToneGenerator(AudioManager.STREAM_MUSIC, 30).also { tone = it }
+            }.getOrNull()
+            if (won) generator?.startTone(ToneGenerator.TONE_PROP_ACK, 140)
+            else generator?.startTone(ToneGenerator.TONE_PROP_BEEP, 65)
+        }
     }
 
-    fun release() { tone.release() }
+    fun release() { tone?.release(); tone = null }
 }
 
 @Composable
