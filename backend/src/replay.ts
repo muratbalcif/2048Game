@@ -1,6 +1,5 @@
 export type Direction = "U" | "D" | "L" | "R";
 export type ReplayState = { board: number[]; score: number; lost: boolean; won: boolean };
-const MASK = 0xffffffff;
 export function nextRandom(seed: number): number {
   let x = seed >>> 0;
   x ^= (x << 13) >>> 0;
