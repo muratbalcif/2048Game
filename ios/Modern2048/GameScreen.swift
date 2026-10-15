@@ -11,6 +11,8 @@ private enum Palette {
 struct GameScreen: View {
     @StateObject private var rewardedAds = RewardedAds()
     @StateObject private var leaderboard = LeaderboardClient()
+    @State private var verifiedSession: VerifiedSession?
+    @State private var startingVerified = false
     @State private var effects = GameEffects()
     @State private var rewardedContinue = GameStorage.loadReward()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
@@ -122,9 +124,9 @@ struct GameScreen: View {
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(theme.ink)
             HStack(spacing: 8) {
                 Button("Geri Al") {
-                    if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
+                    if verifiedSession == nil, let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
                 }
-                .disabled(previous == nil || slideInProgress)
+                .disabled(previous == nil || slideInProgress || verifiedSession != nil)
                 Button("Yeni Oyun") { confirmRestart = true }
                     .disabled(slideInProgress)
                 Button("Ayarlar") { showSettings = true }
@@ -398,7 +400,13 @@ struct GameScreen: View {
             }
             .interactiveDismissDisabled()
             .task(id: "\(mode.rawValue)-\(game.score)") {
-                await leaderboard.load(mode: mode, finalScore: game.score)
+                if let session = verifiedSession {
+                    if VerifiedEngine.replay(session.seed, session.moves)?.score == game.score {
+                        _ = await leaderboard.finalizeVerified(session, score: game.score)
+                    }
+                    verifiedSession = nil
+                }
+                await leaderboard.load(mode: mode)
             }
         }
         .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
@@ -427,10 +435,37 @@ struct GameScreen: View {
         .padding(.vertical, 12)
     }
 
+    private func startRanked() {
+        guard !startingVerified && !slideInProgress else { return }
+        startingVerified = true
+        Task {
+            let session = await leaderboard.startVerified(mode: mode)
+            startingVerified = false
+            guard let session else { return }
+            animationToken = UUID()
+            slideInProgress = false
+            slidingTiles = []
+            verifiedSession = session
+            game = VerifiedEngine.initial(session.seed)
+            previous = nil
+            rewardedContinue.reset()
+            GameStorage.saveReward(rewardedContinue)
+            GameStorage.save(game)
+            winAcknowledged = false
+        }
+    }
+
     private func performMove(_ direction: MoveDirection) {
         guard !slideInProgress && !game.lost else { return }
-        let result = GameEngine.move(game, direction)
+        let result: MoveResult
+        if let session = verifiedSession {
+            guard let next = VerifiedEngine.replay(session.seed, session.moves + VerifiedEngine.letter(direction)) else { return }
+            result = MoveResult(state: next, moved: next.board != game.board, scoreDelta: next.score - game.score)
+        } else {
+            result = GameEngine.move(game, direction)
+        }
         guard result.moved else { return }
+        if verifiedSession != nil { verifiedSession?.moves += VerifiedEngine.letter(direction) }
         let old = game
         rewardedContinue.record(old)
         GameStorage.saveReward(rewardedContinue)
@@ -482,6 +517,7 @@ struct GameScreen: View {
         revealedCells = []
         mergedCells = []
         slideProgress = 0
+        verifiedSession = nil
         game = GameEngine.newGame()
         previous = nil
         rewardedContinue.reset()
