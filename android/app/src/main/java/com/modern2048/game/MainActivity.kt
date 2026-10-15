@@ -89,6 +89,41 @@ private fun GameScreen() {
     var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
     var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
+    val performMove: (Direction) -> Unit = { direction ->
+        if (!motionActive) {
+                                val result = GameEngine.move(game, direction)
+                                if (result.moved) {
+                                    rewardedContinue = rewardedContinue.record(game)
+                                    storage.saveReward(rewardedContinue)
+                                    previous = game
+                                    val mergedCount = TileMotionPlanner.plan(game.board, direction).count { it.merged } / 2
+                                    progress = progress.recordMove(game, result.state, result.scoreDelta, mergedCount)
+                                    storage.saveProgress(progress)
+                                    effects.play(result.scoreDelta, !game.won && result.state.won, soundEnabled, hapticsEnabled)
+                                    if (!reducedMotion) {
+                                        motion = TileMotionPlanner.plan(game.board, direction)
+                                        motionActive = true
+                                        slideJob = scope.launch {
+                                            motionProgress.snapTo(0f)
+                                            motionProgress.animateTo(1f, tween(160))
+                                            val newCells = result.state.board.indices.filter { result.state.board[it] != 0 && motion.none { tile -> tile.to == it } }.toSet()
+                                            revealedCells = newCells
+                                            mergedCells = motion.filter { it.merged }.map { it.to }.toSet()
+                                            game = result.state
+                                            motionActive = false
+                                            motion = emptyList()
+                                            motionProgress.snapTo(0f)
+                                            kotlinx.coroutines.delay(180)
+                                            revealedCells = emptySet()
+                                            mergedCells = emptySet()
+                                        }
+                                    } else game = result.state
+                                    best = maxOf(best, result.state.score)
+                                    storage.save(result.state)
+                                    storage.saveBest(best)
+                                }
+        }
+    }
     if (gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
@@ -243,39 +278,7 @@ private fun GameScreen() {
                                 } else {
                                     if (drag.y > 0) Direction.DOWN else Direction.UP
                                 }
-                                if (!motionActive) {
-                                val result = GameEngine.move(game, direction)
-                                if (result.moved) {
-                                    rewardedContinue = rewardedContinue.record(game)
-                                    storage.saveReward(rewardedContinue)
-                                    previous = game
-                                    val mergedCount = TileMotionPlanner.plan(game.board, direction).count { it.merged } / 2
-                                    progress = progress.recordMove(game, result.state, result.scoreDelta, mergedCount)
-                                    storage.saveProgress(progress)
-                                    effects.play(result.scoreDelta, !game.won && result.state.won, soundEnabled, hapticsEnabled)
-                                    if (!reducedMotion) {
-                                        motion = TileMotionPlanner.plan(game.board, direction)
-                                        motionActive = true
-                                        slideJob = scope.launch {
-                                            motionProgress.snapTo(0f)
-                                            motionProgress.animateTo(1f, tween(160))
-                                            val newCells = result.state.board.indices.filter { result.state.board[it] != 0 && motion.none { tile -> tile.to == it } }.toSet()
-                                            revealedCells = newCells
-                                            mergedCells = motion.filter { it.merged }.map { it.to }.toSet()
-                                            game = result.state
-                                            motionActive = false
-                                            motion = emptyList()
-                                            motionProgress.snapTo(0f)
-                                            kotlinx.coroutines.delay(180)
-                                            revealedCells = emptySet()
-                                            mergedCells = emptySet()
-                                        }
-                                    } else game = result.state
-                                    best = maxOf(best, result.state.score)
-                                    storage.save(result.state)
-                                    storage.saveBest(best)
-                                }
-                                }
+                                performMove(direction)
                             }
                         },
                         onDrag = { change, amount ->
@@ -319,6 +322,16 @@ private fun GameScreen() {
             }
         }
         Spacer(Modifier.height(24.dp))
+        if (directionalControls) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                OutlinedButton(onClick = { performMove(Direction.UP) }, enabled = !motionActive) { Text("↑ Yukarı") }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    OutlinedButton(onClick = { performMove(Direction.LEFT) }, enabled = !motionActive) { Text("← Sol") }
+                    OutlinedButton(onClick = { performMove(Direction.DOWN) }, enabled = !motionActive) { Text("↓ Aşağı") }
+                    OutlinedButton(onClick = { performMove(Direction.RIGHT) }, enabled = !motionActive) { Text("Sağ →") }
+                }
+            }
+        }
         Text("Kaydırarak aynı sayıları birleştir", color = selectedTheme.ink)
         Spacer(Modifier.height(24.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
