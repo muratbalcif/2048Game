@@ -38,24 +38,56 @@ private fun GameScreen() {
     var game by remember { mutableStateOf(storage.load() ?: GameEngine.newGame().also(storage::save)) }
     var previous by remember { mutableStateOf<GameState?>(null) }
     var best by remember { mutableIntStateOf(storage.best()) }
+    val activity = context as ComponentActivity
+    val rewardedAds = remember(activity) { RewardedAds(activity) }
+    var adReady by remember { mutableStateOf(false) }
+    var rewardedContinue by remember { mutableStateOf(RewardedContinue()) }
+    DisposableEffect(rewardedAds) {
+        rewardedAds.onAvailabilityChanged = { adReady = it }
+        rewardedAds.load()
+        onDispose { rewardedAds.onAvailabilityChanged = null }
+    }
     var winAcknowledged by remember { mutableStateOf(false) }
     var confirmRestart by remember { mutableStateOf(false) }
     if (game.won && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
             text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (game.lost) {
         AlertDialog(onDismissRequest = {}, title = { Text("Oyun Bitti") },
             text = { Text("Skorun: ${game.score}. Tekrar denemeye hazır mısın?") },
-            confirmButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; winAcknowledged = false; storage.save(game) }) { Text("Tekrar Oyna") } },
+            confirmButton = {
+                Column {
+                    if (adReady && rewardedContinue.available) {
+                        TextButton(onClick = {
+                            rewardedAds.show {
+                                val (restored, next) = rewardedContinue.redeem(game)
+                                if (next.used && !rewardedContinue.used) {
+                                    game = restored
+                                    rewardedContinue = next
+                                    previous = null
+                                    storage.save(game)
+                                }
+                            }
+                        }) { Text("Reklam İzle · 3 Hamle Geri Al") }
+                    }
+                    TextButton(onClick = {
+                        game = GameEngine.newGame()
+                        previous = null
+                        rewardedContinue = rewardedContinue.reset()
+                        winAcknowledged = false
+                        storage.save(game)
+                    }) { Text("Tekrar Oyna") }
+                }
+            },
             dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
     }
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
             text = { Text("Mevcut oyun ilerlemen sıfırlanacak. Rekorun korunacak.") },
-            confirmButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
+            confirmButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
     }
     Column(
@@ -86,6 +118,7 @@ private fun GameScreen() {
                                 }
                                 val result = GameEngine.move(game, direction)
                                 if (result.moved) {
+                                    rewardedContinue = rewardedContinue.record(game)
                                     previous = game
                                     game = result.state
                                     best = maxOf(best, game.score)
