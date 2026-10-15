@@ -49,6 +49,7 @@ private fun GameScreen() {
     var motion by remember { mutableStateOf<List<TileMotion>>(emptyList()) }
     var motionActive by remember { mutableStateOf(false) }
     var revealedCells by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var mergedCells by remember { mutableStateOf<Set<Int>>(emptySet()) }
     val motionProgress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     var previous by remember { mutableStateOf<GameState?>(null) }
@@ -171,12 +172,14 @@ private fun GameScreen() {
                                             motionProgress.animateTo(1f, tween(160))
                                             val newCells = result.state.board.indices.filter { result.state.board[it] != 0 && motion.none { tile -> tile.to == it } }.toSet()
                                             revealedCells = newCells
+                                            mergedCells = motion.filter { it.merged }.map { it.to }.toSet()
                                             game = result.state
                                             motionActive = false
                                             motion = emptyList()
                                             motionProgress.snapTo(0f)
                                             kotlinx.coroutines.delay(180)
                                             revealedCells = emptySet()
+                                            mergedCells = emptySet()
                                         }
                                     } else game = result.state
                                     best = maxOf(best, result.state.score)
@@ -201,7 +204,7 @@ private fun GameScreen() {
                     value,
                     Modifier.size(cell).offset(x = step * (index % 4), y = step * (index / 4)),
                     reducedMotion,
-                    pop = index in revealedCells
+                    pop = index in revealedCells || index in mergedCells
                 )
             }
             if (motionActive) {
