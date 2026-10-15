@@ -48,6 +48,7 @@ private fun GameScreen() {
     var game by remember { mutableStateOf(storage.load() ?: GameEngine.newGame().also(storage::save)) }
     var motion by remember { mutableStateOf<List<TileMotion>>(emptyList()) }
     var motionActive by remember { mutableStateOf(false) }
+    var revealedCells by remember { mutableStateOf<Set<Int>>(emptySet()) }
     val motionProgress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     var previous by remember { mutableStateOf<GameState?>(null) }
@@ -168,10 +169,14 @@ private fun GameScreen() {
                                         scope.launch {
                                             motionProgress.snapTo(0f)
                                             motionProgress.animateTo(1f, tween(160))
+                                            val newCells = result.state.board.indices.filter { result.state.board[it] != 0 && motion.none { tile -> tile.to == it } }.toSet()
+                                            revealedCells = newCells
                                             game = result.state
                                             motionActive = false
                                             motion = emptyList()
                                             motionProgress.snapTo(0f)
+                                            kotlinx.coroutines.delay(180)
+                                            revealedCells = emptySet()
                                         }
                                     } else game = result.state
                                     best = maxOf(best, result.state.score)
@@ -195,7 +200,8 @@ private fun GameScreen() {
                 AnimatedTile(
                     value,
                     Modifier.size(cell).offset(x = step * (index % 4), y = step * (index / 4)),
-                    reducedMotion
+                    reducedMotion,
+                    pop = index in revealedCells
                 )
             }
             if (motionActive) {
@@ -254,15 +260,19 @@ private fun tileColor(value: Int): Color = when (value) {
 }
 
 @Composable
-private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false) {
+private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false, pop: Boolean = false) {
     val color by animateColorAsState(tileColor(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
     val scale by animateFloatAsState(
         targetValue = if (value == 0) 0.96f else 1f,
         animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(),
         label = "tile-scale"
     )
+    val popScale by animateFloatAsState(
+        targetValue = if (pop && !reducedMotion) 1.12f else 1f,
+        animationSpec = spring(), label = "tile-pop"
+    )
     Box(
-        modifier = modifier.scale(scale).background(color, RoundedCornerShape(14.dp)),
+        modifier = modifier.scale(scale * popScale).background(color, RoundedCornerShape(14.dp)),
         contentAlignment = Alignment.Center
     ) {
         if (value != 0) Text(
