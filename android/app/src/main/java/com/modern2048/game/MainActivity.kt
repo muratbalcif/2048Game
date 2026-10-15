@@ -146,6 +146,10 @@ private fun GameScreen() {
                                      else MoveResult(game, false, 0)
                                  } ?: GameEngine.move(game, direction)
                                 if (result.moved) {
+                                    if (verifiedSession != null) {
+                                        verifiedSession = verifiedSession?.copy(moves = verifiedSession!!.moves + VerifiedEngine.letter(direction))
+                                        storage.saveVerified(verifiedSession)
+                                    }
                                     rewardedContinue = rewardedContinue.record(game)
                                     storage.saveReward(rewardedContinue)
                                     previous = game
@@ -200,11 +204,14 @@ private fun GameScreen() {
             }
         }
     }
+    LaunchedEffect(Unit) {
+        if (verifiedSession == null && !game.lost) startRanked()
+    }
     if (!motionActive && gameMode.reached(game.board) && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("Hedefe Ulaştın!") },
             text = { Text("${gameMode.target} taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; verifiedSession = null; storage.saveVerified(null); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (!motionActive && game.lost) {
         Dialog(onDismissRequest = {}) {
@@ -266,6 +273,7 @@ private fun GameScreen() {
                             verifiedSession = null
                             storage.saveVerified(null)
                             game = GameEngine.newGame()
+                            startRanked()
                             previous = null
                             rewardedContinue = rewardedContinue.reset()
                             storage.saveReward(rewardedContinue)
@@ -326,7 +334,10 @@ private fun GameScreen() {
                                 storage.saveMode(candidate)
                                 progress = progress.nextGame()
                                 storage.saveProgress(progress)
+                                verifiedSession = null
+                                storage.saveVerified(null)
                                 game = GameEngine.newGame()
+                                startRanked()
                                 storage.save(game)
                                 previous = null
                                 rewardedContinue = rewardedContinue.reset()
@@ -501,7 +512,7 @@ private fun GameScreen() {
         Text("2048", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.accent)
         TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
         TextButton(onClick = { showLeaderboard = true }) { Text("🏆 Sıralama", color = selectedTheme.accent) }
-        TextButton(onClick = { startRanked() }, enabled = !startingVerified && !motionActive && verifiedSession == null) { Text(if (startingVerified) "Bağlanıyor..." else if (verifiedSession != null) "🏆 Sıralamalı oyun" else "🏆 Sıralamalı başlat") }
+
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f), selectedTheme)
