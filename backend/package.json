@@ -1,0 +1,14 @@
+{
+  "name": "modern2048-leaderboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply modern2048-leaderboard --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0",
+    "typescript": "^5.9.0"
+  }
+}
