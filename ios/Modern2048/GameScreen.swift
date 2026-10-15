@@ -523,13 +523,9 @@ struct GameScreen: View {
                             .buttonStyle(.bordered)
                             .tint(theme.accent)
                         }
-                        if verifiedSession == nil, let previous {
+                        if previous != nil {
                             Button {
-                                game = previous
-                                self.previous = nil
-                                if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }
-                                GameStorage.saveReward(rewardedContinue)
-                                GameStorage.save(game)
+                                undoLastMove()
                             } label: {
                                 Label("Son Hamleyi Geri Al", systemImage: "arrow.uturn.backward")
                             }
