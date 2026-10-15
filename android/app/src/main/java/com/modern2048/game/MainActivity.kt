@@ -595,7 +595,7 @@ private fun GameScreen() {
                 onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } },
                 enabled = previous != null && !motionActive && verifiedSession == null
             ) { Text("Geri Al", fontSize = 12.sp) }
-            Button(onClick = { confirmRestart = true }, enabled = !motionActive) { Text("Yeni Oyun", fontSize = 12.sp) }
+            Button(onClick = { confirmRestart = true }) { Text("Yeni Oyun", fontSize = 12.sp) }
             OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
         }
         TextButton(onClick = { showProgress = true }, enabled = !motionActive) { Text("İstatistikler ve Başarımlar") }
