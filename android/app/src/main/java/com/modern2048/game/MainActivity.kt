@@ -41,7 +41,7 @@ private fun GameScreen() {
     val activity = context as ComponentActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
     var adReady by remember { mutableStateOf(false) }
-    var rewardedContinue by remember { mutableStateOf(RewardedContinue()) }
+    var rewardedContinue by remember { mutableStateOf(storage.loadReward()) }
     DisposableEffect(rewardedAds) {
         rewardedAds.onAvailabilityChanged = { adReady = it }
         rewardedAds.load()
@@ -53,7 +53,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
             text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (game.lost) {
         AlertDialog(onDismissRequest = {}, title = { Text("Oyun Bitti") },
@@ -67,6 +67,7 @@ private fun GameScreen() {
                                 if (next.used && !rewardedContinue.used) {
                                     game = restored
                                     rewardedContinue = next
+                                    storage.saveReward(next)
                                     previous = null
                                     storage.save(game)
                                 }
@@ -77,6 +78,7 @@ private fun GameScreen() {
                         game = GameEngine.newGame()
                         previous = null
                         rewardedContinue = rewardedContinue.reset()
+                        storage.saveReward(rewardedContinue)
                         winAcknowledged = false
                         storage.save(game)
                     }) { Text("Tekrar Oyna") }
@@ -87,7 +89,7 @@ private fun GameScreen() {
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
             text = { Text("Mevcut oyun ilerlemen sıfırlanacak. Rekorun korunacak.") },
-            confirmButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
+            confirmButton = { TextButton(onClick = { game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text("Başlat") } },
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
     }
     Column(
@@ -119,6 +121,7 @@ private fun GameScreen() {
                                 val result = GameEngine.move(game, direction)
                                 if (result.moved) {
                                     rewardedContinue = rewardedContinue.record(game)
+                                    storage.saveReward(rewardedContinue)
                                     previous = game
                                     game = result.state
                                     best = maxOf(best, game.score)
