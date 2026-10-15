@@ -174,7 +174,7 @@ struct GameScreen: View {
     }
 
     private func settingsHeading(_ title: String) -> some View {
-        Text(title)
+        Text(LocalizedStringKey(title))
             .font(.system(size: 12, weight: .bold, design: .rounded))
             .tracking(1.2)
             .foregroundStyle(theme.accent)
@@ -183,8 +183,8 @@ struct GameScreen: View {
     private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
         Toggle(isOn: value) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
-                Text(subtitle).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+                Text(LocalizedStringKey(title)).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
+                Text(LocalizedStringKey(subtitle)).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
             }
         }
         .tint(theme.accent)
@@ -738,7 +738,7 @@ struct GameScreen: View {
 
     private func scoreCard(_ label: String, _ value: String) -> some View {
         VStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(theme.ink.opacity(0.85))
             Text(value).font(.system(size: 26, weight: .bold, design: .rounded))
