@@ -33,3 +33,18 @@ This beta implementation accepts client-reported scores and client-supplied play
 - decide how to handle legacy unverified scores and protect deletion/rename operations.
 
 No Cloudflare account credentials or API tokens should be committed to GitHub.
+
+## GitHub Actions production deployment (prepared)
+The workflow `.github/workflows/deploy-leaderboard.yml` is manually triggered; it will not deploy on every push.
+
+1. In Cloudflare, create a D1 database named `modern2048-leaderboard`.
+2. Create a scoped API token with **Workers Scripts: Edit**, **D1: Edit**, and **Account: Read** permissions for the target account. Use the least privileges available for the deployment operations.
+3. In GitHub repository **Settings → Environments**, create `leaderboard-production`. Optionally require a reviewer.
+4. Add environment secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `D1_DATABASE_ID`. The last one is the actual D1 database UUID from Cloudflare, **not** the all-zero placeholder.
+5. Open **Actions → Deploy Global Leaderboard → Run workflow**. The workflow validates configuration, checks TypeScript, applies migrations, and deploys the Worker.
+6. Get the actual Worker URL from Cloudflare, confirm `/health` and `/v1/leaderboard?mode=classic`, and configure both mobile apps to use that same HTTPS base URL.
+
+No secrets or real Cloudflare account identifiers are required in the repository source. The production workflow will fail early if required secrets are absent.
+
+### Important operational note
+This workflow deploys the **beta score-submission API**. It does not add replay-based anti-cheat verification. Do not enable competitive rewards or claim tamper-proof rankings until server-side verification is implemented.
