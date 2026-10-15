@@ -10,6 +10,7 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "5.9"
+    LEADERBOARD_BASE_URL: "https://modern2048-leaderboard.muratbalci269.workers.dev"
 targets:
   Modern2048:
     type: application
