@@ -104,7 +104,7 @@ private fun GameScreen() {
     DisposableEffect(lifecycleOwner, storage) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
-                storage.save(game)
+                if (!motionActive) storage.save(game)
                 storage.saveReward(rewardedContinue)
                 storage.saveProgress(progress)
             }
