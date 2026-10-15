@@ -25,6 +25,7 @@ struct GameScreen: View {
     @State private var showProgress = false
     @State private var showLeaderboard = false
     @State private var nicknameDraft = UserDefaults.standard.string(forKey: "modern2048.leaderboard.nickname") ?? ""
+    @State private var nicknameSaved = false
     @AppStorage("modern2048.mode") private var modeRaw = GameMode.classic.rawValue
     @State private var showModePicker = false
     private var mode: GameMode { GameMode(rawValue: modeRaw) ?? .classic }
@@ -803,11 +804,29 @@ struct GameScreen: View {
                         TextField("Oyuncu rumuzun", text: $nicknameDraft)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                            .textFieldStyle(.roundedBorder)
+                            .foregroundStyle(theme.ink)
+                            .tint(theme.accent)
+                            .padding(.horizontal, 14)
+                            .frame(height: 48)
+                            .background(theme.canvas, in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(theme.ink.opacity(0.28), lineWidth: 1))
+                            .colorScheme(.light)
                             .onChange(of: nicknameDraft) { value in
+                                nicknameSaved = false
                                 if value.count > 20 { nicknameDraft = String(value.prefix(20)) }
                             }
-                        Button("Rumuzu kaydet") { leaderboard.saveNickname(nicknameDraft) }
+                        Button("Rumuzu kaydet") {
+                            leaderboard.saveNickname(nicknameDraft)
+                            nicknameDraft = leaderboard.nickname
+                            nicknameSaved = true
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(theme.accent)
+                        if nicknameSaved {
+                            Text("Rumuz cihazda kaydedildi. Global sıralama yeni oyunla güncellenir.")
+                                .font(.caption)
+                                .foregroundStyle(theme.accent)
+                        }
                             .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
                         Text("Rumuzun yeni sıralamalı oyununla birlikte global listede güncellenir.")
                             .font(.caption).foregroundStyle(.secondary)
