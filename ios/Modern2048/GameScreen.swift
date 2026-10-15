@@ -10,6 +10,7 @@ private enum Palette {
 
 struct GameScreen: View {
     @StateObject private var rewardedAds = RewardedAds()
+    @State private var effects = GameEffects()
     @State private var rewardedContinue = GameStorage.loadReward()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
     @State private var bestScore = GameStorage.best
@@ -40,6 +41,8 @@ struct GameScreen: View {
                         }
                     }
                     .aspectRatio(1, contentMode: .fit)
+                    .scaleEffect(value == 0 ? 0.97 : 1.0)
+                    .animation(.spring(response: 0.23, dampingFraction: 0.7), value: value)
                 }
             }
             .padding(10)
@@ -55,7 +58,8 @@ struct GameScreen: View {
                     rewardedContinue.record(game)
                     GameStorage.saveReward(rewardedContinue)
                     previous = game
-                    withAnimation(.easeInOut(duration: 0.15)) { game = result.state }
+                    effects.play(scoreDelta: result.scoreDelta, won: !game.won && result.state.won)
+                    withAnimation(.spring(response: 0.24, dampingFraction: 0.78)) { game = result.state }
                     bestScore = max(bestScore, game.score)
                     GameStorage.save(game)
                     GameStorage.saveBest(bestScore)
