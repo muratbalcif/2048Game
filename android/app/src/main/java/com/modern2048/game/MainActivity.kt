@@ -308,7 +308,7 @@ private fun GameScreen() {
                     if (doubled) {
                         Text(stringResource(R.string.reward_success),
                             fontSize = 12.sp, color = selectedTheme.accent)
-                    } else if (game.score > 0 && (rewardedScoreSession ?: verifiedSession) != null) {
+                    } else if (game.score > 0) {
                         val rewardSession = rewardedScoreSession ?: verifiedSession
                         OutlinedButton(
                             enabled = adReady && !rewardChecking && rewardSession != null,
@@ -376,7 +376,7 @@ private fun GameScreen() {
                                 rewardedAds.show( {
                                     if (game != lostSnapshot) return@show
                                     val (restored, next) = rewardedContinue.redeem(game)
-                                    if (next.used && !rewardedContinue.used) {
+                                    if (restored != game && next.history.isEmpty()) {
                                         game = restored
                                         rewardedContinue = next
                                         storage.saveReward(next)
