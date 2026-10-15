@@ -17,6 +17,9 @@ struct GameScreen: View {
     @State private var previous: GameState?
     @State private var winAcknowledged = false
     @State private var confirmRestart = false
+    @State private var slidingTiles: [TileMotion] = []
+    @State private var slideProgress: CGFloat = 0
+    @State private var slideInProgress = false
     @AppStorage("modern2048.sound") private var soundEnabled = true
     @AppStorage("modern2048.haptics") private var hapticsEnabled = true
     @State private var showSettings = false
@@ -33,44 +36,80 @@ struct GameScreen: View {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
-                ForEach(0..<16, id: \.self) { index in
-                    let value = game.board[index]
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(value == 0 ? Palette.empty : tileColor(value))
-                        if value != 0 {
-                            Text("\(value)")
-                                .font(.system(size: value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
-                                .foregroundStyle(Palette.ink)
+            GeometryReader { geometry in
+                let gap: CGFloat = 10
+                let side = (geometry.size.width - 20 - gap * 3) / 4
+                let step = side + gap
+                ZStack(alignment: .topLeading) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
+                        ForEach(0..<16, id: \.self) { index in
+                            let value = game.board[index]
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(slideInProgress ? Palette.empty : (value == 0 ? Palette.empty : tileColor(value)))
+                                if value != 0 && !slideInProgress {
+                                    Text("\\(value)")
+                                        .font(.system(size: value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
+                                        .foregroundStyle(Palette.ink)
+                                }
+                            }
+                            .frame(height: side)
+                            .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
                         }
                     }
-                    .aspectRatio(1, contentMode: .fit)
-                    .scaleEffect(value == 0 ? 0.97 : 1.0)
-                    .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
+                    if slideInProgress {
+                        ForEach(Array(slidingTiles.enumerated()), id: \.offset) { _, tile in
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 14).fill(tileColor(tile.value))
+                                Text("\(tile.value)")
+                                    .font(.system(size: tile.value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
+                                    .foregroundStyle(Palette.ink)
+                            }
+                            .frame(width: side, height: side)
+                            .offset(
+                                x: CGFloat(tile.from % 4) * step + CGFloat(tile.to % 4 - tile.from % 4) * step * slideProgress,
+                                y: CGFloat(tile.from / 4) * step + CGFloat(tile.to / 4 - tile.from / 4) * step * slideProgress
+                            )
+                        }
+                    }
                 }
-            }
-            .padding(10)
-            .background(Palette.board, in: RoundedRectangle(cornerRadius: 24))
-            .gesture(DragGesture(minimumDistance: 20).onEnded { gesture in
-                let dx = gesture.translation.width
-                let dy = gesture.translation.height
-                let direction: MoveDirection = abs(dx) > abs(dy)
-                    ? (dx > 0 ? .right : .left)
-                    : (dy > 0 ? .down : .up)
-                let result = GameEngine.move(game, direction)
-                if result.moved {
-                    rewardedContinue.record(game)
+                .padding(10)
+                .background(Palette.board, in: RoundedRectangle(cornerRadius: 24))
+                .gesture(DragGesture(minimumDistance: 20).onEnded { gesture in
+                    guard !slideInProgress else { return }
+                    let dx = gesture.translation.width
+                    let dy = gesture.translation.height
+                    let direction: MoveDirection = abs(dx) > abs(dy)
+                        ? (dx > 0 ? .right : .left)
+                        : (dy > 0 ? .down : .up)
+                    let result = GameEngine.move(game, direction)
+                    guard result.moved else { return }
+                    let old = game
+                    rewardedContinue.record(old)
                     GameStorage.saveReward(rewardedContinue)
-                    previous = game
-                    effects.play(scoreDelta: result.scoreDelta, won: !game.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
-                    if reducedMotion || systemReduceMotion { game = result.state }
-                    else { withAnimation(.spring(response: 0.24, dampingFraction: 0.78)) { game = result.state } }
-                    bestScore = max(bestScore, game.score)
-                    GameStorage.save(game)
+                    previous = old
+                    effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
+                    bestScore = max(bestScore, result.state.score)
+                    GameStorage.save(result.state)
                     GameStorage.saveBest(bestScore)
-                }
-            })
+                    if reducedMotion || systemReduceMotion {
+                        game = result.state
+                    } else {
+                        slidingTiles = TileMotionPlanner.plan(old.board, direction)
+                        slideProgress = 0
+                        slideInProgress = true
+                        withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 180_000_000)
+                            game = result.state
+                            slideInProgress = false
+                            slidingTiles = []
+                            slideProgress = 0
+                        }
+                    }
+                })
+            }
+            .aspectRatio(1, contentMode: .fit)
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(Palette.ink)
             HStack {
                 Button("Geri Al") {
