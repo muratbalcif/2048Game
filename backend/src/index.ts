@@ -90,6 +90,31 @@ export default {
       ).bind(payload.playerId,session.mode,finalScore,now).run();
       return json({ accepted: true, verified: true, score: finalScore, rewarded: !!rewarded });
     }
+    // Mobile clients can confirm that Google's signed SSV callback was recorded.
+    // This endpoint is read-only: it never grants or doubles a score.
+    if (request.method === "GET" && url.pathname === "/v2/sessions/reward-status") {
+      const sessionId = url.searchParams.get("sessionId");
+      const playerId = url.searchParams.get("playerId");
+      if (!isId(sessionId) || !isId(playerId))
+        return json({ error: "invalid_session" }, 400);
+      const session = await env.DB.prepare(
+        "SELECT player_id,base_score,finalized_at FROM verified_sessions WHERE session_id=?"
+      ).bind(sessionId).first<{player_id:string;base_score:number|null;finalized_at:number|null}>();
+      if (!session || session.player_id !== playerId)
+        return json({ error: "unknown_session" }, 404);
+      const reward = await env.DB.prepare(
+        "SELECT transaction_id FROM verified_ad_rewards WHERE session_id=? AND player_id=? AND reward_type='double_score'"
+      ).bind(sessionId,playerId).first();
+      const verified = reward !== null;
+      const finalized = session.finalized_at !== null;
+      return json({
+        verified,
+        finalized,
+        credited: verified && finalized,
+        score: verified && finalized && session.base_score !== null
+          ? Math.min(session.base_score * 2, 2147483647) : null
+      });
+    }
     if (request.method === "GET" && url.pathname === "/v1/admob/ssv") {
       const params = url.searchParams;
       const signature = params.get("signature");
