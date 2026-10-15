@@ -157,7 +157,7 @@ private fun GameScreen() {
                                 } else {
                                     if (drag.y > 0) Direction.DOWN else Direction.UP
                                 }
-                                if (motionActive) return@detectDragGestures
+                                if (!motionActive) {
                                 val result = GameEngine.move(game, direction)
                                 if (result.moved) {
                                     rewardedContinue = rewardedContinue.record(game)
@@ -185,6 +185,7 @@ private fun GameScreen() {
                                     best = maxOf(best, result.state.score)
                                     storage.save(result.state)
                                     storage.saveBest(best)
+                                }
                                 }
                             }
                         },
