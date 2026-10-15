@@ -193,9 +193,19 @@ struct GameScreen: View {
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 Form {
+                    Section("Görünüm") {
+                        Picker("Tema", selection: $themeRaw) {
+                            ForEach(GameTheme.allCases) { option in
+                                Text(option.title).tag(option.rawValue)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    Section("Oyun") {
                     Toggle("Ses efektleri", isOn: $soundEnabled)
                     Toggle("Titreşim", isOn: $hapticsEnabled)
                     Toggle("Animasyonları azalt", isOn: $reducedMotion)
+                    }
                 }
                 .navigationTitle("Oyun Ayarları")
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showSettings = false } } }
@@ -283,6 +293,6 @@ struct GameScreen: View {
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .background(.white, in: RoundedRectangle(cornerRadius: 20))
+        .background(theme == .midnight ? theme.board : .white, in: RoundedRectangle(cornerRadius: 20))
     }
 }
