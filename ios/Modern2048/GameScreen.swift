@@ -718,7 +718,7 @@ struct GameScreen: View {
                                 if value.count > 20 { nicknameDraft = String(value.prefix(20)) }
                             }
                         Button("Rumuzu kaydet") { leaderboard.saveNickname(nicknameDraft) }
-                            .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\\p{L}\\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
+                            .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\p{L}\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
                         Text("Rumuzun yeni sıralamalı oyununla birlikte global listede güncellenir.")
                             .font(.caption).foregroundStyle(.secondary)
                         HStack {
