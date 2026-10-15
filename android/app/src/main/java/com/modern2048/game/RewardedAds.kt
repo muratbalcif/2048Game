@@ -1,0 +1,72 @@
+package com.modern2048.game
+
+import android.app.Activity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+
+/** Google official rewarded test unit. Never use this ID in a production release. */
+class RewardedAds(private val activity: Activity) {
+    private var ad: RewardedAd? = null
+    private var loading = false
+    private var showing = false
+    var onAvailabilityChanged: ((Boolean) -> Unit)? = null
+
+    init {
+        MobileAds.initialize(activity) { activity.runOnUiThread { load() } }
+    }
+
+    fun load() {
+        if (loading || showing || ad != null) return
+        loading = true
+        RewardedAd.load(
+            activity,
+            TEST_UNIT_ID,
+            AdRequest.Builder().build(),
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(loaded: RewardedAd) {
+                    loading = false
+                    ad = loaded
+                    onAvailabilityChanged?.invoke(true)
+                }
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    loading = false
+                    ad = null
+                    onAvailabilityChanged?.invoke(false)
+                }
+            }
+        )
+    }
+
+    fun show(onRewardEarned: () -> Unit) {
+        val ready = ad ?: return
+        if (showing) return
+        showing = true
+        ad = null
+        onAvailabilityChanged?.invoke(false)
+        var rewarded = false
+        ready.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                showing = false
+                load()
+            }
+            override fun onAdFailedToShowFullScreenContent(error: com.google.android.gms.ads.AdError) {
+                showing = false
+                load()
+            }
+        }
+        ready.show(activity) {
+            if (!rewarded) {
+                rewarded = true
+                onRewardEarned()
+            }
+        }
+    }
+
+    companion object {
+        private const val TEST_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
+    }
+}
