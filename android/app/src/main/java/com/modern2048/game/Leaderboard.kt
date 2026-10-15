@@ -26,30 +26,9 @@ class Leaderboard(private val context: Context) {
         GameMode.ENDLESS -> "endless"
     }
 
-    suspend fun publishAndLoad(gameMode: GameMode, score: Int): LeaderboardResult = withContext(Dispatchers.IO) {
-        if (!configured) return@withContext LeaderboardResult(emptyList(), null, "Global sıralama henüz etkin değil")
-        try {
-            val key = "submitted_${mode(gameMode)}"
-            val previousBest = prefs.getInt(key, -1)
-            if (score > previousBest) {
-                val body = JSONObject().put("playerId", playerId).put("nickname", "Oyuncu-${playerId.take(6)}")
-                    .put("mode", mode(gameMode)).put("score", score).toString()
-                val connection = URL("$base/v1/scores").openConnection() as HttpURLConnection
-                connection.requestMethod = "POST"
-                connection.connectTimeout = 7000
-                connection.readTimeout = 7000
-                connection.doOutput = true
-                connection.setRequestProperty("Content-Type", "application/json")
-                connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-                val status = connection.responseCode
-                connection.disconnect()
-                if (status in 200..299) prefs.edit().putInt(key, score).apply()
-            }
-            load(gameMode)
-        } catch (_: Exception) {
-            LeaderboardResult(emptyList(), null, "Sıralama yüklenemedi. İnternet bağlantını kontrol et.")
-        }
-    }
+    // Only server-seeded and replay-verified sessions may enter the global ranking.
+    // Offline/local game scores must never be submitted as verified scores.
+    suspend fun publishAndLoad(gameMode: GameMode, score: Int): LeaderboardResult = load(gameMode)
 
     suspend fun load(gameMode: GameMode): LeaderboardResult = withContext(Dispatchers.IO) {
         if (!configured) return@withContext LeaderboardResult(emptyList(), null, "Global sıralama henüz etkin değil")
