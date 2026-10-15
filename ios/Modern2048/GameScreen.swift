@@ -107,6 +107,7 @@ struct GameScreen: View {
         }
         .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 12) }
         .scrollIndicators(.hidden)
+        .scrollDisabled(true) // 2048 swipes must not be intercepted by the parent ScrollView.
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas.ignoresSafeArea())
         .onAppear {
