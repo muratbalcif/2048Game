@@ -66,6 +66,7 @@ struct GameScreen: View {
                                 }
                             }
                             .frame(height: side)
+                            .accessibilityLabel(value == 0 ? "Boş hücre" : String(value) + " taşı")
                             .scaleEffect((revealedCells.contains(index) || mergedCells.contains(index)) && !reducedMotion && !systemReduceMotion ? 1.12 : 1)
                             .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
                         }
