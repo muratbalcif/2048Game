@@ -1,6 +1,7 @@
 package com.modern2048.game
 
 import android.app.Activity
+import android.content.pm.ApplicationInfo
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
@@ -15,12 +16,14 @@ class RewardedAds(private val activity: Activity) {
     private var showing = false
     var onAvailabilityChanged: ((Boolean) -> Unit)? = null
 
+    private val testBuild: Boolean = (activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+
     init {
-        MobileAds.initialize(activity) { activity.runOnUiThread { load() } }
+        if (testBuild) MobileAds.initialize(activity) { activity.runOnUiThread { load() } }
     }
 
     fun load() {
-        if (loading || showing || ad != null) return
+        if (!testBuild || loading || showing || ad != null) return
         loading = true
         RewardedAd.load(
             activity,
@@ -42,6 +45,7 @@ class RewardedAds(private val activity: Activity) {
     }
 
     fun show(onRewardEarned: () -> Unit) {
+        if (!testBuild) return
         val ready = ad ?: return
         if (showing) return
         showing = true
