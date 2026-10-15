@@ -43,23 +43,7 @@ final class LeaderboardClient: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         do {
-            let key = "modern2048.leaderboard.submitted.\(mode.rawValue)"
-            if let finalScore, finalScore > UserDefaults.standard.integer(forKey: key) {
-                var request = URLRequest(url: base.appendingPathComponent("v1/scores"))
-                request.httpMethod = "POST"
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.timeoutInterval = 7
-                request.httpBody = try JSONSerialization.data(withJSONObject: [
-                    "playerId": playerId,
-                    "nickname": "Oyuncu-\(playerId.prefix(6))",
-                    "mode": mode.rawValue,
-                    "score": finalScore
-                ])
-                let (_, response) = try await URLSession.shared.data(for: request)
-                if let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) {
-                    UserDefaults.standard.set(finalScore, forKey: key)
-                }
-            }
+            // Offline scores are not verified. Submit only via a server-seeded replay session.
             var components = URLComponents(url: base.appendingPathComponent("v1/leaderboard"), resolvingAgainstBaseURL: false)!
             components.queryItems = [
                 URLQueryItem(name: "mode", value: mode.rawValue),
