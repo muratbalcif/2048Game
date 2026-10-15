@@ -5,7 +5,7 @@ struct RewardedContinue {
     var history: [GameState] = []
     var used = false
 
-    var available: Bool { !used && !history.isEmpty }
+    var available: Bool { !history.isEmpty }
 
     mutating func record(_ previous: GameState) {
         history.append(previous)
@@ -14,7 +14,6 @@ struct RewardedContinue {
 
     mutating func redeem(current: GameState) -> GameState? {
         guard current.lost && available else { return nil }
-        used = true
         let restored = history[0]
         history.removeAll()
         return restored
