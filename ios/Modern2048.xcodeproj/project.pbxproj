@@ -1,0 +1,379 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		08A0FF4B221B8E77E37DF28A /* GameTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */; };
+		1A598A25893FE4C904210DA4 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 418BA364F8FEF88635B5EAB9 /* GoogleMobileAds */; };
+		523548E951E4ADF8C2EFB756 /* GameStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4766B51C6233435F2861C2 /* GameStorage.swift */; };
+		66118E3DF9772AC2E8CA1225 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90440C2507CC589ACAD787BA /* GameEngine.swift */; };
+		7696E5E5A2553AE5F2B999F4 /* GameProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1ED3F64EF3DF374BF7CD02 /* GameProgress.swift */; };
+		950615BFD1ECC9F8CC46E67C /* GameMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF29CAAF220BD5572982738C /* GameMode.swift */; };
+		A2F5A4EA9A3C2E14E82632E3 /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3779E59467F9CF0CEB78C033 /* Leaderboard.swift */; };
+		AF1041541532A0A3B0D4E44F /* TileMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6AD567D15027125C32EA971 /* TileMotion.swift */; };
+		C4EDCEAF51A9C418345D5713 /* RewardedAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */; };
+		C70CF2331523424CB954F178 /* Modern2048App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */; };
+		C96A0805E129EE141A8EBAF5 /* GameEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51227C1CA3054827EB34DF7F /* GameEffects.swift */; };
+		CE81262E6D0435226A484077 /* VerifiedGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D009D519651212ED4D18C6 /* VerifiedGame.swift */; };
+		DD44A8A0333DFCA08CE57C96 /* GameScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D63992AFDFDB5F28C69A663 /* GameScreen.swift */; };
+		DE95D54AF74B68DDA87926C0 /* RewardedContinue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE63F571159DD0911D847C1 /* RewardedContinue.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0BE63F571159DD0911D847C1 /* RewardedContinue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedContinue.swift; sourceTree = "<group>"; };
+		1D63992AFDFDB5F28C69A663 /* GameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScreen.swift; sourceTree = "<group>"; };
+		3779E59467F9CF0CEB78C033 /* Leaderboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
+		440AEE616B570A27971D4FEC /* Modern2048.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Modern2048.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		51227C1CA3054827EB34DF7F /* GameEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEffects.swift; sourceTree = "<group>"; };
+		5B4766B51C6233435F2861C2 /* GameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStorage.swift; sourceTree = "<group>"; };
+		80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTheme.swift; sourceTree = "<group>"; };
+		90440C2507CC589ACAD787BA /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
+		BF1ED3F64EF3DF374BF7CD02 /* GameProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameProgress.swift; sourceTree = "<group>"; };
+		C6AD567D15027125C32EA971 /* TileMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileMotion.swift; sourceTree = "<group>"; };
+		CF29CAAF220BD5572982738C /* GameMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMode.swift; sourceTree = "<group>"; };
+		D9D009D519651212ED4D18C6 /* VerifiedGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiedGame.swift; sourceTree = "<group>"; };
+		EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modern2048App.swift; sourceTree = "<group>"; };
+		FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAds.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C2FB814D4D0CE3FAD6966A64 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A598A25893FE4C904210DA4 /* GoogleMobileAds in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		51A2AE2D3035E3DE24AF3451 = {
+			isa = PBXGroup;
+			children = (
+				86FBC8128F7BE0B53B09E77A /* Modern2048 */,
+				993A09EDC225A4B4D9EB4734 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		86FBC8128F7BE0B53B09E77A /* Modern2048 */ = {
+			isa = PBXGroup;
+			children = (
+				51227C1CA3054827EB34DF7F /* GameEffects.swift */,
+				90440C2507CC589ACAD787BA /* GameEngine.swift */,
+				CF29CAAF220BD5572982738C /* GameMode.swift */,
+				BF1ED3F64EF3DF374BF7CD02 /* GameProgress.swift */,
+				1D63992AFDFDB5F28C69A663 /* GameScreen.swift */,
+				5B4766B51C6233435F2861C2 /* GameStorage.swift */,
+				80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */,
+				3779E59467F9CF0CEB78C033 /* Leaderboard.swift */,
+				EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */,
+				FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */,
+				0BE63F571159DD0911D847C1 /* RewardedContinue.swift */,
+				C6AD567D15027125C32EA971 /* TileMotion.swift */,
+				D9D009D519651212ED4D18C6 /* VerifiedGame.swift */,
+			);
+			path = Modern2048;
+			sourceTree = "<group>";
+		};
+		993A09EDC225A4B4D9EB4734 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				440AEE616B570A27971D4FEC /* Modern2048.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7A108FAB65BB0A02EDBA017F /* Modern2048 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB8BBC803A7FC872FA6562E1 /* Build configuration list for PBXNativeTarget "Modern2048" */;
+			buildPhases = (
+				50F1ACBB7E8AA13E74DF7057 /* Sources */,
+				C2FB814D4D0CE3FAD6966A64 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Modern2048;
+			packageProductDependencies = (
+				418BA364F8FEF88635B5EAB9 /* GoogleMobileAds */,
+			);
+			productName = Modern2048;
+			productReference = 440AEE616B570A27971D4FEC /* Modern2048.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8F60A94BAC03A1C9BF52B828 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					7A108FAB65BB0A02EDBA017F = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 78CFF99E34575DD1B3CA518C /* Build configuration list for PBXProject "Modern2048" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 51A2AE2D3035E3DE24AF3451;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B716A2F0FFB4A39DF00A9CB2 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 993A09EDC225A4B4D9EB4734 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7A108FAB65BB0A02EDBA017F /* Modern2048 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		50F1ACBB7E8AA13E74DF7057 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C96A0805E129EE141A8EBAF5 /* GameEffects.swift in Sources */,
+				66118E3DF9772AC2E8CA1225 /* GameEngine.swift in Sources */,
+				950615BFD1ECC9F8CC46E67C /* GameMode.swift in Sources */,
+				7696E5E5A2553AE5F2B999F4 /* GameProgress.swift in Sources */,
+				DD44A8A0333DFCA08CE57C96 /* GameScreen.swift in Sources */,
+				523548E951E4ADF8C2EFB756 /* GameStorage.swift in Sources */,
+				08A0FF4B221B8E77E37DF28A /* GameTheme.swift in Sources */,
+				A2F5A4EA9A3C2E14E82632E3 /* Leaderboard.swift in Sources */,
+				C70CF2331523424CB954F178 /* Modern2048App.swift in Sources */,
+				C4EDCEAF51A9C418345D5713 /* RewardedAds.swift in Sources */,
+				DE95D54AF74B68DDA87926C0 /* RewardedContinue.swift in Sources */,
+				AF1041541532A0A3B0D4E44F /* TileMotion.swift in Sources */,
+				CE81262E6D0435226A484077 /* VerifiedGame.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0640D7DF28652386CB723BFB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LEADERBOARD_BASE_URL = "https://modern2048-leaderboard.muratbalci269.workers.dev";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		8C20ED5A008FA27E2A43C88F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LEADERBOARD_BASE_URL = "https://modern2048-leaderboard.muratbalci269.workers.dev";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		E426B44A726997A12AB0E3DF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-9057596586284356~7218954891";
+				INFOPLIST_KEY_LeaderboardBaseURL = "$(LEADERBOARD_BASE_URL)";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.modern2048.game;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E4AC7CF442DDEAB0A95F7D71 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-9057596586284356~7218954891";
+				INFOPLIST_KEY_LeaderboardBaseURL = "$(LEADERBOARD_BASE_URL)";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.modern2048.game;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		78CFF99E34575DD1B3CA518C /* Build configuration list for PBXProject "Modern2048" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8C20ED5A008FA27E2A43C88F /* Debug */,
+				0640D7DF28652386CB723BFB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BB8BBC803A7FC872FA6562E1 /* Build configuration list for PBXNativeTarget "Modern2048" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E4AC7CF442DDEAB0A95F7D71 /* Debug */,
+				E426B44A726997A12AB0E3DF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B716A2F0FFB4A39DF00A9CB2 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		418BA364F8FEF88635B5EAB9 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B716A2F0FFB4A39DF00A9CB2 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8F60A94BAC03A1C9BF52B828 /* Project object */;
+}
