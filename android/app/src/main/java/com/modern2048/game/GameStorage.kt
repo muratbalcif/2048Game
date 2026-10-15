@@ -116,6 +116,9 @@ class GameStorage(context: Context) {
     fun saveSoundEnabled(enabled: Boolean) { prefs.edit().putBoolean("sound_enabled", enabled).apply() }
     fun saveHapticsEnabled(enabled: Boolean) { prefs.edit().putBoolean("haptics_enabled", enabled).apply() }
 
+    fun doubledGameKey(): String? = prefs.getString("double_score_game", null)
+    fun saveDoubledGameKey(key: String) { prefs.edit().putString("double_score_game", key).apply() }
+
     fun best(): Int = prefs.getInt("best", 0)
     fun saveBest(score: Int) { prefs.edit().putInt("best", maxOf(best(), score)).apply() }
 }
