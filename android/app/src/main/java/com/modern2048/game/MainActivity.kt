@@ -63,6 +63,8 @@ private fun GameScreen() {
         mergedCells = emptySet()
     }
     var previous by remember { mutableStateOf<GameState?>(null) }
+    var progress by remember { mutableStateOf(storage.loadProgress()) }
+    var showProgress by remember { mutableStateOf(false) }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
@@ -83,7 +85,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
             text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text("Devam Et") } },
-            dismissButton = { TextButton(onClick = { resetMotion(); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text("Yeni Oyun") } })
     }
     if (game.lost) {
         AlertDialog(onDismissRequest = {}, title = { Text("Oyun Bitti") },
@@ -107,6 +109,8 @@ private fun GameScreen() {
                         }) { Text("Reklam İzle · 3 Hamle Geri Al") }
                     }
                     TextButton(onClick = {
+                        progress = progress.nextGame()
+                        storage.saveProgress(progress)
                         game = GameEngine.newGame()
                         previous = null
                         rewardedContinue = rewardedContinue.reset()
@@ -117,6 +121,19 @@ private fun GameScreen() {
                 }
             },
             dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
+    }
+    if (showProgress) {
+        AlertDialog(onDismissRequest = { showProgress = false }, title = { Text("İstatistikler ve Başarımlar") },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Hamle: ${progress.moves}  ·  Birleşme: ${progress.merges}")
+                Text("Oyun: ${progress.gamesStarted}  ·  En büyük taş: ${progress.bestTile}")
+                Text("Toplam puan: ${progress.totalPoints}")
+                HorizontalDivider()
+                GameAchievements.list(progress).forEach { achievement ->
+                    Text("${if (achievement.unlocked) "✓" else "○"}  ${achievement.title}",
+                        color = if (achievement.unlocked) ink else Color.Gray)
+                }
+            } }, confirmButton = { TextButton(onClick = { showProgress = false }) { Text("Kapat") } })
     }
     if (showSettings) {
         AlertDialog(onDismissRequest = { showSettings = false }, title = { Text("Oyun Ayarları") },
@@ -173,6 +190,9 @@ private fun GameScreen() {
                                     rewardedContinue = rewardedContinue.record(game)
                                     storage.saveReward(rewardedContinue)
                                     previous = game
+                                    val mergedCount = TileMotionPlanner.plan(game.board, direction).count { it.merged } / 2
+                                    progress = progress.recordMove(game, result.state, result.scoreDelta, mergedCount)
+                                    storage.saveProgress(progress)
                                     effects.play(result.scoreDelta, !game.won && result.state.won, soundEnabled, hapticsEnabled)
                                     if (!reducedMotion) {
                                         motion = TileMotionPlanner.plan(game.board, direction)
@@ -244,6 +264,7 @@ private fun GameScreen() {
             Button(onClick = { confirmRestart = true }, enabled = !motionActive) { Text("Yeni Oyun", fontSize = 12.sp) }
             OutlinedButton(onClick = { showSettings = true }, enabled = !motionActive) { Text("Ayarlar", fontSize = 12.sp) }
         }
+        TextButton(onClick = { showProgress = true }, enabled = !motionActive) { Text("İstatistikler ve Başarımlar") }
     }
 }
 
