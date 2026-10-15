@@ -35,6 +35,41 @@ final class LeaderboardClient: ObservableObject {
         return url
     }
 
+    func startVerified(mode: GameMode) async -> VerifiedSession? {
+        guard let base else { error = "Global sıralama henüz etkin değil"; return nil }
+        do {
+            var request = URLRequest(url: base.appendingPathComponent("v2/sessions"))
+            request.httpMethod = "POST"
+            request.timeoutInterval = 7
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "playerId": playerId, "nickname": "Oyuncu-\(playerId.prefix(6))", "mode": mode.rawValue
+            ])
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 201 else { return nil }
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            guard let id = json?["sessionId"] as? String, let seed = json?["seed"] as? NSNumber else { return nil }
+            return VerifiedSession(sessionId: id, playerId: playerId, seed: seed.uint32Value)
+        } catch { error = "Sıralamalı oyun başlatılamadı"; return nil }
+    }
+
+    func finalizeVerified(_ session: VerifiedSession, score: Int) async -> Bool {
+        guard let base, !session.moves.isEmpty else { return false }
+        do {
+            var request = URLRequest(url: base.appendingPathComponent("v2/sessions/finalize"))
+            request.httpMethod = "POST"
+            request.timeoutInterval = 10
+            request.setValue("Content-Type", forHTTPHeaderField: "Content-Type")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "sessionId": session.sessionId, "playerId": session.playerId,
+                "moves": session.moves, "score": score
+            ])
+            let (_, response) = try await URLSession.shared.data(for: request)
+            return (response as? HTTPURLResponse)?.statusCode == 200
+        } catch { return false }
+    }
+
     func load(mode: GameMode, finalScore: Int? = nil) async {
         guard let base else {
             error = "Global sıralama henüz etkin değil"
