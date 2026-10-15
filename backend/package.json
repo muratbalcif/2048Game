@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "migrate": "wrangler d1 migrations apply modern2048-leaderboard --remote"
+    "migrate": "wrangler d1 migrations apply modern2048-leaderboard --remote",
+    "check": "tsc -p tsconfig.json"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "@cloudflare/workers-types": "^4.20261001.0"
   }
 }
