@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -210,7 +212,7 @@ private fun GameScreen() {
     }
     if (showSettings) {
         AlertDialog(onDismissRequest = { showSettings = false }, title = { Text("Oyun Ayarları") },
-            text = { Column {
+            text = { Column(Modifier.verticalScroll(rememberScrollState())) {
                 Text("Tema", fontWeight = FontWeight.Bold)
                 GameTheme.entries.forEach { option ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
