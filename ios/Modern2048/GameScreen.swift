@@ -28,6 +28,8 @@ struct GameScreen: View {
     @State private var animationToken = UUID()
     @State private var revealedCells: Set<Int> = []
     @State private var mergedCells: Set<Int> = []
+    @AppStorage("modern2048.theme") private var themeRaw = GameTheme.sunset.rawValue
+    private var theme: GameTheme { GameTheme(rawValue: themeRaw) ?? .sunset }
     @AppStorage("modern2048.sound") private var soundEnabled = true
     @AppStorage("modern2048.haptics") private var hapticsEnabled = true
     @State private var showSettings = false
@@ -38,10 +40,10 @@ struct GameScreen: View {
         VStack(spacing: 14) {
             Text("2048")
                 .font(.system(size: 48, weight: .black, design: .rounded))
-                .foregroundStyle(Palette.purple)
+                .foregroundStyle(theme.accent)
             Button(mode.title + "  ▾") { showModePicker = true }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Palette.ink)
+                .foregroundStyle(theme.ink)
             HStack(spacing: 12) {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
@@ -56,7 +58,7 @@ struct GameScreen: View {
                             let value = game.board[index]
                             ZStack {
                                 RoundedRectangle(cornerRadius: 14)
-                                    .fill(slideInProgress ? Palette.empty : (value == 0 ? Palette.empty : tileColor(value)))
+                                    .fill(slideInProgress ? theme.empty : (value == 0 ? Palette.empty : theme.tile(value)))
                                 if value != 0 && !slideInProgress {
                                     Text("\(value)")
                                         .font(.system(size: value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
@@ -71,7 +73,7 @@ struct GameScreen: View {
                     if slideInProgress {
                         ForEach(Array(slidingTiles.enumerated()), id: \.offset) { _, tile in
                             ZStack {
-                                RoundedRectangle(cornerRadius: 14).fill(tileColor(tile.value))
+                                RoundedRectangle(cornerRadius: 14).fill(theme.tile(tile.value))
                                 Text("\(tile.value)")
                                     .font(.system(size: tile.value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
                                     .foregroundStyle(Palette.ink)
@@ -85,7 +87,7 @@ struct GameScreen: View {
                     }
                 }
                 .padding(10)
-                .background(Palette.board, in: RoundedRectangle(cornerRadius: 24))
+                .background(theme.board, in: RoundedRectangle(cornerRadius: 24))
                 .gesture(DragGesture(minimumDistance: 20).onEnded { gesture in
                     guard !slideInProgress else { return }
                     let dx = gesture.translation.width
@@ -152,7 +154,7 @@ struct GameScreen: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Palette.canvas.ignoresSafeArea())
+        .background(theme.canvas.ignoresSafeArea())
         .onAppear { rewardedAds.load() }
         .confirmationDialog("Oyun Modu Seç", isPresented: $showModePicker) {
             ForEach(GameMode.allCases) { candidate in
