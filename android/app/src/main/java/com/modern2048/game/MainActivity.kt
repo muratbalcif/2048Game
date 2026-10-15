@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -350,7 +352,8 @@ private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotio
         animationSpec = spring(), label = "tile-pop"
     )
     Box(
-        modifier = modifier.scale(scale * popScale).background(color, RoundedCornerShape(14.dp)),
+        modifier = modifier.scale(scale * popScale).background(color, RoundedCornerShape(14.dp))
+            .semantics { contentDescription = if (value == 0) "Boş hücre" else "$value taşı" },
         contentAlignment = Alignment.Center
     ) {
         if (value != 0) Text(
