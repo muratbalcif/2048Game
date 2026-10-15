@@ -68,10 +68,17 @@ enum GameEngine {
     static func canMove(_ board: [Int]) -> Bool {
         precondition(board.count == 16)
         if board.contains(0) { return true }
-        return (0..<16).contains { index in
-            (index % 4 < 3 && board[index] == board[index + 1]) ||
-            (index / 4 < 3 && board[index] == board[index + 4])
+        for index in 0..<16 {
+            let column = index % 4
+            let row = index / 4
+            if column < 3 && board[index] == board[index + 1] {
+                return true
+            }
+            if row < 3 && board[index] == board[index + 4] {
+                return true
+            }
         }
+        return false
     }
 
     private static func spawn(_ board: inout [Int]) {
