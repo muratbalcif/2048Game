@@ -24,6 +24,7 @@ struct GameScreen: View {
     @State private var progress = GameStorage.loadProgress()
     @State private var showProgress = false
     @State private var showLeaderboard = false
+    @State private var nicknameDraft = UserDefaults.standard.string(forKey: "modern2048.leaderboard.nickname") ?? ""
     @AppStorage("modern2048.mode") private var modeRaw = GameMode.classic.rawValue
     @State private var showModePicker = false
     private var mode: GameMode { GameMode(rawValue: modeRaw) ?? .classic }
@@ -709,6 +710,17 @@ struct GameScreen: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Dünyanın dört bir yanından oyuncular")
                             .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
+                        TextField("Oyuncu rumuzun", text: $nicknameDraft)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .textFieldStyle(.roundedBorder)
+                            .onChange(of: nicknameDraft) { _, value in
+                                if value.count > 20 { nicknameDraft = String(value.prefix(20)) }
+                            }
+                        Button("Rumuzu kaydet") { leaderboard.saveNickname(nicknameDraft) }
+                            .disabled(nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines).range(of: #"^[\\p{L}\\p{N} _.-]{2,20}$"#, options: .regularExpression) == nil || nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines) == leaderboard.nickname)
+                        Text("Rumuzun yeni sıralamalı oyununla birlikte global listede güncellenir.")
+                            .font(.caption).foregroundStyle(.secondary)
                         HStack {
                             Text(mode.title).font(.headline).foregroundStyle(theme.accent)
                             Spacer()
