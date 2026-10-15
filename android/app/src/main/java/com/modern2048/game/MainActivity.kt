@@ -208,8 +208,8 @@ private fun GameScreen() {
         TextButton(onClick = { showModePicker = true }, enabled = !motionActive) { Text(gameMode.title + " ▾", color = selectedTheme.ink) }
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f))
-            ScoreCard("REKOR", best.toString(), Modifier.weight(1f))
+            ScoreCard("SKOR", game.score.toString(), Modifier.weight(1f), selectedTheme)
+            ScoreCard("REKOR", best.toString(), Modifier.weight(1f), selectedTheme)
         }
         Spacer(Modifier.height(16.dp))
         BoxWithConstraints(
@@ -312,13 +312,13 @@ private fun GameScreen() {
 }
 
 @Composable
-private fun ScoreCard(label: String, value: String, modifier: Modifier = Modifier) {
+private fun ScoreCard(label: String, value: String, modifier: Modifier = Modifier, theme: GameTheme = GameTheme.SUNSET) {
     Column(
-        modifier = modifier.background(Color.White, RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = modifier.background(if (theme == GameTheme.MIDNIGHT) theme.board else Color.White, RoundedCornerShape(20.dp)).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(label, color = Color.Gray, fontSize = 12.sp)
-        Text(value, color = ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Text(value, color = theme.ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
     }
 }
 
