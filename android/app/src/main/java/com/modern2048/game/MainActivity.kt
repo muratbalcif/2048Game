@@ -85,6 +85,9 @@ private fun GameScreen() {
         onDispose { rewardedAds.onAvailabilityChanged = null }
     }
     var winAcknowledged by remember { mutableStateOf(false) }
+    LaunchedEffect(gameMode, game.board) {
+        if (!gameMode.reached(game.board)) winAcknowledged = false
+    }
     var confirmRestart by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var selectedTheme by remember { mutableStateOf(storage.loadTheme()) }
