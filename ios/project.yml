@@ -18,13 +18,11 @@ targets:
       - Modern2048
     dependencies:
       - package: GoogleMobileAds
-    info:
-      properties:
-        GADApplicationIdentifier: "ca-app-pub-3940256099942544~1458002511"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.modern2048.game
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_GADApplicationIdentifier: "ca-app-pub-3940256099942544~1458002511"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_STYLE: Automatic
