@@ -25,7 +25,7 @@ enum GameStorage {
               snapshot.board.allSatisfy({ $0 == 0 || ($0 >= 2 && ($0 & ($0 - 1)) == 0) }),
               snapshot.score >= 0 else { return nil }
         return GameState(board: snapshot.board, score: snapshot.score,
-                         won: snapshot.won, lost: snapshot.lost)
+                         won: snapshot.won, lost: !GameEngine.canMove(snapshot.board))
     }
 
     static func save(_ state: GameState) {
@@ -45,7 +45,7 @@ enum GameStorage {
                   state.board.allSatisfy({ $0 == 0 || ($0 >= 2 && ($0 & ($0 - 1)) == 0) })
               }) else { return RewardedContinue() }
         return RewardedContinue(
-            history: record.history.map { GameState(board: $0.board, score: $0.score, won: $0.won, lost: $0.lost) },
+            history: record.history.map { GameState(board: $0.board, score: $0.score, won: $0.won, lost: !GameEngine.canMove($0.board)) },
             used: record.used
         )
     }
