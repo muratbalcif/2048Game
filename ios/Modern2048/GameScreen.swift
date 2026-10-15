@@ -41,7 +41,8 @@ struct GameScreen: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        VStack(spacing: 14) {
+        ScrollView {
+        VStack(spacing: 12) {
             Text("2048")
                 .font(.system(size: 48, weight: .black, design: .rounded))
                 .foregroundStyle(theme.accent)
@@ -133,9 +134,12 @@ struct GameScreen: View {
             Button("İstatistikler ve Başarımlar") { showProgress = true }
                 .disabled(slideInProgress)
                 .font(.footnote)
-            Spacer()
         }
-        .padding(20)
+        .padding(16)
+        .frame(maxWidth: 560)
+        .frame(maxWidth: .infinity)
+        }
+        .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas.ignoresSafeArea())
         .onAppear { rewardedAds.load() }
