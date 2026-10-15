@@ -107,6 +107,8 @@ private fun GameScreen() {
         VerifiedEngine.replay(session.seed, session.moves)?.let { it.board == game.board && it.score == game.score } == true
     }) }
     var rewardedScoreSession by remember { mutableStateOf<VerifiedGame?>(null) }
+    var rewardChecking by remember { mutableStateOf(false) }
+    var rewardMessage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(verifiedSession) { storage.saveVerified(verifiedSession) }
     var startingVerified by remember { mutableStateOf(false) }
     LaunchedEffect(game.lost, game.score, gameMode) {
@@ -298,22 +300,65 @@ private fun GameScreen() {
                     if (doubled) {
                         Text("✓ 2× puan ödülü uygulandı",
                             fontSize = 12.sp, color = selectedTheme.accent)
-                    } else if (adReady && game.score > 0) {
-                        OutlinedButton(onClick = {
-                            val snapshot = game
-                            val claimKey = gameKey
-                            rewardedAds.show(onRewardEarned = {
-                                if (game == snapshot && game.lost && doubledGameKey != claimKey) {
-                                    doubledGameKey = claimKey
-                                    storage.saveDoubledGameKey(claimKey)
-                                    val bonusScore = (game.score.toLong() * 2).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-                                    best = maxOf(best, bonusScore)
-                                    storage.saveBest(best)
+                    } else if (game.score > 0 && (rewardedScoreSession ?: verifiedSession) != null) {
+                        val rewardSession = rewardedScoreSession ?: verifiedSession
+                        OutlinedButton(
+                            enabled = adReady && !rewardChecking && rewardSession != null,
+                            onClick = {
+                                val session = rewardSession ?: return@OutlinedButton
+                                val snapshot = game
+                                val claimKey = gameKey
+                                rewardedAds.show(onRewardEarned = {
+                                    if (game == snapshot && game.lost && doubledGameKey != claimKey) {
+                                        rewardChecking = true
+                                        rewardMessage = "Google reklam ödülü doğrulanıyor…"
+                                        scope.launch {
+                                            var verified = false
+                                            repeat(12) {
+                                                if (!verified) {
+                                                    verified = leaderboard.isRewardVerified(session)
+                                                    if (!verified) kotlinx.coroutines.delay(2500)
+                                                }
+                                            }
+                                            if (verified && game == snapshot && game.lost && doubledGameKey != claimKey) {
+                                                doubledGameKey = claimKey
+                                                storage.saveDoubledGameKey(claimKey)
+                                                val bonusScore = (game.score.toLong() * 2).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                                                best = maxOf(best, bonusScore)
+                                                storage.saveBest(best)
+                                                ranking = leaderboard.load(gameMode)
+                                                rewardMessage = null
+                                            } else {
+                                                rewardMessage = "Ödül henüz doğrulanmadı. Biraz sonra tekrar kontrol et."
+                                            }
+                                            rewardChecking = false
+                                        }
+                                    }
+                                }, sessionId = session.sessionId, playerId = session.playerId)
+                            },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(if (rewardChecking) "Ödül doğrulanıyor…" else "▶  Reklam İzle · 2× Puan",
+                                fontSize = 12.sp, color = selectedTheme.ink)
+                        }
+                        rewardMessage?.let { Text(it, fontSize = 12.sp, color = selectedTheme.ink) }
+                        if (!rewardChecking && rewardMessage != null && rewardSession != null) {
+                            TextButton(onClick = {
+                                rewardChecking = true
+                                scope.launch {
+                                    val verified = leaderboard.isRewardVerified(rewardSession)
+                                    if (verified && game.lost && doubledGameKey != gameKey) {
+                                        doubledGameKey = gameKey
+                                        storage.saveDoubledGameKey(gameKey)
+                                        best = maxOf(best, (game.score.toLong() * 2).coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+                                        storage.saveBest(best)
+                                        ranking = leaderboard.load(gameMode)
+                                        rewardMessage = null
+                                    } else rewardMessage = "Ödül henüz doğrulanmadı."
+                                    rewardChecking = false
                                 }
-                            }, sessionId = (rewardedScoreSession ?: verifiedSession)?.sessionId, playerId = (rewardedScoreSession ?: verifiedSession)?.playerId)
-                        }, modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(16.dp)) {
-                            Text("▶  Reklam İzle · 2× Puan", fontSize = 12.sp, color = selectedTheme.ink)
+                            }) { Text("Ödülü tekrar kontrol et") }
                         }
                     }
                     if (verifiedSession == null && adReady && rewardedContinue.available) {
