@@ -153,18 +153,6 @@ private fun GameScreen() {
                     repeat(4) { col ->
                         val value = game.board[row * 4 + col]
                         AnimatedTile(value, Modifier.weight(1f).aspectRatio(1f))
-                        /*Box(
-                            modifier = Modifier.weight(1f).aspectRatio(1f)
-                                .background(tileColor(value), RoundedCornerShape(14.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (value != 0) Text(
-                                value.toString(),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = if (value >= 1024) 19.sp else 25.sp,
-                                color = ink
-                            )
-                        }*/
                     }
                 }
             }
