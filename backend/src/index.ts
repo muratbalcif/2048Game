@@ -89,31 +89,6 @@ export default {
     if (request.method === "POST" && url.pathname === "/v1/scores") {
       return json({ error: "legacy_score_submission_disabled", migration: "/v2/sessions" }, 410);
     }
-    if (false && request.method === "POST" && url.pathname === "/v1/scores") {
-      const length = Number(request.headers.get("content-length") ?? 0);
-      if (length > 4096) return json({ error: "too_large" }, 413);
-      let body: Record<string, unknown>;
-      try {
-        const raw = await request.text();
-        if (raw.length > 4096) return json({ error: "too_large" }, 413);
-        body = JSON.parse(raw) as Record<string, unknown>;
-      } catch { return json({ error: "invalid_json" }, 400); }
-      if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "invalid_submission" }, 400);
-      const { playerId, mode, score } = body;
-      const name = nickname(body.nickname);
-      if (!isId(playerId) || !validMode(mode) || typeof score !== "number" || !Number.isSafeInteger(score) || score < 0 || score > 2_000_000_000 || !name)
-        return json({ error: "invalid_submission" }, 400);
-      const now = Date.now();
-      // This is abuse throttling, NOT cryptographic score verification.
-      const last = await env.DB.prepare("SELECT last_submission FROM submission_limits WHERE player_id=?").bind(playerId).first<{last_submission:number}>();
-      if (last && now - last.last_submission < 10_000) return json({ error: "rate_limited" }, 429);
-      await env.DB.batch([
-        env.DB.prepare("INSERT INTO players(player_id,nickname,created_at,updated_at) VALUES(?,?,?,?) ON CONFLICT(player_id) DO UPDATE SET nickname=excluded.nickname,updated_at=excluded.updated_at").bind(playerId,name,now,now),
-        env.DB.prepare("INSERT INTO scores(player_id,mode,score,updated_at) VALUES(?,?,?,?) ON CONFLICT(player_id,mode) DO UPDATE SET score=excluded.score,updated_at=excluded.updated_at WHERE excluded.score > scores.score").bind(playerId,mode,score,now),
-        env.DB.prepare("INSERT INTO submission_limits(player_id,last_submission) VALUES(?,?) ON CONFLICT(player_id) DO UPDATE SET last_submission=excluded.last_submission").bind(playerId,now)
-      ]);
-      return json({ accepted: true });
-    }
     return json({ error: "not_found" }, 404);
   }
 } satisfies ExportedHandler<Env>;
