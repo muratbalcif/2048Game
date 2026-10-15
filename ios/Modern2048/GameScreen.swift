@@ -238,56 +238,7 @@ struct GameScreen: View {
             .presentationDetents([.large])
         }
         .sheet(isPresented: $showLeaderboard) {
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Dünyanın dört bir yanından oyuncular")
-                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
-                        HStack {
-                            Text(mode.title).font(.headline).foregroundStyle(theme.accent)
-                            Spacer()
-                            Button("Yenile", systemImage: "arrow.clockwise") {
-                                Task { await leaderboard.load(mode: mode) }
-                            }.font(.subheadline)
-                        }
-                        if leaderboard.isLoading { ProgressView().frame(maxWidth: .infinity) }
-                        if let rank = leaderboard.myRank {
-                            Text("Senin sıralaman  #\(rank)")
-                                .font(.title3.bold()).foregroundStyle(theme.accent)
-                                .frame(maxWidth: .infinity, alignment: .leading).padding(18)
-                                .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
-                        }
-                        if let error = leaderboard.error {
-                            Text(error).font(.subheadline).foregroundStyle(theme.ink.opacity(0.7))
-                        }
-                        if !leaderboard.isLoading && leaderboard.entries.isEmpty && leaderboard.error == nil {
-                            Text("Henüz doğrulanmış skor yok. İlk sırayı sen al!")
-                                .foregroundStyle(theme.ink)
-                        }
-                        ForEach(leaderboard.entries) { entry in
-                            HStack(spacing: 12) {
-                                Text(entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : entry.rank == 3 ? "🥉" : "#\(entry.rank)")
-                                    .font(.headline).frame(width: 44, alignment: .leading)
-                                Text(entry.nickname + (leaderboard.isMe(entry) ? " (Sen)" : ""))
-                                    .fontWeight(leaderboard.isMe(entry) ? .bold : .medium)
-                                Spacer()
-                                Text(entry.score.formatted()).font(.headline.bold()).foregroundStyle(theme.accent)
-                            }
-                            .foregroundStyle(theme.ink)
-                            .padding(16)
-                            .background(leaderboard.isMe(entry) ? theme.accent.opacity(0.12) : theme.board.opacity(0.7),
-                                        in: RoundedRectangle(cornerRadius: 16))
-                        }
-                    }
-                    .padding(20)
-                }
-                .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("🏆 Global sıralama")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showLeaderboard = false } } }
-                .task { await leaderboard.load(mode: mode) }
-            }
-            .presentationDetents([.large])
+            leaderboardSheet
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
@@ -700,6 +651,59 @@ struct GameScreen: View {
         winAcknowledged = false
         GameStorage.save(game)
         startRanked()
+    }
+
+    private var leaderboardSheet: some View {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Dünyanın dört bir yanından oyuncular")
+                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
+                        HStack {
+                            Text(mode.title).font(.headline).foregroundStyle(theme.accent)
+                            Spacer()
+                            Button("Yenile", systemImage: "arrow.clockwise") {
+                                Task { await leaderboard.load(mode: mode) }
+                            }.font(.subheadline)
+                        }
+                        if leaderboard.isLoading { ProgressView().frame(maxWidth: .infinity) }
+                        if let rank = leaderboard.myRank {
+                            Text("Senin sıralaman  #\(rank)")
+                                .font(.title3.bold()).foregroundStyle(theme.accent)
+                                .frame(maxWidth: .infinity, alignment: .leading).padding(18)
+                                .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
+                        }
+                        if let error = leaderboard.error {
+                            Text(error).font(.subheadline).foregroundStyle(theme.ink.opacity(0.7))
+                        }
+                        if !leaderboard.isLoading && leaderboard.entries.isEmpty && leaderboard.error == nil {
+                            Text("Henüz doğrulanmış skor yok. İlk sırayı sen al!")
+                                .foregroundStyle(theme.ink)
+                        }
+                        ForEach(leaderboard.entries) { entry in
+                            HStack(spacing: 12) {
+                                Text(entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : entry.rank == 3 ? "🥉" : "#\(entry.rank)")
+                                    .font(.headline).frame(width: 44, alignment: .leading)
+                                Text(entry.nickname + (leaderboard.isMe(entry) ? " (Sen)" : ""))
+                                    .fontWeight(leaderboard.isMe(entry) ? .bold : .medium)
+                                Spacer()
+                                Text(entry.score.formatted()).font(.headline.bold()).foregroundStyle(theme.accent)
+                            }
+                            .foregroundStyle(theme.ink)
+                            .padding(16)
+                            .background(leaderboard.isMe(entry) ? theme.accent.opacity(0.12) : theme.board.opacity(0.7),
+                                        in: RoundedRectangle(cornerRadius: 16))
+                        }
+                    }
+                    .padding(20)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("🏆 Global sıralama")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showLeaderboard = false } } }
+                .task { await leaderboard.load(mode: mode) }
+            }
+            .presentationDetents([.large])
     }
 
     private func tileColor(_ value: Int) -> Color {
