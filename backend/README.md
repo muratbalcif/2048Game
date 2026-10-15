@@ -17,7 +17,7 @@ Android and iOS use the same `/v1/leaderboard?mode=classic&playerId=...` and `PO
 - `GET /v1/leaderboard?mode=classic&playerId=<UUID>` returns only `verified=1` scores.
 - `POST /v1/scores` returns HTTP 410; legacy unverified submissions are disabled.
 
-**Mobile migration is still pending:** the current Android/iOS game engines use platform RNG, so they cannot yet play a server-seeded session. Until the engines, move history, undo/reward semantics, and session persistence are migrated, their leaderboards are **read-only**. Do not treat this backend work as end-to-end verified ranking support.
+**Mobile integration implemented in code:** both clients now expose a separate “Sıralamalı başlat” action, fetch a server seed, reproduce the deterministic game board, record accepted moves and finalize a lost game. Normal offline play remains separate. Ranked undo and rewarded rewind are disabled during the active session. **Release limitations:** session recovery after app termination is not implemented; abandoning or switching modes forfeits the ranked session. Real Android/iOS builds and live Worker integration tests have not been executed.
 
 ## Security limits
 Replay validation rejects arbitrary score numbers, but does not establish a real human identity, prevent automation/bots, or prove that a game was played in real time. Anonymous UUIDs can be rotated and server sessions can be scripted. For competitive prize-bearing rankings, add attestation (Play Integrity / App Attest), edge abuse controls, and risk monitoring. Local undo/reward moves must not be mixed into a verified session unless the server protocol explicitly supports them.
