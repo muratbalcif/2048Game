@@ -192,143 +192,13 @@ struct GameScreen: View {
             Button("Vazgeç", role: .cancel) {}
         } message: { Text("Mod değiştirildiğinde yeni oyun başlar.") }
         .sheet(isPresented: $showProgress) {
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        Text("Her hamle gelişiminin bir parçası")
-                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
-                        HStack(spacing: 12) {
-                            scoreCard("TOPLAM PUAN", progress.totalPoints.formatted())
-                            scoreCard("EN BÜYÜK TAŞ", "\(progress.bestTile)")
-                        }
-                        HStack(spacing: 12) {
-                            scoreCard("OYUN", "\(progress.gamesStarted)")
-                            scoreCard("HAMLE", "\(progress.moves)")
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Oyun performansı").font(.headline)
-                            Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
-                            Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
-                            Label(mergeRateLabel, systemImage: "arrow.triangle.merge")
-                        }
-                        .font(.subheadline).foregroundStyle(theme.ink)
-                        .padding(18)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(theme.board.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
-                        Text("Başarımlar").font(.title3.bold()).foregroundStyle(theme.ink)
-                        ForEach(GameAchievements.list(progress)) { achievement in
-                            HStack(spacing: 12) {
-                                Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
-                                    .foregroundStyle(theme.accent)
-                                Text(achievement.title).fontWeight(.semibold).foregroundStyle(theme.ink)
-                                Spacer()
-                            }
-                            .padding(16)
-                            .background(achievement.unlocked ? theme.accent.opacity(0.12) : theme.board.opacity(0.65),
-                                        in: RoundedRectangle(cornerRadius: 16))
-                        }
-                    }
-                    .padding(20)
-                }
-                .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("İstatistikler")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showProgress = false } } }
-            }
-            .presentationDetents([.large])
+            progressSheet
         }
         .sheet(isPresented: $showLeaderboard) {
             leaderboardSheet
         }
         .sheet(isPresented: $showSettings) {
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Kendine göre oyna")
-                                .font(.title2.bold())
-                                .foregroundStyle(theme.ink)
-                            Text("Görünümü ve oyun deneyimini kişiselleştir.")
-                                .font(.subheadline)
-                                .foregroundStyle(theme.ink.opacity(0.65))
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            settingsHeading("GÖRÜNÜM")
-                            HStack(spacing: 10) {
-                                ForEach(GameTheme.allCases) { option in
-                                    Button {
-                                        themeRaw = option.rawValue
-                                    } label: {
-                                        VStack(spacing: 9) {
-                                            HStack(spacing: 3) {
-                                                ForEach([2, 8, 32], id: \.self) { value in
-                                                    Text("\(value)")
-                                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                                        .foregroundStyle(Color.black)
-                                                        .frame(maxWidth: .infinity)
-                                                        .frame(height: 25)
-                                                        .background(option.tile(value), in: RoundedRectangle(cornerRadius: 6))
-                                                }
-                                            }
-                                            Text(option.title)
-                                                .font(.system(size: 12, weight: .semibold))
-                                                .lineLimit(1)
-                                            Label(theme == option ? "Seçili" : "Seç", systemImage: theme == option ? "checkmark.circle.fill" : "circle")
-                                                .font(.system(size: 11))
-                                        }
-                                        .foregroundStyle(option.ink)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(10)
-                                        .background(option.board, in: RoundedRectangle(cornerRadius: 18))
-                                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(theme == option ? option.accent : .clear, lineWidth: 2))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel("\(option.title) teması")
-                                    .accessibilityAddTraits(theme == option ? .isSelected : [])
-                                }
-                            }
-                        }
-                        VStack(alignment: .leading, spacing: 10) {
-                            settingsHeading("ERİŞİLEBİLİRLİK")
-                            VStack(spacing: 0) {
-                                settingsToggle("Yüksek kontrast", subtitle: "Taşları daha belirgin göster", value: $highContrast)
-                                Divider()
-                                settingsToggle("Büyük taş sayıları", subtitle: "Taş değerlerini daha kolay oku", value: $largeNumbers)
-                                Divider()
-                                settingsToggle("Yön tuşları", subtitle: "Kaydırmadan da hamle yap", value: $directionalControls)
-                            }
-                            .padding(.horizontal, 14)
-                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
-                        }
-                        VStack(alignment: .leading, spacing: 10) {
-                            settingsHeading("OYUN DENEYİMİ")
-                            VStack(spacing: 0) {
-                                settingsToggle("Ses efektleri", subtitle: "Birleşme ve başarı sesleri", value: $soundEnabled)
-                                Divider()
-                                settingsToggle("Titreşim", subtitle: "Dokunsal geri bildirim", value: $hapticsEnabled)
-                                Divider()
-                                settingsToggle("Animasyonları azalt", subtitle: "Daha sakin geçişler", value: $reducedMotion)
-                            }
-                            .padding(.horizontal, 14)
-                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
-                        }
-                    }
-                    .padding(20)
-                    .frame(maxWidth: 560)
-                    .frame(maxWidth: .infinity)
-                }
-                .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("Oyun ayarları")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Bitti") { showSettings = false }
-                            .fontWeight(.semibold)
-                            .tint(theme.accent)
-                    }
-                }
-            }
-            .presentationDetents([.large])
+            settingsSheet
         }
         .alert("Hedefe Ulaştın!", isPresented: Binding(
             get: { mode.reached(game.board) && !winAcknowledged && !game.lost },
@@ -651,6 +521,144 @@ struct GameScreen: View {
         winAcknowledged = false
         GameStorage.save(game)
         startRanked()
+    }
+
+    private var progressSheet: some View {
+        NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("Her hamle gelişiminin bir parçası")
+                            .font(.subheadline).foregroundStyle(theme.ink.opacity(0.65))
+                        HStack(spacing: 12) {
+                            scoreCard("TOPLAM PUAN", progress.totalPoints.formatted())
+                            scoreCard("EN BÜYÜK TAŞ", "\(progress.bestTile)")
+                        }
+                        HStack(spacing: 12) {
+                            scoreCard("OYUN", "\(progress.gamesStarted)")
+                            scoreCard("HAMLE", "\(progress.moves)")
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Oyun performansı").font(.headline)
+                            Label("Toplam birleşme: \(progress.merges)", systemImage: "square.on.square")
+                            Label("Oyun başına puan: \(progress.totalPoints / max(1, progress.gamesStarted))", systemImage: "chart.bar.fill")
+                            Label(mergeRateLabel, systemImage: "arrow.triangle.merge")
+                        }
+                        .font(.subheadline).foregroundStyle(theme.ink)
+                        .padding(18)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(theme.board.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
+                        Text("Başarımlar").font(.title3.bold()).foregroundStyle(theme.ink)
+                        ForEach(GameAchievements.list(progress)) { achievement in
+                            HStack(spacing: 12) {
+                                Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
+                                    .foregroundStyle(theme.accent)
+                                Text(achievement.title).fontWeight(.semibold).foregroundStyle(theme.ink)
+                                Spacer()
+                            }
+                            .padding(16)
+                            .background(achievement.unlocked ? theme.accent.opacity(0.12) : theme.board.opacity(0.65),
+                                        in: RoundedRectangle(cornerRadius: 16))
+                        }
+                    }
+                    .padding(20)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("İstatistikler")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showProgress = false } } }
+            }
+            .presentationDetents([.large])
+    }
+
+    private var settingsSheet: some View {
+        NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("Kendine göre oyna")
+                                .font(.title2.bold())
+                                .foregroundStyle(theme.ink)
+                            Text("Görünümü ve oyun deneyimini kişiselleştir.")
+                                .font(.subheadline)
+                                .foregroundStyle(theme.ink.opacity(0.65))
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            settingsHeading("GÖRÜNÜM")
+                            HStack(spacing: 10) {
+                                ForEach(GameTheme.allCases) { option in
+                                    Button {
+                                        themeRaw = option.rawValue
+                                    } label: {
+                                        VStack(spacing: 9) {
+                                            HStack(spacing: 3) {
+                                                ForEach([2, 8, 32], id: \.self) { value in
+                                                    Text("\(value)")
+                                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                        .foregroundStyle(Color.black)
+                                                        .frame(maxWidth: .infinity)
+                                                        .frame(height: 25)
+                                                        .background(option.tile(value), in: RoundedRectangle(cornerRadius: 6))
+                                                }
+                                            }
+                                            Text(option.title)
+                                                .font(.system(size: 12, weight: .semibold))
+                                                .lineLimit(1)
+                                            Label(theme == option ? "Seçili" : "Seç", systemImage: theme == option ? "checkmark.circle.fill" : "circle")
+                                                .font(.system(size: 11))
+                                        }
+                                        .foregroundStyle(option.ink)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(10)
+                                        .background(option.board, in: RoundedRectangle(cornerRadius: 18))
+                                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(theme == option ? option.accent : .clear, lineWidth: 2))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("\(option.title) teması")
+                                    .accessibilityAddTraits(theme == option ? .isSelected : [])
+                                }
+                            }
+                        }
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("ERİŞİLEBİLİRLİK")
+                            VStack(spacing: 0) {
+                                settingsToggle("Yüksek kontrast", subtitle: "Taşları daha belirgin göster", value: $highContrast)
+                                Divider()
+                                settingsToggle("Büyük taş sayıları", subtitle: "Taş değerlerini daha kolay oku", value: $largeNumbers)
+                                Divider()
+                                settingsToggle("Yön tuşları", subtitle: "Kaydırmadan da hamle yap", value: $directionalControls)
+                            }
+                            .padding(.horizontal, 14)
+                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
+                        }
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("OYUN DENEYİMİ")
+                            VStack(spacing: 0) {
+                                settingsToggle("Ses efektleri", subtitle: "Birleşme ve başarı sesleri", value: $soundEnabled)
+                                Divider()
+                                settingsToggle("Titreşim", subtitle: "Dokunsal geri bildirim", value: $hapticsEnabled)
+                                Divider()
+                                settingsToggle("Animasyonları azalt", subtitle: "Daha sakin geçişler", value: $reducedMotion)
+                            }
+                            .padding(.horizontal, 14)
+                            .background(theme.board.opacity(0.8), in: RoundedRectangle(cornerRadius: 20))
+                        }
+                    }
+                    .padding(20)
+                    .frame(maxWidth: 560)
+                    .frame(maxWidth: .infinity)
+                }
+                .background(theme.canvas.ignoresSafeArea())
+                .navigationTitle("Oyun ayarları")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Bitti") { showSettings = false }
+                            .fontWeight(.semibold)
+                            .tint(theme.accent)
+                    }
+                }
+            }
+            .presentationDetents([.large])
     }
 
     private var leaderboardSheet: some View {
