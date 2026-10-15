@@ -283,32 +283,84 @@ struct GameScreen: View {
         } message: {
             Text("\(mode.target ?? 2048) taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.")
         }
-        .alert("Oyun Bitti", isPresented: Binding(
-            get: { game.lost },
+        .fullScreenCover(isPresented: Binding(
+            get: { game.lost && !slideInProgress },
             set: { _ in }
         )) {
-            if rewardedAds.isReady && rewardedContinue.available {
-                Button("Reklam İzle · 3 Hamle Geri Al") {
-                    let lostSnapshot = game
-                    rewardedAds.show {
-                        guard game == lostSnapshot else { return }
-                        if let restored = rewardedContinue.redeem(current: game) {
-                            game = restored
-                            GameStorage.saveReward(rewardedContinue)
-                            previous = nil
-                            GameStorage.save(game)
+            ZStack {
+                theme.canvas.ignoresSafeArea()
+                ScrollView {
+                    VStack(spacing: 18) {
+                        Spacer(minLength: 24)
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundStyle(theme.accent)
+                            .frame(width: 84, height: 84)
+                            .background(theme.board, in: RoundedRectangle(cornerRadius: 26))
+                        Text("Oyun Bitti!")
+                            .font(.system(size: 32, weight: .black, design: .rounded))
+                            .foregroundStyle(theme.ink)
+                        Text("Harika bir denemeydi! Bir sonraki oyunda rekorunu geçebilirsin.")
+                            .font(.subheadline)
+                            .foregroundStyle(theme.ink.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                        HStack(spacing: 12) {
+                            scoreCard("SKOR", "\(game.score)")
+                            scoreCard("REKOR", "\(bestScore)")
                         }
+                        Button {
+                            restart()
+                        } label: {
+                            Label("Yeniden Oyna", systemImage: "arrow.clockwise")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 54)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.white)
+                        .background(theme.accent, in: RoundedRectangle(cornerRadius: 17))
+                        if rewardedAds.isReady && rewardedContinue.available {
+                            Button {
+                                let lostSnapshot = game
+                                rewardedAds.show {
+                                    guard game == lostSnapshot else { return }
+                                    if let restored = rewardedContinue.redeem(current: game) {
+                                        game = restored
+                                        GameStorage.saveReward(rewardedContinue)
+                                        previous = nil
+                                        GameStorage.save(game)
+                                    }
+                                }
+                            } label: {
+                                Label("Reklam İzle · 3 Hamle Geri Al", systemImage: "play.rectangle.fill")
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(theme.accent)
+                        }
+                        if let previous {
+                            Button {
+                                game = previous
+                                self.previous = nil
+                                if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }
+                                GameStorage.saveReward(rewardedContinue)
+                                GameStorage.save(game)
+                            } label: {
+                                Label("Son Hamleyi Geri Al", systemImage: "arrow.uturn.backward")
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .tint(theme.accent)
+                        }
+                        Spacer(minLength: 24)
                     }
+                    .padding(24)
+                    .frame(maxWidth: 440)
+                    .frame(maxWidth: .infinity)
                 }
             }
-            Button("Tekrar Oyna") { restart() }
-            if previous != nil {
-                Button("Geri Al") {
-                    if let previous { game = previous; self.previous = nil; if !rewardedContinue.history.isEmpty { rewardedContinue.history.removeLast() }; GameStorage.saveReward(rewardedContinue); GameStorage.save(game) }
-                }
-            }
-        } message: {
-            Text("Skorun: \(game.score)")
+            .interactiveDismissDisabled()
         }
         .confirmationDialog("Yeni oyun başlatılsın mı?", isPresented: $confirmRestart) {
             Button("Yeni Oyun", role: .destructive) { restart() }
