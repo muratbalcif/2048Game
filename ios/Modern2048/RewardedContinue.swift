@@ -2,8 +2,8 @@ import Foundation
 
 /// Redeem only after the rewarded-ad SDK invokes its earned-reward callback.
 struct RewardedContinue {
-    private(set) var history: [GameState] = []
-    private(set) var used = false
+    var history: [GameState] = []
+    var used = false
 
     var available: Bool { !used && !history.isEmpty }
 
