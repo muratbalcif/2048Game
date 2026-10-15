@@ -17,6 +17,7 @@ struct GameScreen: View {
     @State private var rewardedContinue = GameStorage.loadReward()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
     @State private var bestScore = GameStorage.best
+    @AppStorage("modern2048.doubleScoreGame") private var doubledGameKey = ""
     @State private var progress = GameStorage.loadProgress()
     @State private var showProgress = false
     @State private var showLeaderboard = false
@@ -400,7 +401,7 @@ struct GameScreen: View {
                             .foregroundStyle(theme.ink.opacity(0.7))
                             .multilineTextAlignment(.center)
                         HStack(spacing: 12) {
-                            scoreCard("SKOR", "\(game.score)")
+                            scoreCard("SKOR", doubledGameKey == "\(game.score):\(game.board.map(String.init).joined(separator: ","))" ? "\(game.score * 2)" : "\(game.score)")
                             scoreCard("REKOR", "\(bestScore)")
                         }
                         VStack(alignment: .leading, spacing: 10) {
@@ -449,6 +450,27 @@ struct GameScreen: View {
                         .buttonStyle(.plain)
                         .foregroundStyle(.white)
                         .background(theme.accent, in: RoundedRectangle(cornerRadius: 17))
+                        if doubledGameKey == "\(game.score):\(game.board.map(String.init).joined(separator: ","))" {
+                            Text("✓ 2× yerel bonus uygulandı · Global sıralama puanı değişmez")
+                                .font(.caption).foregroundStyle(theme.accent)
+                        } else if rewardedAds.isReady && game.score > 0 {
+                            Button {
+                                let snapshot = game
+                                let claimKey = "\(game.score):\(game.board.map(String.init).joined(separator: ","))"
+                                rewardedAds.show {
+                                    guard game == snapshot, game.lost, doubledGameKey != claimKey else { return }
+                                    doubledGameKey = claimKey
+                                    let doubled = game.score > Int.max / 2 ? Int.max : game.score * 2
+                                    bestScore = max(bestScore, doubled)
+                                    GameStorage.saveBest(bestScore)
+                                }
+                            } label: {
+                                Label("Reklam İzle · 2× Puan (Yerel)", systemImage: "play.rectangle.fill")
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(maxWidth: .infinity).frame(height: 50)
+                            }
+                            .buttonStyle(.bordered).tint(theme.accent)
+                        }
                         if verifiedSession == nil && rewardedAds.isReady && rewardedContinue.available {
                             Button {
                                 let lostSnapshot = game
