@@ -28,6 +28,9 @@ struct GameScreen: View {
     @State private var animationToken = UUID()
     @State private var revealedCells: Set<Int> = []
     @State private var mergedCells: Set<Int> = []
+    @AppStorage("modern2048.highContrast") private var highContrast = false
+    @AppStorage("modern2048.largeNumbers") private var largeNumbers = false
+    @AppStorage("modern2048.directionalControls") private var directionalControls = false
     @AppStorage("modern2048.theme") private var themeRaw = GameTheme.sunset.rawValue
     private var theme: GameTheme { GameTheme(rawValue: themeRaw) ?? .sunset }
     @AppStorage("modern2048.sound") private var soundEnabled = true
@@ -58,10 +61,10 @@ struct GameScreen: View {
                             let value = game.board[index]
                             ZStack {
                                 RoundedRectangle(cornerRadius: 14)
-                                    .fill(slideInProgress ? theme.empty : (value == 0 ? Palette.empty : theme.tile(value)))
+                                    .fill(slideInProgress ? theme.empty : (value == 0 ? Palette.empty : (highContrast ? contrastTile(value) : theme.tile(value))))
                                 if value != 0 && !slideInProgress {
                                     Text("\(value)")
-                                        .font(.system(size: value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
+                                        .font(.system(size: value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
                                         .foregroundStyle(Palette.ink)
                                 }
                             }
@@ -74,9 +77,9 @@ struct GameScreen: View {
                     if slideInProgress {
                         ForEach(Array(slidingTiles.enumerated()), id: \.offset) { _, tile in
                             ZStack {
-                                RoundedRectangle(cornerRadius: 14).fill(theme.tile(tile.value))
+                                RoundedRectangle(cornerRadius: 14).fill((highContrast ? contrastTile(tile.value) : theme.tile(tile.value)))
                                 Text("\(tile.value)")
-                                    .font(.system(size: tile.value >= 1024 ? 19 : 25, weight: .bold, design: .rounded))
+                                    .font(.system(size: tile.value >= 1024 ? (largeNumbers ? 22 : 19) : (largeNumbers ? 30 : 25), weight: .bold, design: .rounded))
                                     .foregroundStyle(Palette.ink)
                             }
                             .frame(width: side, height: side)
@@ -96,45 +99,22 @@ struct GameScreen: View {
                     let direction: MoveDirection = abs(dx) > abs(dy)
                         ? (dx > 0 ? .right : .left)
                         : (dy > 0 ? .down : .up)
-                    let result = GameEngine.move(game, direction)
-                    guard result.moved else { return }
-                    let old = game
-                    rewardedContinue.record(old)
-                    GameStorage.saveReward(rewardedContinue)
-                    previous = old
-                    let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
-                    progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
-                    GameStorage.saveProgress(progress)
-                    effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
-                    bestScore = max(bestScore, result.state.score)
-                    GameStorage.save(result.state)
-                    GameStorage.saveBest(bestScore)
-                    if reducedMotion || systemReduceMotion {
-                        game = result.state
-                    } else {
-                        slidingTiles = TileMotionPlanner.plan(old.board, direction)
-                        slideProgress = 0
-                        slideInProgress = true
-                        withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
-                        let token = UUID()
-                        animationToken = token
-                        Task { @MainActor in
-                            try? await Task.sleep(nanoseconds: 180_000_000)
-                            guard animationToken == token else { return }
-                            revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
-                            mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
-                            game = result.state
-                            slideInProgress = false
-                            slidingTiles = []
-                            slideProgress = 0
-                            try? await Task.sleep(nanoseconds: 180_000_000)
-                            revealedCells = []
-                            mergedCells = []
-                        }
-                    }
+                    performMove(direction)
                 })
             }
             .aspectRatio(1, contentMode: .fit)
+            if directionalControls {
+                VStack(spacing: 2) {
+                    Button("↑ Yukarı") { performMove(.up) }
+                    HStack(spacing: 16) {
+                        Button("← Sol") { performMove(.left) }
+                        Button("↓ Aşağı") { performMove(.down) }
+                        Button("Sağ →") { performMove(.right) }
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(slideInProgress)
+            }
             Text("Kaydırarak aynı sayıları birleştir").foregroundStyle(Palette.ink)
             HStack(spacing: 8) {
                 Button("Geri Al") {
@@ -202,6 +182,11 @@ struct GameScreen: View {
                         }
                         .pickerStyle(.segmented)
                     }
+                    Section("Erişilebilirlik") {
+                        Toggle("Yüksek kontrast", isOn: $highContrast)
+                        Toggle("Büyük taş sayıları", isOn: $largeNumbers)
+                        Toggle("Yön tuşlarını göster", isOn: $directionalControls)
+                    }
                     Section("Oyun") {
                     Toggle("Ses efektleri", isOn: $soundEnabled)
                     Toggle("Titreşim", isOn: $hapticsEnabled)
@@ -255,6 +240,51 @@ struct GameScreen: View {
         } message: {
             Text("Mevcut ilerlemen sıfırlanacak. Rekorun korunacak.")
         }
+    }
+
+    private func performMove(_ direction: MoveDirection) {
+        guard !slideInProgress else { return }
+        let result = GameEngine.move(game, direction)
+        guard result.moved else { return }
+        let old = game
+        rewardedContinue.record(old)
+        GameStorage.saveReward(rewardedContinue)
+        previous = old
+        let mergedCount = TileMotionPlanner.plan(old.board, direction).filter(\.merged).count / 2
+        progress.recordMove(after: result.state, scoreDelta: result.scoreDelta, mergedCount: mergedCount)
+        GameStorage.saveProgress(progress)
+        effects.play(scoreDelta: result.scoreDelta, won: !old.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
+        bestScore = max(bestScore, result.state.score)
+        GameStorage.save(result.state)
+        GameStorage.saveBest(bestScore)
+        if reducedMotion || systemReduceMotion {
+            game = result.state
+        } else {
+            slidingTiles = TileMotionPlanner.plan(old.board, direction)
+            slideProgress = 0
+            slideInProgress = true
+            withAnimation(.easeInOut(duration: 0.16)) { slideProgress = 1 }
+            let token = UUID()
+            animationToken = token
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                guard animationToken == token else { return }
+                revealedCells = Set(result.state.board.indices.filter { index in result.state.board[index] != 0 && !slidingTiles.contains(where: { tile in tile.to == index }) })
+                mergedCells = Set(slidingTiles.filter { $0.merged }.map(\.to))
+                game = result.state
+                slideInProgress = false
+                slidingTiles = []
+                slideProgress = 0
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                revealedCells = []
+                mergedCells = []
+            }
+        }
+    }
+
+    private func contrastTile(_ value: Int) -> Color {
+        if value == 0 { return theme == .midnight ? Color.black : Color.white }
+        return value >= 128 ? Color(red: 0.98, green: 0.77, blue: 0.13) : Color(red: 0.16, green: 0.72, blue: 0.88)
     }
 
     private func restart() {
