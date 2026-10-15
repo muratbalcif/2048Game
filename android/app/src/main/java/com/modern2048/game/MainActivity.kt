@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -32,9 +33,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun GameScreen() {
-    var game by remember { mutableStateOf(GameEngine.newGame()) }
+    val context = LocalContext.current
+    val storage = remember(context) { GameStorage(context) }
+    var game by remember { mutableStateOf(storage.load() ?: GameEngine.newGame().also(storage::save)) }
     var previous by remember { mutableStateOf<GameState?>(null) }
-    var best by remember { mutableIntStateOf(0) }
+    var best by remember { mutableIntStateOf(storage.best()) }
     Column(
         Modifier.fillMaxSize().background(canvas).padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -66,6 +69,8 @@ private fun GameScreen() {
                                     previous = game
                                     game = result.state
                                     best = maxOf(best, game.score)
+                                    storage.save(game)
+                                    storage.saveBest(best)
                                 }
                             }
                         },
@@ -103,10 +108,10 @@ private fun GameScreen() {
         Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
-                onClick = { previous?.let { game = it; previous = null } },
+                onClick = { previous?.let { game = it; previous = null; storage.save(game) } },
                 enabled = previous != null
             ) { Text("Geri Al") }
-            Button(onClick = { game = GameEngine.newGame(); previous = null }) { Text("Yeni Oyun") }
+            Button(onClick = { game = GameEngine.newGame(); previous = null; storage.save(game) }) { Text("Yeni Oyun") }
         }
     }
 }
