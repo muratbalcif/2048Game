@@ -896,7 +896,7 @@ struct GameScreen: View {
                     ToolbarItem(placement: .principal) {
                         Text("🏆 Global sıralama")
                             .font(.headline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(theme.ink)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Bitti") { showLeaderboard = false }
