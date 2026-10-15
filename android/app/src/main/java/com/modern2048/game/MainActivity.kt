@@ -6,6 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.BoxWithConstraints
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -42,6 +46,10 @@ private fun GameScreen() {
     val effects = rememberGameEffects(context)
     DisposableEffect(effects) { onDispose { effects.release() } }
     var game by remember { mutableStateOf(storage.load() ?: GameEngine.newGame().also(storage::save)) }
+    var motion by remember { mutableStateOf<List<TileMotion>>(emptyList()) }
+    var motionActive by remember { mutableStateOf(false) }
+    val motionProgress = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
     var previous by remember { mutableStateOf<GameState?>(null) }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
@@ -134,8 +142,8 @@ private fun GameScreen() {
             ScoreCard("REKOR", best.toString(), Modifier.weight(1f))
         }
         Spacer(Modifier.height(28.dp))
-        Column(
-            modifier = Modifier.fillMaxWidth()
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth().aspectRatio(1f)
                 .pointerInput(game) {
                     var drag = Offset.Zero
                     detectDragGestures(
@@ -147,15 +155,27 @@ private fun GameScreen() {
                                 } else {
                                     if (drag.y > 0) Direction.DOWN else Direction.UP
                                 }
+                                if (motionActive) return@detectDragGestures
                                 val result = GameEngine.move(game, direction)
                                 if (result.moved) {
                                     rewardedContinue = rewardedContinue.record(game)
                                     storage.saveReward(rewardedContinue)
                                     previous = game
                                     effects.play(result.scoreDelta, !game.won && result.state.won, soundEnabled, hapticsEnabled)
-                                    game = result.state
-                                    best = maxOf(best, game.score)
-                                    storage.save(game)
+                                    if (!reducedMotion) {
+                                        motion = TileMotionPlanner.plan(game.board, direction)
+                                        motionActive = true
+                                        scope.launch {
+                                            motionProgress.snapTo(0f)
+                                            motionProgress.animateTo(1f, tween(160))
+                                            game = result.state
+                                            motionActive = false
+                                            motion = emptyList()
+                                            motionProgress.snapTo(0f)
+                                        }
+                                    } else game = result.state
+                                    best = maxOf(best, result.state.score)
+                                    storage.save(result.state)
                                     storage.saveBest(best)
                                 }
                             }
@@ -169,12 +189,28 @@ private fun GameScreen() {
                 .background(boardColor, RoundedCornerShape(24.dp)).padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            repeat(4) { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    repeat(4) { col ->
-                        val value = game.board[row * 4 + col]
-                        AnimatedTile(value, Modifier.weight(1f).aspectRatio(1f), reducedMotion)
-                    }
+            val cell = (maxWidth - 20.dp - 30.dp) / 4
+            val step = cell + 10.dp
+            repeat(16) { index ->
+                val value = if (motionActive) 0 else game.board[index]
+                AnimatedTile(
+                    value,
+                    Modifier.size(cell).offset(x = step * (index % 4), y = step * (index / 4)),
+                    reducedMotion
+                )
+            }
+            if (motionActive) {
+                motion.forEach { tile ->
+                    val dx = (tile.to % 4 - tile.from % 4) * motionProgress.value
+                    val dy = (tile.to / 4 - tile.from / 4) * motionProgress.value
+                    AnimatedTile(
+                        tile.value,
+                        Modifier.size(cell).offset(
+                            x = step * (tile.from % 4 + dx),
+                            y = step * (tile.from / 4 + dy)
+                        ),
+                        true
+                    )
                 }
             }
         }
