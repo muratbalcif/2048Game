@@ -124,6 +124,36 @@ private fun GameScreen() {
             },
             dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
     }
+    if (showModePicker) {
+        AlertDialog(
+            onDismissRequest = { showModePicker = false },
+            title = { Text("Oyun Modu Seç") },
+            text = {
+                Column {
+                    Text("Mod değiştirildiğinde yeni oyun başlar.")
+                    GameMode.entries.forEach { candidate ->
+                        TextButton(onClick = {
+                            if (candidate != gameMode) {
+                                resetMotion()
+                                gameMode = candidate
+                                storage.saveMode(candidate)
+                                progress = progress.nextGame()
+                                storage.saveProgress(progress)
+                                game = GameEngine.newGame()
+                                storage.save(game)
+                                previous = null
+                                rewardedContinue = rewardedContinue.reset()
+                                storage.saveReward(rewardedContinue)
+                                winAcknowledged = false
+                            }
+                            showModePicker = false
+                        }) { Text(candidate.title) }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showModePicker = false }) { Text("Vazgeç") } }
+        )
+    }
     if (showProgress) {
         AlertDialog(onDismissRequest = { showProgress = false }, title = { Text("İstatistikler ve Başarımlar") },
             text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
