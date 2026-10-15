@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -237,42 +238,70 @@ private fun GameScreen() {
             } }, confirmButton = { TextButton(onClick = { showProgress = false }) { Text("Kapat") } })
     }
     if (showSettings) {
-        AlertDialog(onDismissRequest = { showSettings = false }, title = { Text("Oyun Ayarları") },
-            text = { Column(Modifier.verticalScroll(rememberScrollState())) {
-                Text("Tema", fontWeight = FontWeight.Bold)
-                GameTheme.entries.forEach { option ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = selectedTheme == option, onClick = { selectedTheme = option; storage.saveTheme(option) })
-                        Text(option.title)
+        ModalBottomSheet(
+            onDismissRequest = { showSettings = false },
+            containerColor = selectedTheme.canvas,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            Column(
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp).padding(bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Oyun ayarları", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
+                        Text("Oyun deneyimini kendine göre düzenle", fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                    }
+                    TextButton(onClick = { showSettings = false }) { Text("Bitti", color = selectedTheme.accent) }
+                }
+                Text("GÖRÜNÜM", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    GameTheme.entries.forEach { option ->
+                        val active = option == selectedTheme
+                        Column(
+                            modifier = Modifier.weight(1f)
+                                .background(option.board, RoundedCornerShape(18.dp))
+                                .clickable { selectedTheme = option; storage.saveTheme(option) }
+                                .padding(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                listOf(2, 8, 32).forEach { number ->
+                                    Box(
+                                        Modifier.size(22.dp).background(option.tile(number), RoundedCornerShape(6.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text(number.toString(), fontSize = 10.sp, color = Color(0xFF24243A), fontWeight = FontWeight.Bold) }
+                                }
+                            }
+                            Text(option.title, fontSize = 12.sp, color = option.ink, fontWeight = if (active) FontWeight.Bold else FontWeight.Medium)
+                            Text(if (active) "● Seçili" else "○ Seç", fontSize = 11.sp, color = if (active) option.accent else option.ink.copy(alpha = .65f))
+                        }
                     }
                 }
-                HorizontalDivider()
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Yüksek kontrast", Modifier.weight(1f))
-                    Switch(highContrast, onCheckedChange = { highContrast = it; storage.saveHighContrast(it) })
+                Text("ERİŞİLEBİLİRLİK", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                Surface(shape = RoundedCornerShape(20.dp), color = selectedTheme.board.copy(alpha = .75f)) {
+                    Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        SettingsToggle("Yüksek kontrast", "Taşları daha belirgin göster", highContrast, selectedTheme.ink) { highContrast = it; storage.saveHighContrast(it) }
+                        HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
+                        SettingsToggle("Büyük taş sayıları", "Taş değerlerini daha kolay oku", largeNumbers, selectedTheme.ink) { largeNumbers = it; storage.saveLargeNumbers(it) }
+                        HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
+                        SettingsToggle("Yön tuşları", "Kaydırmadan da hamle yap", directionalControls, selectedTheme.ink) { directionalControls = it; storage.saveDirectionalControls(it) }
+                    }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Büyük taş sayıları", Modifier.weight(1f))
-                    Switch(largeNumbers, onCheckedChange = { largeNumbers = it; storage.saveLargeNumbers(it) })
+                Text("OYUN DENEYİMİ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = selectedTheme.accent)
+                Surface(shape = RoundedCornerShape(20.dp), color = selectedTheme.board.copy(alpha = .75f)) {
+                    Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        SettingsToggle("Ses efektleri", "Birleşme ve başarı sesleri", soundEnabled, selectedTheme.ink) { soundEnabled = it; storage.saveSoundEnabled(it) }
+                        HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
+                        SettingsToggle("Titreşim", "Hamlelerde dokunsal geri bildirim", hapticsEnabled, selectedTheme.ink) { hapticsEnabled = it; storage.saveHapticsEnabled(it) }
+                        HorizontalDivider(color = selectedTheme.ink.copy(alpha = .12f))
+                        SettingsToggle("Animasyonları azalt", "Daha sakin ve hızlı geçişler", reducedMotion, selectedTheme.ink) { reducedMotion = it; storage.saveReducedMotion(it) }
+                    }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Yön tuşları", Modifier.weight(1f))
-                    Switch(directionalControls, onCheckedChange = { directionalControls = it; storage.saveDirectionalControls(it) })
-                }
-                HorizontalDivider()
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Ses efektleri", modifier = Modifier.weight(1f))
-                    Switch(checked = soundEnabled, onCheckedChange = { soundEnabled = it; storage.saveSoundEnabled(it) })
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Titreşim", modifier = Modifier.weight(1f))
-                    Switch(checked = hapticsEnabled, onCheckedChange = { hapticsEnabled = it; storage.saveHapticsEnabled(it) })
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Animasyonları azalt", modifier = Modifier.weight(1f))
-                    Switch(checked = reducedMotion, onCheckedChange = { reducedMotion = it; storage.saveReducedMotion(it) })
-                }
-            } }, confirmButton = { TextButton(onClick = { showSettings = false }) { Text("Kapat") } })
+            }
+        }
     }
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
@@ -424,5 +453,25 @@ private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotio
             fontSize = if (value >= 1024) (if (largeNumbers) 22.sp else 19.sp) else (if (largeNumbers) 30.sp else 25.sp),
             color = ink
         )
+    }
+}
+
+@Composable
+private fun SettingsToggle(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    textColor: Color,
+    onChange: (Boolean) -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, color = textColor.copy(alpha = .65f), fontSize = 12.sp)
+        }
+        Switch(checked = checked, onCheckedChange = onChange)
     }
 }
