@@ -91,6 +91,7 @@ private fun GameScreen() {
     var showModePicker by remember { mutableStateOf(false) }
     var showProgress by remember { mutableStateOf(false) }
     var showLeaderboard by remember { mutableStateOf(false) }
+    var nicknameDraft by remember { mutableStateOf("") }
     var best by remember { mutableIntStateOf(storage.best()) }
     val activity = context as ComponentActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
@@ -107,6 +108,7 @@ private fun GameScreen() {
         if (!gameMode.reached(game.board)) winAcknowledged = false
     }
     val leaderboard = remember(context) { Leaderboard(context) }
+    LaunchedEffect(Unit) { nicknameDraft = leaderboard.nickname }
     var ranking by remember { mutableStateOf(LeaderboardResult(emptyList(), null)) }
     var rankingLoading by remember { mutableStateOf(false) }
     var verifiedSession by remember { mutableStateOf(storage.loadVerified()?.takeIf { session ->
@@ -485,6 +487,10 @@ private fun GameScreen() {
                 verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(stringResource(R.string.global_leaderboard), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = selectedTheme.ink)
                 Text(stringResource(R.string.leaderboard_subtitle), fontSize = 13.sp, color = selectedTheme.ink.copy(alpha = .65f))
+                androidx.compose.material3.OutlinedTextField(value = nicknameDraft, onValueChange = { if (it.length <= 20) nicknameDraft = it }, label = { Text("Oyuncu rumuzun") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                val validNickname = nicknameDraft.trim().matches(Regex("[\\p{L}\\p{N} _.-]{2,20}"))
+                Button(onClick = { leaderboard.nickname = nicknameDraft }, enabled = validNickname && nicknameDraft.trim() != leaderboard.nickname) { Text("Rumuzu kaydet") }
+                Text("Rumuzun yeni sıralamalı oyununla birlikte global listede güncellenir.", fontSize = 12.sp, color = selectedTheme.ink.copy(alpha = .65f))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(when (gameMode) { GameMode.CLASSIC -> R.string.classic; GameMode.TARGET_1024 -> R.string.target_1024; GameMode.ENDLESS -> R.string.endless }), color = selectedTheme.accent, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     TextButton(onClick = { scope.launch { rankingLoading = true; ranking = leaderboard.load(gameMode); rankingLoading = false } }) { Text(stringResource(R.string.refresh_icon)) }

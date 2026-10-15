@@ -18,6 +18,9 @@ class Leaderboard(private val context: Context) {
             prefs.edit().putString("player_id", it).apply()
         }
     }
+    var nickname: String
+        get() = prefs.getString("nickname", null) ?: "Oyuncu-${playerId.take(6)}"
+        set(value) { prefs.edit().putString("nickname", value.trim()).apply() }
     private val base = BuildConfig.LEADERBOARD_BASE_URL.trimEnd('/')
     val configured: Boolean get() = base.startsWith("https://") && !base.contains("REPLACE_")
     private fun mode(value: GameMode): String = when (value) {
@@ -33,7 +36,7 @@ class Leaderboard(private val context: Context) {
     suspend fun startVerified(mode: GameMode): VerifiedGame? = withContext(Dispatchers.IO) {
         if (!configured) return@withContext null
         try {
-            val request = JSONObject().put("playerId", playerId).put("nickname", "Oyuncu-${playerId.take(6)}")
+            val request = JSONObject().put("playerId", playerId).put("nickname", nickname)
                 .put("mode", mode(mode)).toString()
             val conn = URL("$base/v2/sessions").openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
