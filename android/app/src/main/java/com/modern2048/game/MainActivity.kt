@@ -276,6 +276,7 @@ private fun GameScreen() {
                     value,
                     Modifier.size(cell).offset(x = step * (index % 4), y = step * (index / 4)),
                     reducedMotion,
+                    theme = selectedTheme,
                     pop = index in revealedCells || index in mergedCells
                 )
             }
@@ -289,7 +290,8 @@ private fun GameScreen() {
                             x = step * (tile.from % 4 + dx),
                             y = step * (tile.from / 4 + dy)
                         ),
-                        true
+                        true,
+                        theme = selectedTheme
                     )
                 }
             }
@@ -336,8 +338,8 @@ private fun tileColor(value: Int): Color = when (value) {
 }
 
 @Composable
-private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false, pop: Boolean = false) {
-    val color by animateColorAsState(tileColor(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
+private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false, theme: GameTheme = GameTheme.SUNSET, pop: Boolean = false) {
+    val color by animateColorAsState(theme.tile(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
     val scale by animateFloatAsState(
         targetValue = if (value == 0) 0.96f else 1f,
         animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(),
