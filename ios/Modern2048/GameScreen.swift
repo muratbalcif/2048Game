@@ -183,13 +183,36 @@ struct GameScreen: View {
     }
 
     private func settingsToggle(_ title: String, subtitle: String, value: Binding<Bool>) -> some View {
-        Toggle(isOn: value) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(LocalizedStringKey(title)).font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.ink)
-                Text(LocalizedStringKey(subtitle)).font(.system(size: 12)).foregroundStyle(theme.ink.opacity(0.65))
+        Button {
+            value.wrappedValue.toggle()
+        } label: {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(LocalizedStringKey(title))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(theme.ink)
+                    Text(LocalizedStringKey(subtitle))
+                        .font(.system(size: 12))
+                        .foregroundStyle(theme.ink.opacity(0.75))
+                }
+                Spacer(minLength: 8)
+                ZStack(alignment: value.wrappedValue ? .trailing : .leading) {
+                    Capsule()
+                        .fill(value.wrappedValue ? theme.accent : theme.ink.opacity(0.22))
+                        .frame(width: 52, height: 32)
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 26, height: 26)
+                        .padding(3)
+                }
+                .accessibilityHidden(true)
             }
+            .contentShape(Rectangle())
         }
-        .tint(theme.accent)
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(LocalizedStringKey(title)))
+        .accessibilityValue(value.wrappedValue ? Text("Açık") : Text("Kapalı"))
+        .accessibilityAddTraits(.isButton)
         .padding(.vertical, 12)
     }
 
@@ -604,6 +627,26 @@ struct GameScreen: View {
             .presentationDetents([.large])
     }
 
+    private func languageOption(_ title: String, code: String) -> some View {
+        let selected = selectedLanguage == code
+        return Button {
+            selectedLanguage = code
+        } label: {
+            Text(LocalizedStringKey(title))
+                .font(.system(size: 13, weight: selected ? .bold : .medium))
+                .foregroundStyle(selected ? Color.white : theme.ink)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 44)
+                .padding(.horizontal, 4)
+                .background(selected ? theme.accent : theme.board.opacity(0.9),
+                            in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12)
+                    .stroke(selected ? theme.accent : theme.ink.opacity(0.14), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
     private var settingsSheet: some View {
         NavigationStack {
                 ScrollView {
@@ -618,12 +661,11 @@ struct GameScreen: View {
                         }
                         VStack(alignment: .leading, spacing: 10) {
                             settingsHeading("Dil")
-                            Picker("Dil", selection: $selectedLanguage) {
-                                Text("Telefon dili").tag("system")
-                                Text("Türkçe").tag("tr")
-                                Text("English").tag("en")
+                            HStack(spacing: 8) {
+                                languageOption("Telefon dili", code: "system")
+                                languageOption("Türkçe", code: "tr")
+                                languageOption("English", code: "en")
                             }
-                            .pickerStyle(.segmented)
                         }
                         VStack(alignment: .leading, spacing: 12) {
                             settingsHeading("GÖRÜNÜM")
@@ -691,9 +733,14 @@ struct GameScreen: View {
                     .frame(maxWidth: .infinity)
                 }
                 .background(theme.canvas.ignoresSafeArea())
-                .navigationTitle("Oyun ayarları")
+                .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Oyun ayarları")
+                            .font(.headline)
+                            .foregroundStyle(theme.ink)
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Bitti") { showSettings = false }
                             .fontWeight(.semibold)
