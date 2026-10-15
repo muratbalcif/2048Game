@@ -50,7 +50,7 @@ final class LeaderboardClient: ObservableObject {
             let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
             guard let id = json?["sessionId"] as? String, let seed = json?["seed"] as? NSNumber else { return nil }
             return VerifiedSession(sessionId: id, playerId: playerId, seed: seed.uint32Value)
-        } catch { error = "Sıralamalı oyun başlatılamadı"; return nil }
+        } catch { self.error = "Sıralamalı oyun başlatılamadı"; return nil }
     }
 
     func finalizeVerified(_ session: VerifiedSession, score: Int) async -> Bool {
