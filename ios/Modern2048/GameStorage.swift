@@ -1,6 +1,20 @@
 import Foundation
 
 enum GameStorage {
+    static func loadProgress() -> GameProgress {
+        guard let data = UserDefaults.standard.data(forKey: "modern2048.progress"),
+              let progress = try? JSONDecoder().decode(GameProgress.self, from: data),
+              progress.moves >= 0, progress.merges >= 0, progress.gamesStarted >= 1,
+              progress.bestTile >= 0, progress.totalPoints >= 0 else { return GameProgress() }
+        return progress
+    }
+
+    static func saveProgress(_ progress: GameProgress) {
+        if let data = try? JSONEncoder().encode(progress) {
+            UserDefaults.standard.set(data, forKey: "modern2048.progress")
+        }
+    }
+
     private static let gameKey = "modern2048.game"
     private static let bestKey = "modern2048.best"
 
