@@ -834,6 +834,7 @@ struct GameScreen: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
+                        .foregroundStyle(theme.accent)
                         .tint(theme.accent)
                         .disabled(!isNicknameSaveEnabled)
                         if let nicknameError = leaderboard.error, !nicknameSaved {
@@ -846,7 +847,7 @@ struct GameScreen: View {
                         }
 
                         Text("Rumuz değiştiğinde mevcut skorun ve oyuncu kimliğin korunur.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(theme.accent)
                         HStack {
                             Text(mode.title).font(.headline).foregroundStyle(theme.accent)
                             Spacer()
@@ -891,6 +892,7 @@ struct GameScreen: View {
                 }
                 .background(theme.canvas.ignoresSafeArea())
                 .navigationTitle("🏆 Global sıralama")
+                
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showLeaderboard = false } } }
                 .task { await leaderboard.load(mode: mode) }
