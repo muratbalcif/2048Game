@@ -738,7 +738,9 @@ struct GameScreen: View {
 
     private func scoreCard(_ label: String, _ value: String) -> some View {
         VStack {
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(label)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(theme.ink.opacity(0.85))
             Text(value).font(.system(size: 26, weight: .bold, design: .rounded))
                 .foregroundStyle(theme.ink)
         }
