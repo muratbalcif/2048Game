@@ -10,7 +10,7 @@ private enum Palette {
 
 struct GameScreen: View {
     @StateObject private var rewardedAds = RewardedAds()
-    @State private var rewardedContinue = RewardedContinue()
+    @State private var rewardedContinue = GameStorage.loadReward()
     @State private var game = GameStorage.load() ?? GameEngine.newGame()
     @State private var bestScore = GameStorage.best
     @State private var previous: GameState?
@@ -53,6 +53,7 @@ struct GameScreen: View {
                 let result = GameEngine.move(game, direction)
                 if result.moved {
                     rewardedContinue.record(game)
+                    GameStorage.saveReward(rewardedContinue)
                     previous = game
                     withAnimation(.easeInOut(duration: 0.15)) { game = result.state }
                     bestScore = max(bestScore, game.score)
@@ -93,6 +94,7 @@ struct GameScreen: View {
                     rewardedAds.show {
                         if let restored = rewardedContinue.redeem(current: game) {
                             game = restored
+                            GameStorage.saveReward(rewardedContinue)
                             previous = nil
                             GameStorage.save(game)
                         }
@@ -120,6 +122,7 @@ struct GameScreen: View {
         game = GameEngine.newGame()
         previous = nil
         rewardedContinue.reset()
+        GameStorage.saveReward(rewardedContinue)
         winAcknowledged = false
         GameStorage.save(game)
     }
