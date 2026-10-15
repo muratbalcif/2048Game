@@ -714,7 +714,7 @@ struct GameScreen: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .textFieldStyle(.roundedBorder)
-                            .onChange(of: nicknameDraft) { _, value in
+                            .onChange(of: nicknameDraft) { value in
                                 if value.count > 20 { nicknameDraft = String(value.prefix(20)) }
                             }
                         Button("Rumuzu kaydet") { leaderboard.saveNickname(nicknameDraft) }
@@ -746,7 +746,11 @@ struct GameScreen: View {
                             HStack(spacing: 12) {
                                 Text(entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : entry.rank == 3 ? "🥉" : "#\(entry.rank)")
                                     .font(.headline).frame(width: 44, alignment: .leading)
-                                Text(entry.nickname + (leaderboard.isMe(entry) ? " (" + NSLocalizedString("Sen", comment: "Current player") + ")" : ""))
+                                Text(
+                                    leaderboard.isMe(entry)
+                                        ? "\(entry.nickname) (\(String(localized: "Sen")))"
+                                        : entry.nickname
+                                )
                                     .fontWeight(leaderboard.isMe(entry) ? .bold : .medium)
                                 Spacer()
                                 Text(entry.score.formatted()).font(.headline.bold()).foregroundStyle(theme.accent)
