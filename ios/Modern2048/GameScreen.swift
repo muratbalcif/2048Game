@@ -337,7 +337,8 @@ struct GameScreen: View {
                 }
                 .padding(10)
                 .background(theme.board, in: RoundedRectangle(cornerRadius: 24))
-                .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { gesture in
+                .contentShape(RoundedRectangle(cornerRadius: 24))
+                .highPriorityGesture(DragGesture(minimumDistance: 12).onEnded { gesture in
                     guard !slideInProgress && !game.lost else { return }
                     let dx = gesture.translation.width
                     let dy = gesture.translation.height
