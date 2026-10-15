@@ -8,7 +8,7 @@ enum GameStorage {
         guard let data = UserDefaults.standard.data(forKey: gameKey),
               let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data),
               snapshot.board.count == 16,
-              snapshot.board.allSatisfy({ $0 == 0 || ($0 > 0 && ($0 & ($0 - 1)) == 0) }),
+              snapshot.board.allSatisfy({ $0 == 0 || ($0 >= 2 && ($0 & ($0 - 1)) == 0) }),
               snapshot.score >= 0 else { return nil }
         return GameState(board: snapshot.board, score: snapshot.score,
                          won: snapshot.won, lost: snapshot.lost)
