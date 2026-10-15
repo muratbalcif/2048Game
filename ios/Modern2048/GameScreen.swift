@@ -54,10 +54,6 @@ struct GameScreen: View {
                 .disabled(slideInProgress)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.ink)
-            Button(startingVerified ? "Bağlanıyor..." : verifiedSession == nil ? "🏆 Sıralamalı başlat" : "🏆 Sıralamalı oyun") { startRanked() }
-                .disabled(startingVerified || slideInProgress || verifiedSession != nil)
-                .font(.subheadline.weight(.semibold))
-                .tint(theme.accent)
             HStack(spacing: 12) {
                 scoreCard("SKOR", "\(game.score)")
                 scoreCard("REKOR", "\(bestScore)")
@@ -155,6 +151,7 @@ struct GameScreen: View {
         .background(theme.canvas.ignoresSafeArea())
         .onAppear {
             rewardedAds.load()
+            if verifiedSession == nil && !game.lost { startRanked() }
             if let session = verifiedSession {
                 guard let replayed = VerifiedEngine.replay(session.seed, session.moves),
                       replayed.board == game.board && replayed.score == game.score else {
@@ -626,6 +623,7 @@ struct GameScreen: View {
         GameStorage.saveReward(rewardedContinue)
         winAcknowledged = false
         GameStorage.save(game)
+        startRanked()
     }
 
     private func tileColor(_ value: Int) -> Color {
