@@ -26,12 +26,12 @@ struct GameAchievement: Identifiable {
 enum GameAchievements {
     static func list(_ progress: GameProgress) -> [GameAchievement] {
         [
-            .init(id: "first_merge", title: "İlk Birleşme", unlocked: progress.merges >= 1),
-            .init(id: "hundred_moves", title: "100 Hamle", unlocked: progress.moves >= 100),
-            .init(id: "tile_128", title: "128 Taşı", unlocked: progress.bestTile >= 128),
-            .init(id: "tile_512", title: "512 Taşı", unlocked: progress.bestTile >= 512),
-            .init(id: "tile_2048", title: "2048 Ustası", unlocked: progress.bestTile >= 2048),
-            .init(id: "five_games", title: "5 Oyun", unlocked: progress.gamesStarted >= 5)
+            .init(id: "first_merge", title: NSLocalizedString("İlk Birleşme", comment: "Achievement"), unlocked: progress.merges >= 1),
+            .init(id: "hundred_moves", title: NSLocalizedString("100 Hamle", comment: "Achievement"), unlocked: progress.moves >= 100),
+            .init(id: "tile_128", title: NSLocalizedString("128 Taşı", comment: "Achievement"), unlocked: progress.bestTile >= 128),
+            .init(id: "tile_512", title: NSLocalizedString("512 Taşı", comment: "Achievement"), unlocked: progress.bestTile >= 512),
+            .init(id: "tile_2048", title: NSLocalizedString("2048 Ustası", comment: "Achievement"), unlocked: progress.bestTile >= 2048),
+            .init(id: "five_games", title: NSLocalizedString("5 Oyun", comment: "Achievement"), unlocked: progress.gamesStarted >= 5)
         ]
     }
 }
