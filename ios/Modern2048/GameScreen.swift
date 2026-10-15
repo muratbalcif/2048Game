@@ -48,6 +48,7 @@ struct GameScreen: View {
     @AppStorage("modern2048.sound") private var soundEnabled = true
     @AppStorage("modern2048.haptics") private var hapticsEnabled = true
     @State private var showSettings = false
+    @AppStorage("modern2048.language") private var selectedLanguage = "system"
     @AppStorage("modern2048.reducedMotion") private var reducedMotion = false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -613,6 +614,15 @@ struct GameScreen: View {
                             Text("Görünümü ve oyun deneyimini kişiselleştir.")
                                 .font(.subheadline)
                                 .foregroundStyle(theme.ink.opacity(0.65))
+                        }
+                        VStack(alignment: .leading, spacing: 10) {
+                            settingsHeading("Dil")
+                            Picker("Dil", selection: $selectedLanguage) {
+                                Text("Telefon dili").tag("system")
+                                Text("Türkçe").tag("tr")
+                                Text("English").tag("en")
+                            }
+                            .pickerStyle(.segmented)
                         }
                         VStack(alignment: .leading, spacing: 12) {
                             settingsHeading("GÖRÜNÜM")
