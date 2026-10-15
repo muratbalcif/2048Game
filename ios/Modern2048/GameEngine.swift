@@ -23,7 +23,9 @@ enum GameEngine {
         return GameState(board: board)
     }
 
-    static func move(_ state: GameState, _ direction: MoveDirection) -> MoveResult {
+    static func move(_ state: GameState, _ direction: MoveDirection) -> MoveResult { moveInternal(state, direction, spawnTile: true) }
+    static func moveWithoutSpawn(_ state: GameState, _ direction: MoveDirection) -> MoveResult { moveInternal(state, direction, spawnTile: false) }
+    private static func moveInternal(_ state: GameState, _ direction: MoveDirection, spawnTile: Bool) -> MoveResult {
         precondition(state.board.count == 16)
         guard !state.lost else { return MoveResult(state: state, moved: false, scoreDelta: 0) }
         var output = state.board
@@ -56,7 +58,7 @@ enum GameEngine {
             }
         }
         guard output != state.board else { return MoveResult(state: state, moved: false, scoreDelta: 0) }
-        spawn(&output)
+        if spawnTile { spawn(&output) }
         let next = GameState(board: output, score: state.score + gained,
                              won: state.won || output.contains(where: { $0 >= 2048 }),
                              lost: !canMove(output))
