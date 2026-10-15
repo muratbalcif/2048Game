@@ -83,6 +83,9 @@ private fun GameScreen() {
     var confirmRestart by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var selectedTheme by remember { mutableStateOf(storage.loadTheme()) }
+    var highContrast by remember { mutableStateOf(storage.highContrast()) }
+    var largeNumbers by remember { mutableStateOf(storage.largeNumbers()) }
+    var directionalControls by remember { mutableStateOf(storage.directionalControls()) }
     var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
     var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
@@ -179,6 +182,19 @@ private fun GameScreen() {
                         RadioButton(selected = selectedTheme == option, onClick = { selectedTheme = option; storage.saveTheme(option) })
                         Text(option.title)
                     }
+                }
+                HorizontalDivider()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Yüksek kontrast", Modifier.weight(1f))
+                    Switch(highContrast, onCheckedChange = { highContrast = it; storage.saveHighContrast(it) })
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Büyük taş sayıları", Modifier.weight(1f))
+                    Switch(largeNumbers, onCheckedChange = { largeNumbers = it; storage.saveLargeNumbers(it) })
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Yön tuşları", Modifier.weight(1f))
+                    Switch(directionalControls, onCheckedChange = { directionalControls = it; storage.saveDirectionalControls(it) })
                 }
                 HorizontalDivider()
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -279,6 +295,8 @@ private fun GameScreen() {
                     Modifier.size(cell).offset(x = step * (index % 4), y = step * (index / 4)),
                     reducedMotion,
                     theme = selectedTheme,
+                    highContrast = highContrast,
+                    largeNumbers = largeNumbers,
                     pop = index in revealedCells || index in mergedCells
                 )
             }
@@ -293,7 +311,9 @@ private fun GameScreen() {
                             y = step * (tile.from / 4 + dy)
                         ),
                         true,
-                        theme = selectedTheme
+                        theme = selectedTheme,
+                        highContrast = highContrast,
+                        largeNumbers = largeNumbers
                     )
                 }
             }
@@ -340,8 +360,8 @@ private fun tileColor(value: Int): Color = when (value) {
 }
 
 @Composable
-private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false, theme: GameTheme = GameTheme.SUNSET, pop: Boolean = false) {
-    val color by animateColorAsState(theme.tile(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
+private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false, theme: GameTheme = GameTheme.SUNSET, highContrast: Boolean = false, largeNumbers: Boolean = false, pop: Boolean = false) {
+    val color by animateColorAsState(if (highContrast) { if (value == 0) Color.White else if (value >= 128) Color(0xFFFFC400) else Color(0xFF20B6DF) } else theme.tile(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
     val scale by animateFloatAsState(
         targetValue = if (value == 0) 0.96f else 1f,
         animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(),
@@ -359,7 +379,7 @@ private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotio
         if (value != 0) Text(
             value.toString(),
             fontWeight = FontWeight.Bold,
-            fontSize = if (value >= 1024) 19.sp else 25.sp,
+            fontSize = if (value >= 1024) (if (largeNumbers) 22.sp else 19.sp) else (if (largeNumbers) 30.sp else 25.sp),
             color = ink
         )
     }
