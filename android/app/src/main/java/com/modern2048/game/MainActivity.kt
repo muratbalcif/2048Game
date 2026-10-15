@@ -55,6 +55,9 @@ private fun GameScreen() {
     }
     var winAcknowledged by remember { mutableStateOf(false) }
     var confirmRestart by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
+    var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
+    var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
     if (game.won && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
             text = { Text("2048 taşına ulaştın. Daha yüksek sayılar için devam edebilirsin.") },
@@ -94,6 +97,19 @@ private fun GameScreen() {
             },
             dismissButton = { TextButton(onClick = { previous?.let { game = it; previous = null; rewardedContinue = rewardedContinue.copy(history = rewardedContinue.history.dropLast(1)); storage.saveReward(rewardedContinue); storage.save(game) } }, enabled = previous != null) { Text("Geri Al") } })
     }
+    if (showSettings) {
+        AlertDialog(onDismissRequest = { showSettings = false }, title = { Text("Oyun Ayarları") },
+            text = { Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Ses efektleri", modifier = Modifier.weight(1f))
+                    Switch(checked = soundEnabled, onCheckedChange = { soundEnabled = it; storage.saveSoundEnabled(it) })
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Titreşim", modifier = Modifier.weight(1f))
+                    Switch(checked = hapticsEnabled, onCheckedChange = { hapticsEnabled = it; storage.saveHapticsEnabled(it) })
+                }
+            } }, confirmButton = { TextButton(onClick = { showSettings = false }) { Text("Kapat") } })
+    }
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Yeni oyun başlatılsın mı?") },
             text = { Text("Mevcut oyun ilerlemen sıfırlanacak. Rekorun korunacak.") },
@@ -131,7 +147,7 @@ private fun GameScreen() {
                                     rewardedContinue = rewardedContinue.record(game)
                                     storage.saveReward(rewardedContinue)
                                     previous = game
-                                    effects.play(result.scoreDelta, !game.won && result.state.won)
+                                    effects.play(result.scoreDelta, !game.won && result.state.won, soundEnabled, hapticsEnabled)
                                     game = result.state
                                     best = maxOf(best, game.score)
                                     storage.save(game)
@@ -166,6 +182,7 @@ private fun GameScreen() {
                 enabled = previous != null
             ) { Text("Geri Al") }
             Button(onClick = { confirmRestart = true }) { Text("Yeni Oyun") }
+            OutlinedButton(onClick = { showSettings = true }) { Text("Ayarlar") }
         }
     }
 }
