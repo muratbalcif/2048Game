@@ -8,6 +8,8 @@ import org.json.JSONObject
 class GameStorage(context: Context) {
     private val prefs = context.getSharedPreferences("modern2048", Context.MODE_PRIVATE)
 
+    fun loadTheme(): GameTheme = GameTheme.entries.firstOrNull { it.name == prefs.getString("theme", "SUNSET") } ?: GameTheme.SUNSET
+    fun saveTheme(value: GameTheme) { prefs.edit().putString("theme", value.name).apply() }
     fun loadMode(): GameMode = runCatching {
         GameMode.valueOf(prefs.getString("mode", GameMode.CLASSIC.name)!!)
     }.getOrDefault(GameMode.CLASSIC)
