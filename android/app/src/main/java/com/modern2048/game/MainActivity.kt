@@ -57,6 +57,7 @@ private fun GameScreen() {
     var confirmRestart by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var soundEnabled by remember { mutableStateOf(storage.soundEnabled()) }
+    var reducedMotion by remember { mutableStateOf(storage.reducedMotion()) }
     var hapticsEnabled by remember { mutableStateOf(storage.hapticsEnabled()) }
     if (game.won && !game.lost && !winAcknowledged) {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text("2048! Harika!") },
@@ -107,6 +108,10 @@ private fun GameScreen() {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Titreşim", modifier = Modifier.weight(1f))
                     Switch(checked = hapticsEnabled, onCheckedChange = { hapticsEnabled = it; storage.saveHapticsEnabled(it) })
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Animasyonları azalt", modifier = Modifier.weight(1f))
+                    Switch(checked = reducedMotion, onCheckedChange = { reducedMotion = it; storage.saveReducedMotion(it) })
                 }
             } }, confirmButton = { TextButton(onClick = { showSettings = false }) { Text("Kapat") } })
     }
@@ -168,7 +173,7 @@ private fun GameScreen() {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     repeat(4) { col ->
                         val value = game.board[row * 4 + col]
-                        AnimatedTile(value, Modifier.weight(1f).aspectRatio(1f))
+                        AnimatedTile(value, Modifier.weight(1f).aspectRatio(1f), reducedMotion)
                     }
                 }
             }
@@ -214,11 +219,11 @@ private fun tileColor(value: Int): Color = when (value) {
 }
 
 @Composable
-private fun AnimatedTile(value: Int, modifier: Modifier = Modifier) {
-    val color by animateColorAsState(tileColor(value), label = "tile-color")
+private fun AnimatedTile(value: Int, modifier: Modifier = Modifier, reducedMotion: Boolean = false) {
+    val color by animateColorAsState(tileColor(value), animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(), label = "tile-color")
     val scale by animateFloatAsState(
         targetValue = if (value == 0) 0.96f else 1f,
-        animationSpec = spring(),
+        animationSpec = if (reducedMotion) androidx.compose.animation.core.snap() else spring(),
         label = "tile-scale"
     )
     Box(
