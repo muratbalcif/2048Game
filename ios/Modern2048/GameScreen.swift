@@ -20,6 +20,8 @@ struct GameScreen: View {
     @AppStorage("modern2048.sound") private var soundEnabled = true
     @AppStorage("modern2048.haptics") private var hapticsEnabled = true
     @State private var showSettings = false
+    @AppStorage("modern2048.reducedMotion") private var reducedMotion = false
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
 
     var body: some View {
         VStack(spacing: 24) {
@@ -45,7 +47,7 @@ struct GameScreen: View {
                     }
                     .aspectRatio(1, contentMode: .fit)
                     .scaleEffect(value == 0 ? 0.97 : 1.0)
-                    .animation(.spring(response: 0.23, dampingFraction: 0.7), value: value)
+                    .animation((reducedMotion || systemReduceMotion) ? nil : .spring(response: 0.23, dampingFraction: 0.7), value: value)
                 }
             }
             .padding(10)
@@ -62,7 +64,8 @@ struct GameScreen: View {
                     GameStorage.saveReward(rewardedContinue)
                     previous = game
                     effects.play(scoreDelta: result.scoreDelta, won: !game.won && result.state.won, sound: soundEnabled, haptics: hapticsEnabled)
-                    withAnimation(.spring(response: 0.24, dampingFraction: 0.78)) { game = result.state }
+                    if reducedMotion || systemReduceMotion { game = result.state }
+                    else { withAnimation(.spring(response: 0.24, dampingFraction: 0.78)) { game = result.state } }
                     bestScore = max(bestScore, game.score)
                     GameStorage.save(game)
                     GameStorage.saveBest(bestScore)
@@ -89,6 +92,7 @@ struct GameScreen: View {
                 Form {
                     Toggle("Ses efektleri", isOn: $soundEnabled)
                     Toggle("Titreşim", isOn: $hapticsEnabled)
+                    Toggle("Animasyonları azalt", isOn: $reducedMotion)
                 }
                 .navigationTitle("Oyun Ayarları")
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Bitti") { showSettings = false } } }
