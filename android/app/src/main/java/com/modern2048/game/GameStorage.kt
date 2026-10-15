@@ -83,6 +83,13 @@ class GameStorage(context: Context) {
             .putLong("progress_points", progress.totalPoints).apply()
     }
 
+    fun highContrast(): Boolean = prefs.getBoolean("high_contrast", false)
+    fun saveHighContrast(value: Boolean) { prefs.edit().putBoolean("high_contrast", value).apply() }
+    fun directionalControls(): Boolean = prefs.getBoolean("directional_controls", false)
+    fun saveDirectionalControls(value: Boolean) { prefs.edit().putBoolean("directional_controls", value).apply() }
+    fun largeNumbers(): Boolean = prefs.getBoolean("large_numbers", false)
+    fun saveLargeNumbers(value: Boolean) { prefs.edit().putBoolean("large_numbers", value).apply() }
+
     fun reducedMotion(): Boolean = prefs.getBoolean("reduced_motion", false)
     fun saveReducedMotion(enabled: Boolean) { prefs.edit().putBoolean("reduced_motion", enabled).apply() }
     fun soundEnabled(): Boolean = prefs.getBoolean("sound_enabled", true)
