@@ -293,7 +293,7 @@ private fun GameScreen() {
                         colors = ButtonDefaults.buttonColors(containerColor = selectedTheme.accent)
                     ) { Text("↻  Yeniden Oyna", fontWeight = FontWeight.Bold) }
                     if (doubled) {
-                        Text("✓ 2× yerel bonus uygulandı · Global sıralama puanı değişmez",
+                        Text("✓ 2× puan ödülü uygulandı",
                             fontSize = 12.sp, color = selectedTheme.accent)
                     } else if (adReady && game.score > 0) {
                         OutlinedButton(onClick = {
@@ -310,7 +310,7 @@ private fun GameScreen() {
                             }
                         }, modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(16.dp)) {
-                            Text("▶  Reklam İzle · 2× Puan (Yerel)", fontSize = 12.sp, color = selectedTheme.ink)
+                            Text("▶  Reklam İzle · 2× Puan", fontSize = 12.sp, color = selectedTheme.ink)
                         }
                     }
                     if (verifiedSession == null && adReady && rewardedContinue.available) {
