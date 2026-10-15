@@ -14,8 +14,10 @@ class GameStorage(context: Context) {
         val cells = json.getJSONArray("board")
         if (cells.length() != 16) return null
         val board = (0 until 16).map { cells.getInt(it) }
-        if (board.any { it < 0 || (it != 0 && (it and (it - 1)) != 0) }) return null
-        GameState(board, json.getInt("score"), json.getBoolean("won"), json.getBoolean("lost"))
+        if (board.any { it < 0 || (it != 0 && (it < 2 || (it and (it - 1)) != 0)) }) return null
+        val score = json.getInt("score")
+        if (score < 0) return null
+        GameState(board, score, json.getBoolean("won"), json.getBoolean("lost"))
     }.getOrNull()
 
     fun save(state: GameState) {
