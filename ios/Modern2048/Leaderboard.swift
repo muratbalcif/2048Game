@@ -23,6 +23,11 @@ final class LeaderboardClient: ObservableObject {
     @Published var isLoading = false
     @Published var error: String?
     private let idKey = "modern2048.leaderboard.playerId"
+    @Published var nickname: String = UserDefaults.standard.string(forKey: "modern2048.leaderboard.nickname") ?? ""
+    func saveNickname(_ value: String) {
+        nickname = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.set(nickname, forKey: "modern2048.leaderboard.nickname")
+    }
     private var playerId: String {
         if let id = UserDefaults.standard.string(forKey: idKey) { return id }
         let id = UUID().uuidString.lowercased()
@@ -43,7 +48,7 @@ final class LeaderboardClient: ObservableObject {
             request.timeoutInterval = 7
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONSerialization.data(withJSONObject: [
-                "playerId": playerId, "nickname": "Oyuncu-\(playerId.prefix(6))", "mode": mode.rawValue
+                "playerId": playerId, "nickname": nickname.isEmpty ? "Oyuncu-\(playerId.prefix(6))" : nickname, "mode": mode.rawValue
             ])
             let (data, response) = try await URLSession.shared.data(for: request)
             guard (response as? HTTPURLResponse)?.statusCode == 201 else { return nil }
