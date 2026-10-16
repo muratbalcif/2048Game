@@ -242,7 +242,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -299,7 +299,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -339,15 +339,10 @@
 				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Modern2048/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Modern 2048";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
-				NEW_SETTING = "";
-				NEW_SETTING1 = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.modern2048.game;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -363,15 +358,10 @@
 				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Modern2048/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Modern 2048";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
-				NEW_SETTING = "";
-				NEW_SETTING1 = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.modern2048.game;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
