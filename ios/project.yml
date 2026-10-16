@@ -8,6 +8,9 @@ packages:
     url: https://github.com/googleads/swift-package-manager-google-mobile-ads.git
     from: "12.0.0"
 settings:
+  configs:
+    Release:
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
   base:
     SWIFT_VERSION: "5.9"
     LEADERBOARD_BASE_URL: "https://modern2048-leaderboard.muratbalci269.workers.dev"
@@ -42,3 +45,4 @@ targets:
         INFOPLIST_FILE: Modern2048/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_STYLE: Automatic
+
