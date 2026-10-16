@@ -15,6 +15,7 @@
 		7696E5E5A2553AE5F2B999F4 /* GameProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1ED3F64EF3DF374BF7CD02 /* GameProgress.swift */; };
 		797E9E990FCAD585B296DD12 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 33D41806E82BBA77DF0864CF /* Localizable.strings */; };
 		950615BFD1ECC9F8CC46E67C /* GameMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF29CAAF220BD5572982738C /* GameMode.swift */; };
+		A27128B4C966B17B5694676F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E7412E0B9AC5D1257E06091E /* LaunchScreen.storyboard */; };
 		A2F5A4EA9A3C2E14E82632E3 /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3779E59467F9CF0CEB78C033 /* Leaderboard.swift */; };
 		AF1041541532A0A3B0D4E44F /* TileMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6AD567D15027125C32EA971 /* TileMotion.swift */; };
 		C4EDCEAF51A9C418345D5713 /* RewardedAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */; };
@@ -41,6 +42,7 @@
 		C6AD567D15027125C32EA971 /* TileMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileMotion.swift; sourceTree = "<group>"; };
 		CF29CAAF220BD5572982738C /* GameMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMode.swift; sourceTree = "<group>"; };
 		D9D009D519651212ED4D18C6 /* VerifiedGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiedGame.swift; sourceTree = "<group>"; };
+		E7412E0B9AC5D1257E06091E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EBB3A55C774FDEC2F90C57A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modern2048App.swift; sourceTree = "<group>"; };
 		FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAds.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				5B4766B51C6233435F2861C2 /* GameStorage.swift */,
 				80A7B7F0FF7748CDBA00C87A /* GameTheme.swift */,
 				BCAB2AA55C6B46B3B975BD6C /* Info.plist */,
+				E7412E0B9AC5D1257E06091E /* LaunchScreen.storyboard */,
 				3779E59467F9CF0CEB78C033 /* Leaderboard.swift */,
 				EFAA6CC11A2E6908748C40C7 /* Modern2048App.swift */,
 				FBB510A9C0BA9FC7C90BFA0F /* RewardedAds.swift */,
@@ -163,6 +166,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				093503B12C771EE3240CD681 /* Assets.xcassets in Resources */,
+				A27128B4C966B17B5694676F /* LaunchScreen.storyboard in Resources */,
 				797E9E990FCAD585B296DD12 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -335,11 +339,13 @@
 				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Modern2048/Info.plist;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Modern 2048";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.modern2048.game;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -355,11 +361,13 @@
 				DEVELOPMENT_TEAM = 4GJ9A7QFDT;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Modern2048/Info.plist;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Modern 2048";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.modern2048.game;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
