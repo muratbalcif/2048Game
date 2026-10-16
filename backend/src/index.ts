@@ -3,6 +3,24 @@ interface Env { DB: D1Database; ALLOWED_ORIGIN: string }
 type Mode = "classic" | "target1024" | "endless";
 const modes: Mode[] = ["classic", "target1024", "endless"];
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
+const privacyHtml = `<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2048 — Gizlilik Politikası</title><meta name="description" content="2048 Sayı Bulmaca Oyunu gizlilik politikası">
+<style>body{margin:0;background:#f8f7f4;color:#24303b;font:16px/1.8 system-ui,-apple-system,sans-serif;padding:36px 16px}main{max-width:780px;margin:auto;background:white;border-radius:22px;padding:clamp(24px,5vw,54px);box-shadow:0 8px 32px #1e293b0b}h1{font-size:clamp(28px,5vw,42px);line-height:1.2}h2{font-size:21px;margin-top:30px}p,li{color:#475569}a{color:#0f766e}small{color:#64748b}.tag{color:#0f766e;font-weight:700;letter-spacing:.08em}</style>
+</head><body><main><div class="tag">2048 · GİZLİLİK</div><h1>Gizlilik Politikası</h1><p>2048: Sayı Bulmaca Oyunu</p><small>Son güncelleme: 15 Ekim 2026</small>
+<h2>1. Genel Bilgilendirme</h2><p>2048: Sayı Bulmaca Oyunu kullanıcılarının gizliliğine önem verir. Bu politika, oyun sırasında işlenebilen bilgileri, kullanım amaçlarını ve kullanıcı haklarını açıklar. Kişisel verilerin işlenmesinde 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve uygulanabilir mevzuat dikkate alınır.</p>
+<h2>2. İşlenen Bilgiler</h2><p>Oyun puanları, en yüksek skor, oynanan oyun sayısı, hamleler, oyun modları, başarımlar ve ilerleme bilgileri işlenebilir. Global sıralama için benzersiz oyuncu kimliği, takma ad, skor, sıralama ve skor doğrulama amacıyla oturum ve hamle kayıtları kullanılabilir. Global sıralamadaki takma ad ve puan diğer oyunculara gösterilebilir.</p>
+<h2>3. Kullanım Amaçları</h2><p>Veriler oyun ilerlemesini saklamak, istatistikleri sunmak, liderlik tablosunu oluşturmak, skorları doğrulamak, hileli işlemleri önlemek, ödüllü reklamları yönetmek, teknik sorunları çözmek ve güvenliği geliştirmek için işlenebilir.</p>
+<h2>4. Verilerin Saklanması</h2><p>Oyun ilerlemesi ve bazı istatistikler cihazda saklanabilir. Global sıralama verileri Cloudflare altyapısında işlenebilir. Veriler, amaç ve yasal yükümlülükler için gerekli süre boyunca saklanır; şartları oluştuğunda silinir, yok edilir veya anonimleştirilir.</p>
+<h2>5. Reklamlar ve Üçüncü Taraf Hizmetleri</h2><p>Reklamların etkin olduğu sürümlerde Google AdMob üzerinden isteğe bağlı ödüllü reklamlar gösterilebilir. Google ve iş ortakları reklam sunumu, ölçüm ve kötüye kullanımın önlenmesi için cihaz tanımlayıcıları, IP adresi, teknik bilgiler ve reklam etkileşimlerini işleyebilir. Reklam ödülleri sağlayıcının doğrulama mekanizmalarıyla kontrol edilebilir. Global sıralama için Cloudflare kullanılır.</p>
+<p><a href="https://policies.google.com/privacy">Google Gizlilik Politikası</a> · <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare Gizlilik Politikası</a></p>
+<h2>6. Çocukların Gizliliği</h2><p>Uygulama bir sayı bulmaca oyunudur. Çocuklara yönelik veri işleme ve reklam gösteriminde geçerli mevzuat ve mağaza kuralları dikkate alınır. Hukuki şartları bulunmadan çocuklara ait verilerin işlendiği tespit edilirse gerekli silme işlemleri yapılır.</p>
+<h2>7. Veri Güvenliği</h2><p>Güvenli bağlantılar, sunucu tarafında skor doğrulaması ve yetkisiz erişimi önlemeye yönelik uygun teknik ve idari tedbirler uygulanır. İnternet üzerinden aktarımın tamamen risksiz olduğu garanti edilemez.</p>
+<h2>8. Kullanıcı Hakları</h2><p>KVKK madde 11 kapsamında uygulanabilir olduğu ölçüde verilerinizin işlenip işlenmediğini öğrenebilir, bilgi talep edebilir, işleme amacı ve aktarım yapılan üçüncü kişileri öğrenebilir, yanlış verilerin düzeltilmesini ve kanuni şartlarda silinmesini veya yok edilmesini isteyebilirsiniz. Başvurularınızı aşağıdaki e-posta adresine iletebilirsiniz.</p>
+<h2>9. Uluslararası Veri Aktarımı</h2><p>Hizmet sağlayıcıların sistemleri farklı ülkelerde bulunabilir. Yurt dışına veri aktarımında KVKK ve uygulanabilir mevzuatın gerektirdiği şartlar dikkate alınır.</p>
+<h2>10. Politika Değişiklikleri</h2><p>Uygulama özellikleri, kullanılan hizmetler veya yasal gereklilikler değiştiğinde bu politika güncellenebilir. Güncel metin bu sayfada yayımlanır.</p>
+<h2>11. İletişim ve Veri Silme</h2><p>Veri sorumlusu: BALANCETECH Bilişim Danışmanlık Ltd. Şti.<br>E-posta: <a href="mailto:muratbalci269@gmail.com">muratbalci269@gmail.com</a></p>
+</main></body></html>`;
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers });
 async function parsePayload(request: Request, maxBytes = 4096): Promise<Record<string, unknown> | Response> {
   try {
@@ -19,6 +37,7 @@ const nickname = (v: unknown) => typeof v === "string" && /^[\p{L}\p{N} _.-]{2,2
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (request.method === "GET" && (url.pathname === "/privacy" || url.pathname === "/privacy/")) return new Response(privacyHtml, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=3600", "x-content-type-options": "nosniff" } });
     if (request.method === "GET" && url.pathname === "/health") return json({ ok: true });
     if (request.method === "GET" && url.pathname === "/v1/leaderboard") {
       const mode = url.searchParams.get("mode") ?? "classic";
