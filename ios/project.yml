@@ -22,7 +22,7 @@ targets:
       properties:
         GADApplicationIdentifier: "ca-app-pub-9057596586284356~7218954891"
         LeaderboardBaseURL: "$(LEADERBOARD_BASE_URL)"
-        UILaunchScreen: {}
+        UILaunchStoryboardName: LaunchScreen
     dependencies:
       - package: GoogleMobileAds
     settings:
@@ -31,6 +31,5 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Modern2048/Info.plist
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_STYLE: Automatic
