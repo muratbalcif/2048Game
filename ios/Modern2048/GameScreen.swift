@@ -645,7 +645,9 @@ struct GameScreen: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(theme.board.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
                         Text("Başarımlar").font(.title3.bold()).foregroundStyle(theme.ink)
-                        ForEach(GameAchievements.list(progress)) { achievement in
+                        ForEach(GameAchievements.list(progress).sorted { first, second in
+                            first.unlocked && !second.unlocked
+                        }) { achievement in
                             HStack(spacing: 12) {
                                 Image(systemName: achievement.unlocked ? "checkmark.seal.fill" : "lock")
                                     .foregroundStyle(theme.accent)
