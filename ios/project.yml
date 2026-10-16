@@ -23,6 +23,15 @@ targets:
         GADApplicationIdentifier: "ca-app-pub-9057596586284356~7218954891"
         LeaderboardBaseURL: "$(LEADERBOARD_BASE_URL)"
         UILaunchStoryboardName: LaunchScreen
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
     dependencies:
       - package: GoogleMobileAds
     settings:
