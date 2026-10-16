@@ -122,3 +122,6 @@
 "Puan Efsanesi" = "Score Legend";
 "Açık" = "On";
 "Kapalı" = "Off";
+"Rumuzu kaydet"="Save Nickname";
+"Rumuz ve mevcut skorun global sıralamada güncellendi."="Your nickname and current score have been updated in the global rankings.";
+"Rumuz değiştiğinde mevcut skorun ve oyuncu kimliğin korunur."="When you change your nickname, your current score and player identity are preserved.";
