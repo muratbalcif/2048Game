@@ -50,11 +50,16 @@ private val ink = Color(0xFF24243A)
 private val boardColor = Color(0xFFE9E5E2)
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var interstitialAds: InterstitialAds
+
+    fun onNewGameStarted() = interstitialAds.onNewGame()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val savedLanguage = getSharedPreferences("language_settings", MODE_PRIVATE).getString("language", "") ?: ""
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLanguage))
+        interstitialAds = InterstitialAds(this)
         setContent { MaterialTheme { GameScreen() } }
+        window.decorView.post { interstitialAds.onHomeReady() }
     }
 }
 
@@ -95,7 +100,7 @@ private fun GameScreen() {
     var nicknameSaved by remember { mutableStateOf(false) }
     var nicknameError by remember { mutableStateOf(false) }
     var best by remember { mutableIntStateOf(storage.best()) }
-    val activity = context as ComponentActivity
+    val activity = context as MainActivity
     val rewardedAds = remember(activity) { RewardedAds(activity) }
     var adReady by remember { mutableStateOf(false) }
     var doubledGameKey by remember { mutableStateOf(storage.doubledGameKey()) }
@@ -231,7 +236,7 @@ private fun GameScreen() {
         AlertDialog(onDismissRequest = { winAcknowledged = true }, title = { Text(stringResource(R.string.win_title)) },
             text = { Text(stringResource(R.string.target_reached_desc, gameMode.target ?: 2048)) },
             confirmButton = { TextButton(onClick = { winAcknowledged = true }) { Text(stringResource(R.string.devam)) } },
-            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text(stringResource(R.string.new_game)) } })
+            dismissButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); activity.onNewGameStarted(); verifiedSession = null; rewardedScoreSession = null; storage.saveVerified(null); game = GameEngine.newGame(); startRanked(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game) }) { Text(stringResource(R.string.new_game)) } })
     }
     if (!motionActive && game.lost) {
         Dialog(onDismissRequest = {}) {
@@ -292,6 +297,7 @@ private fun GameScreen() {
                             resetMotion()
                             progress = progress.nextGame()
                             storage.saveProgress(progress)
+                            activity.onNewGameStarted()
                             verifiedSession = null
                             rewardedScoreSession = null
                             storage.saveVerified(null)
@@ -427,6 +433,7 @@ private fun GameScreen() {
                                 storage.saveMode(candidate)
                                 progress = progress.nextGame()
                                 storage.saveProgress(progress)
+                                activity.onNewGameStarted()
                                 verifiedSession = null
                                 storage.saveVerified(null)
                                 game = GameEngine.newGame()
@@ -624,7 +631,7 @@ private fun GameScreen() {
     if (confirmRestart) {
         AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text(stringResource(R.string.restart_confirm)) },
             text = { Text(stringResource(R.string.restart_message)) },
-            confirmButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text(stringResource(R.string.start)) } },
+            confirmButton = { TextButton(onClick = { resetMotion(); progress = progress.nextGame(); storage.saveProgress(progress); activity.onNewGameStarted(); game = GameEngine.newGame(); previous = null; rewardedContinue = rewardedContinue.reset(); storage.saveReward(rewardedContinue); winAcknowledged = false; storage.save(game); confirmRestart = false }) { Text(stringResource(R.string.start)) } },
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text(stringResource(R.string.cancel)) } })
     }
     Column(
