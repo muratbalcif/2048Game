@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.pm.ApplicationInfo
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.AdError
@@ -28,6 +29,7 @@ class InterstitialAds(private val activity: Activity) {
         val launches = preferences.getInt("launches", 0) + 1
         preferences.edit().putInt("launches", launches).apply()
         launchDue = launches % 4 == 0
+        Log.d("Modern2048Ads", "launches=$launches launchDue=$launchDue")
         load()
     }
 
@@ -45,6 +47,7 @@ class InterstitialAds(private val activity: Activity) {
         val games = preferences.getInt("games", 0) + 1
         preferences.edit().putInt("games", games).apply()
         if (games % 3 == 0) gameDue = true
+        Log.d("Modern2048Ads", "games=$games gameDue=$gameDue")
         if (gameDue) showIfReady { gameDue = false }
     }
 
@@ -56,27 +59,30 @@ class InterstitialAds(private val activity: Activity) {
             override fun onAdLoaded(loaded: InterstitialAd) {
                 loading = false
                 ad = loaded
+                Log.d("Modern2048Ads", "interstitial loaded")
             }
 
             override fun onAdFailedToLoad(error: LoadAdError) {
                 loading = false
                 ad = null
+                Log.w("Modern2048Ads", "interstitial load failed code=${error.code} message=${error.message}")
             }
         })
     }
 
     private fun showIfReady(onShown: () -> Unit) {
         if (showing) return
-        val ready = ad ?: run { load(); return }
+        val ready = ad ?: run { Log.d("Modern2048Ads", "interstitial not ready at transition"); load(); return }
         showing = true
         ad = null
         ready.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdShowedFullScreenContent() { onShown() }
+            override fun onAdShowedFullScreenContent() { Log.d("Modern2048Ads", "interstitial shown"); onShown() }
             override fun onAdDismissedFullScreenContent() {
                 showing = false
                 load()
             }
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                Log.w("Modern2048Ads", "interstitial show failed: ${error.message}")
                 showing = false
                 load()
             }
