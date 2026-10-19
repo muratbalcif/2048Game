@@ -2,6 +2,7 @@ package com.modern2048.game
 
 import android.app.Activity
 import android.content.pm.ApplicationInfo
+import android.util.Log
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
@@ -24,21 +25,23 @@ class RewardedAds(private val activity: Activity) {
     }
 
     fun load() {
-        if ( loading || showing || ad != null) return
+        if (loading || showing || ad != null) return
         loading = true
         RewardedAd.load(
             activity,
-            REWARDED_UNIT_ID,
+            if (testBuild) TEST_UNIT_ID else REWARDED_UNIT_ID,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(loaded: RewardedAd) {
                     loading = false
                     ad = loaded
+                    Log.d("Modern2048Ads", "rewarded loaded")
                     onAvailabilityChanged?.invoke(true)
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     loading = false
                     ad = null
+                    Log.w("Modern2048Ads", "rewarded load failed code=${error.code}: ${error.message}")
                     onAvailabilityChanged?.invoke(false)
                 }
             }
@@ -46,7 +49,6 @@ class RewardedAds(private val activity: Activity) {
     }
 
     fun show(onRewardEarned: () -> Unit, sessionId: String? = null, playerId: String? = null) {
-        //if (!testBuild) return
         val ready = ad ?: return
         if (showing) return
         if (sessionId != null && playerId != null) {
@@ -67,6 +69,7 @@ class RewardedAds(private val activity: Activity) {
                 load()
             }
             override fun onAdFailedToShowFullScreenContent(error: com.google.android.gms.ads.AdError) {
+                Log.w("Modern2048Ads", "rewarded show failed: ${error.message}")
                 showing = false
                 load()
             }
