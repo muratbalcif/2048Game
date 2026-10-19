@@ -10,8 +10,8 @@ android {
         applicationId = "com.modern2048.game"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.1.9"
+        versionCode = 4
+        versionName = "3.1.10"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
