@@ -2,6 +2,7 @@ package com.modern2048.game
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import com.google.android.gms.ads.MobileAds
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.LocaleListCompat
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val savedLanguage = getSharedPreferences("language_settings", MODE_PRIVATE).getString("language", "") ?: ""
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLanguage))
+        MobileAds.initialize(this)
         interstitialAds = InterstitialAds(this)
         setContent { MaterialTheme { GameScreen() } }
         window.decorView.post { interstitialAds.onHomeReady() }
