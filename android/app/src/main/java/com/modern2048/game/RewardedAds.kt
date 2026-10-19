@@ -20,11 +20,11 @@ class RewardedAds(private val activity: Activity) {
     private val testBuild: Boolean = (activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     init {
-        if (testBuild) MobileAds.initialize(activity) { activity.runOnUiThread { load() } }
+       MobileAds.initialize(activity) { activity.runOnUiThread { load() } }
     }
 
     fun load() {
-        if (!testBuild || loading || showing || ad != null) return
+        if ( loading || showing || ad != null) return
         loading = true
         RewardedAd.load(
             activity,
@@ -46,7 +46,7 @@ class RewardedAds(private val activity: Activity) {
     }
 
     fun show(onRewardEarned: () -> Unit, sessionId: String? = null, playerId: String? = null) {
-        if (!testBuild) return
+        //if (!testBuild) return
         val ready = ad ?: return
         if (showing) return
         if (sessionId != null && playerId != null) {
