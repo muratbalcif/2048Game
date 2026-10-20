@@ -84,6 +84,6 @@ class RewardedAds(private val activity: Activity) {
 
     companion object {
         private const val TEST_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
-        private const val REWARDED_UNIT_ID = "ca-app-pub-9057596586284356/1602829386"
+        private const val REWARDED_UNIT_ID = "ca-app-pub-9057596586284356/5444954200"
     }
 }
