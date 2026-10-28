@@ -29,7 +29,7 @@ class RewardedAds(private val activity: Activity) {
         loading = true
         RewardedAd.load(
             activity,
-            if (testBuild) TEST_UNIT_ID else REWARDED_UNIT_ID,
+            REWARDED_UNIT_ID,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(loaded: RewardedAd) {
